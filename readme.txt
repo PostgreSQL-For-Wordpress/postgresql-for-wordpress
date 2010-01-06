@@ -36,7 +36,7 @@ This is because the database needs to be up and running before any plugin can be
 1.	Copy the `dp.php` from the `pg4wp` directory to `wp-content`
 	
 	You can modify this file to configure the database driver you wish to use
-	Currently you can set 'DB_TYPE' to 'pgsql' or 'mysql'
+	Currently you can set 'DB_DRIVER' to 'pgsql' or 'mysql'
 	
 	You can also activate DEBUG logs
 
