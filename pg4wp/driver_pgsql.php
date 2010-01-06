@@ -71,7 +71,7 @@
 		{ if( $GLOBALS['pg4wp_user'] == '') return pg_last_error(); else return ''; }
 	function wpsql_fetch_assoc($result) { return pg_fetch_assoc($result); }
 	function wpsql_escape_string($s) { return pg_escape_string($s); }
-	function wpsql_get_server_info() { return '4.1.0'; } // Just want to fool wordpress ...
+	function wpsql_get_server_info() { return '4.1.3'; } // Just want to fool wordpress ...
 	function wpsql_result($result, $i, $fieldname)
 		{ return pg_fetch_result($result, $i, $fieldname); }
 
@@ -89,7 +89,10 @@
 		$pg_user = $GLOBALS['pg4wp_user'];
 		$pg_password = $GLOBALS['pg4wp_password'];
 		$pg_server = $GLOBALS['pg4wp_server'];
-		$conn = pg_connect("host=$pg_server user=$pg_user password=$pg_password dbname=$dbname");
+		if( empty( $pg_server))
+			$conn = pg_connect("user=$pg_user password=$pg_password dbname=$dbname");
+		else
+			$conn = pg_connect("host=$pg_server user=$pg_user password=$pg_password dbname=$dbname");
 		// Now we should be connected, we "forget" about the connection parameters
 		$GLOBALS['pg4wp_user'] = '';
 		$GLOBALS['pg4wp_password'] = '';
@@ -223,7 +226,7 @@
 			if( $GLOBALS['pg4wp_ins_table'] == $table_prefix.'zd_ml_trans')
 			{
 				preg_match( '/VALUES \([^\d]*(\d+)', $sql, $matches);
-				$GLOBALS['pg4wp_insid'] = $match[1];
+				$GLOBALS['pg4wp_insid'] = $matches[1];
 			}
 			
 			// Fix inserts into wp_categories
