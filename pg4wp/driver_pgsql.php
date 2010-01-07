@@ -430,7 +430,7 @@ WHERE pg_class.relname='$table_name' AND pg_attribute.attnum>=1 AND NOT pg_attri
 				error_log("$sql\n---------------------\n", 3, PG4WP_LOG.'pg4wp_unmodified.log');
 		}
 		$GLOBALS['pg4wp_result'] = pg_query($sql);
-		if( PG4WP_DEBUG && $GLOBALS['pg4wp_result'] === false && $err = pg_last_error())
+		if( (PG4WP_DEBUG || PG4WP_LOG_ERRORS) && $GLOBALS['pg4wp_result'] === false && $err = pg_last_error())
 			if( false === strpos($err, 'relation "'.$table_prefix.'options"'))
 				error_log("Error running :\n$initial\n---- converted to ----\n$sql\n----\n$err\n---------------------\n", 3, PG4WP_LOG.'pg4wp_errors.log');
 		

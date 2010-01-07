@@ -13,10 +13,14 @@ define( 'PG4WP_ROOT', dirname( __FILE__).'/plugins/pg4wp');
 
 // Set this to 'true' and check that `pg4wp` is writable if you want debug logs to be written
 define( 'PG4WP_DEBUG', false);
+// If you just want to log queries that generate errors, leave PG4WP_DEBUG to "false"
+// and set this to true 
+define( 'PG4WP_LOG_ERRORS', false);
+
 // Logs are put in the pg4wp directory
 define( 'PG4WP_LOG', PG4WP_ROOT.'/logs/');
 // Check if the logs directory is needed and exists or create it if possible
-if( PG4WP_DEBUG &&
+if( (PG4WP_DEBUG || PG4WP_LOG_ERRORS) &&
 	!file_exists( PG4WP_LOG) &&
 	is_writable(dirname( PG4WP_LOG)))
 	mkdir( PG4WP_LOG);
