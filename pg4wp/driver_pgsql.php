@@ -241,7 +241,7 @@
 			$sql = str_replace( "'0000-00-00 00:00:00'", 'now() AT TIME ZONE \'gmt\'', $sql);
 			
 			// Multiple values group when calling INSERT INTO don't always work
-			if( false !== strpos( $sql, 'wp_options') && false !== strpos( $sql, '), ('))
+			if( false !== strpos( $sql, $table_prefix.'options') && false !== strpos( $sql, '), ('))
 			{
 				$pattern = '/INSERT INTO.+VALUES/';
 				preg_match($pattern, $sql, $matches);
@@ -431,7 +431,7 @@ WHERE pg_class.relname='$table_name' AND pg_attribute.attnum>=1 AND NOT pg_attri
 		}
 		$GLOBALS['pg4wp_result'] = pg_query($sql);
 		if( PG4WP_DEBUG && $GLOBALS['pg4wp_result'] === false && $err = pg_last_error())
-			if( false === strpos($err, 'relation "wp_options"'))
+			if( false === strpos($err, 'relation "'.$table_prefix.'options"'))
 				error_log("Error running :\n$initial\n---- converted to ----\n$sql\n----\n$err\n---------------------\n", 3, PG4WP_LOG.'pg4wp_errors.log');
 		
 		return $GLOBALS['pg4wp_result'];
