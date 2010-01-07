@@ -35,6 +35,7 @@
 		'BIGINT(20)'			=> 'int',
 		'character set utf8'	=> '',
 		'CHARACTER SET utf8'	=> '',
+		'UNSIGNED'				=> '', // ZdMultilang 1.2.5
 	);
 	
 	// Initializing some variables
