@@ -50,6 +50,8 @@ There is no screenshot for this plugin
 
 == Changelog ==
 
+* Added support for "INTERVAL 15 DAY" found in Akismet 2.2.7
+
 = 1.0.2 =
 * Updated support for plugin zdMultilang 1.2.5
 * Got rid of some remaining hardcoded table prefix

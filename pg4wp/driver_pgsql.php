@@ -164,6 +164,8 @@
 			$sql = preg_replace($pattern, 'LIMIT $2 OFFSET $1', $sql);
 			
 			$sql = str_replace('INTERVAL 120 MINUTE', "'120 minutes'::interval", $sql);
+			// The following handles a new "INTERVAL" call in Akismet 2.2.7
+			$sql = str_replace('INTERVAL 15 DAY', "'15 days'::interval", $sql);
 			
 			$pattern = '/DATE_ADD[ ]*\(([^,]+),([^\)]+)\)/';
 			$sql = preg_replace( $pattern, '($1 + $2)', $sql);
