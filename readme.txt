@@ -50,7 +50,9 @@ There is no screenshot for this plugin
 
 == Changelog ==
 
-* Upgrading from WP 2.8.6 to WP 2.9.1 works with errors
+
+* Upgrading from WP 2.8.6 to WP 2.9.1 works with a minor error
+	Upgrading should remove an index on table "wp_options" that may not exist, throwing an error
 * Installing WP 2.9.1 works smoothly
 * Generic hack to avoid duplicate index names
 * REGEXP gets replaced with '~'

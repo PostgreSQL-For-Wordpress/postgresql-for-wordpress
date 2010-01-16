@@ -255,6 +255,13 @@
 			// LIMIT is not allowed in DELETE queries
 			$sql = str_replace( 'LIMIT 1', '', $sql);
 			$sql = str_replace( ' REGEXP ', ' ~ ', $sql);
+			
+			// This handles removal of duplicate entries in table options
+			if( false !== strpos( $sql, 'DELETE o1 FROM '))
+				$sql = "DELETE FROM ${table_prefix}options WHERE option_id IN " .
+					"(SELECT o1.option_id FROM ${table_prefix}options AS o1, ${table_prefix}options AS o2 " .
+					"WHERE o1.option_name = o2.option_name " .
+					"AND o1.option_id < o2.option_id)";
 		}
 		// Fix tables listing
 		elseif( 0 === strpos($sql, 'SHOW TABLES'))
@@ -320,6 +327,19 @@ WHERE bc.oid = i.indrelid
 				// Workaround for index name duplicate
 				$index = $table.'_'.$index;
 				$sql = "CREATE {$unique}INDEX $index ON $table ($columns)";
+			}
+			$pattern = '/ALTER TABLE\s+(\w+)\s+DROP INDEX\s+([^\s]+)/';
+			if( 1 === preg_match( $pattern, $sql, $matches))
+			{
+				$table = $matches[1];
+				$index = $matches[2];
+				$sql = "DROP INDEX ${table}_${index}";
+			}
+			$pattern = '/ALTER TABLE\s+(\w+)\s+DROP PRIMARY KEY/';
+			if( 1 === preg_match( $pattern, $sql, $matches))
+			{
+				$table = $matches[1];
+				$sql = "ALTER TABLE ${table} DROP CONSTRAINT ${table}_pkey";
 			}
 		}
 		// Table description
