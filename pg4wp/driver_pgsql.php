@@ -124,25 +124,6 @@
 		// Remove illegal characters
 		$sql = str_replace('`', '', $sql);
 		
-		// Field names with CAPITALS need special handling
-		if( false !== strpos($sql, 'ID'))
-		{
-			$pattern = '/ID([^ ])/';
-				$sql = preg_replace($pattern, 'ID $1', $sql);
-			$pattern = '/ID$/';
-				$sql = preg_replace($pattern, 'ID ', $sql);
-			$pattern = '/\(ID/';
-				$sql = preg_replace($pattern, '( ID', $sql);
-			$pattern = '/,ID/';
-				$sql = preg_replace($pattern, ', ID', $sql);
-			$pattern = '/[a-zA-Z_]+ID/';
-				$sql = preg_replace($pattern, '"$0"', $sql);
-			$pattern = '/\.ID/';
-				$sql = preg_replace($pattern, '."ID"', $sql);
-			$pattern = '/[\s]ID /';
-				$sql = preg_replace($pattern, ' "ID" ', $sql);
-		} // CAPITALS
-		
 		if( 0 === strpos($sql, 'SELECT'))
 		{
 			$logto = 'SELECT';
@@ -251,6 +232,18 @@
 				$sql = str_replace( '), (', ');'.$insert.'(', $sql);
 			}
 			
+			// Support for "INSERT ... ON DUPLICATE KEY UPDATE ..." is a dirty hack
+			// consisting in deleting the row before inserting it
+			if( false !== $pos = strpos( $sql, 'ON DUPLICATE KEY'))
+			{
+				// Remove 'ON DUPLICATE KEY UPDATE...' and following
+				$sql = substr( $sql, 0, $pos);
+				// Get the elements we need (table name, first field, value)
+				$pattern = '/INSERT INTO (\w+)\s+\(([^,]+).+VALUES\s+\(([^,]+)/';
+				preg_match($pattern, $sql, $matches);
+				$sql = 'DELETE FROM '.$matches[1].' WHERE '.$matches[2].' = '.$matches[3].';'.$sql;
+			}
+			
 			// To avoid Encoding errors when inserting data coming from outside
 			if( preg_match('/^.{1}/us',$sql,$ar) != 1)
 				$sql = utf8_encode($sql);
@@ -261,6 +254,7 @@
 			$logto = 'DELETE';
 			// LIMIT is not allowed in DELETE queries
 			$sql = str_replace( 'LIMIT 1', '', $sql);
+			$sql = str_replace( ' REGEXP ', ' ~ ', $sql);
 		}
 		// Fix tables listing
 		elseif( 0 === strpos($sql, 'SHOW TABLES'))
@@ -324,8 +318,7 @@ WHERE bc.oid = i.indrelid
 				$index = $matches[3];
 				$columns = $matches[4];
 				// Workaround for index name duplicate
-				if( $table == $table_prefix.'usermeta' && $index == 'meta_key')
-					$index = 'umeta_key';
+				$index = $table.'_'.$index;
 				$sql = "CREATE {$unique}INDEX $index ON $table ($columns)";
 			}
 		}
@@ -396,13 +389,33 @@ WHERE pg_class.relname='$table_name' AND pg_attribute.attnum>=1 AND NOT pg_attri
 					$index = $match[2];
 					$columns = $match[3];
 					// Workaround for index name duplicate
-					if( $table == $table_prefix.'usermeta' && $index == 'meta_key')
-						$index = 'umeta_key';
+					$index = $table.'_'.$index;
 					$sql .= "\nCREATE {$unique}INDEX $index ON $table ($columns);";
 				}
 			// Now remove handled indexes
 			$sql = preg_replace( $pattern, '', $sql);
 		}// CREATE TABLE
+		
+		// Field names with CAPITALS need special handling
+		if( false !== strpos($sql, 'ID'))
+		{
+			$pattern = '/ID([^ ])/';
+				$sql = preg_replace($pattern, 'ID $1', $sql);
+			$pattern = '/ID$/';
+				$sql = preg_replace($pattern, 'ID ', $sql);
+			$pattern = '/\(ID/';
+				$sql = preg_replace($pattern, '( ID', $sql);
+			$pattern = '/,ID/';
+				$sql = preg_replace($pattern, ', ID', $sql);
+			$pattern = '/[a-zA-Z_]+ID/';
+				$sql = preg_replace($pattern, '"$0"', $sql);
+			$pattern = '/\.ID/';
+				$sql = preg_replace($pattern, '."ID"', $sql);
+			$pattern = '/[\s]ID /';
+				$sql = preg_replace($pattern, ' "ID" ', $sql);
+			$pattern = '/"ID "/';
+				$sql = preg_replace($pattern, ' "ID" ', $sql);
+		} // CAPITALS
 		
 		// Empty "IN" statements are erroneous
 		$sql = str_replace( 'IN (\'\')', 'IN (NULL)', $sql);

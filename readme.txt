@@ -38,7 +38,7 @@ This is because the database needs to be up and running before any plugin can be
 	You can modify this file to configure the database driver you wish to use
 	Currently you can set 'DB_DRIVER' to 'pgsql' or 'mysql'
 	
-	You can also activate DEBUG logs
+	You can also activate DEBUG or ERROR logs
 
 1.	Point your Web Browser to your wordpress installation and go through the traditional WordPress installation routine.
 
@@ -50,6 +50,12 @@ There is no screenshot for this plugin
 
 == Changelog ==
 
+* Upgrading from WP 2.8.6 to WP 2.9.1 works with errors
+* Installing WP 2.9.1 works smoothly
+* Generic hack to avoid duplicate index names
+* REGEXP gets replaced with '~'
+* Added a hack to handle "ON DUPLICATE KEY" 
+* Moved handling field names with CAPITALS near the end
 * Added support for "INTERVAL 15 DAY" found in Akismet 2.2.7
 
 = 1.0.2 =
@@ -62,7 +68,6 @@ There is no screenshot for this plugin
 * Updated installation procedure
 * Changed the fake server version to 4.1.3
 * Added support for Unix socket connections (just leave the "host" field empty when installing)
-
 
 = 1.0.0 =
 * Initial stable release.
@@ -97,7 +102,12 @@ There is no screenshot for this plugin
 * Case insensitivity of MySQL 'LIKE' restored
 * Importing WordPress eXtended RSS tested and seems to work
 
+== Upgrade Notice ==
+
+= 1.0 =
+Initial stable release, you should upgrade to this version if you have installed any older release
+
 == Licence ==
-PG4WP is provided "as-is" with no warranty.
+PG4WP is provided "as-is" with no warranty in the hope it can be useful.
 
 PG4WP is licensed under the [GNU GPL](http://www.gnu.org/licenses/gpl.html "GNU GPL") v2 or any newer version at your choice.
