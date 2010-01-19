@@ -152,9 +152,10 @@
 			$sql = preg_replace( $pattern, '($1 + $2)', $sql);
 			
 			$date_funcs = array(
-				'YEAR('		=> 'EXTRACT(YEAR FROM ',
-				'MONTH('	=> 'EXTRACT(MONTH FROM ',
-				'DAY('		=> 'EXTRACT(DAY FROM ',
+				'YEAR('			=> 'EXTRACT(YEAR FROM ',
+				'MONTH('		=> 'EXTRACT(MONTH FROM ',
+				'DAY('			=> 'EXTRACT(DAY FROM ',
+				'DAYOFMONTH('	=> 'EXTRACT(DAY FROM ',
 			);
 			
 			$sql = str_replace( 'ORDER BY post_date DESC', 'ORDER BY YEAR(post_date) DESC, MONTH(post_date) DESC', $sql);
