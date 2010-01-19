@@ -50,6 +50,8 @@ There is no screenshot for this plugin
 
 == Changelog ==
 
+* Moved parts required only when installing/upgrading from driver_pgsql.php to a separate file
+	The file is loaded only when needed so that memory footprint should be a bit smaller
 * Added UNIX_TIMESTAMP support
 * Added DAYOFMONTH support (Thanks to Pete Deffendol for noticing the problem)
 * Upgrading from WP 2.8.6 to WP 2.9.1 works with a minor error
