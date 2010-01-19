@@ -131,6 +131,7 @@
 			if( false !== strpos($sql, 'SQL_CALC_FOUND_ROWS'))
 			{
 				$catchnumrows = true;
+				$sql = str_replace('GROUP BY '.$table_prefix.'posts."ID"', '' , $sql);
 				$sql = str_replace('SQL_CALC_FOUND_ROWS', 'DISTINCT', $sql);
 				$GLOBALS['pg4wp_numrows'] = preg_replace( '/SELECT DISTINCT.+FROM ('.$table_prefix.'posts)/', 'SELECT DISTINCT "ID" FROM $1', $sql);
 				$GLOBALS['pg4wp_numrows'] = preg_replace( '/SELECT(.+)FROM/', 'SELECT COUNT($1) FROM', $GLOBALS['pg4wp_numrows']);
