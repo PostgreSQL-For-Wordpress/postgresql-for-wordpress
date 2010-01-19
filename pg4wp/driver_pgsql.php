@@ -151,6 +151,10 @@
 			$pattern = '/DATE_ADD[ ]*\(([^,]+),([^\)]+)\)/';
 			$sql = preg_replace( $pattern, '($1 + $2)', $sql);
 			
+			// UNIX_TIMESTAMP in MYSQL returns an integer
+			$pattern = '/UNIX_TIMESTAMP\(([^\)])\)';
+			$sql = preg_replace( $pattern, 'ROUND(DATE_PART(\'epoch\',$1))', $sql);
+			
 			$date_funcs = array(
 				'YEAR('			=> 'EXTRACT(YEAR FROM ',
 				'MONTH('		=> 'EXTRACT(MONTH FROM ',

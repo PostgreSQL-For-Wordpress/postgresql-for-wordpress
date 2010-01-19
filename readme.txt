@@ -50,6 +50,7 @@ There is no screenshot for this plugin
 
 == Changelog ==
 
+* Added UNIX_TIMESTAMP support
 * Added DAYOFMONTH support (Thanks to Pete Deffendol for noticing the problem)
 * Upgrading from WP 2.8.6 to WP 2.9.1 works with a minor error
 	Upgrading should remove an index on table "wp_options" that may not exist, throwing an error
