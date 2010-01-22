@@ -50,6 +50,8 @@ There is no screenshot for this plugin
 
 == Changelog ==
 
+= 1.1.0rc =
+* Hack for WP using meta_value = integer (instead of text)
 * Moved parts required only when installing/upgrading from driver_pgsql.php to a separate file
 	The file is loaded only when needed so that memory footprint should be a bit smaller
 * Added UNIX_TIMESTAMP support
