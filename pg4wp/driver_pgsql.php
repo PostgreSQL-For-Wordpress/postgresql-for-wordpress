@@ -157,10 +157,6 @@
 			if( false !== strpos( $sql, 'USE INDEX (comment_date_gmt)'))
 				$sql = str_replace( 'USE INDEX (comment_date_gmt)', '', $sql);
 			
-			// WP 2.9.1 uses a comparison where text data is not quoted
-			$pattern = '/AND meta_value = (-?\d+)/';
-			$sql = preg_replace( $pattern, 'AND meta_value = \'$1\'', $sql);
-			
 			// ZdMultiLang support hacks
 			$sql = preg_replace( '/post_type="([^"]+)"/', 'post_type=\'$1\'', $sql);
 			$sql = str_replace( 'link_url o_url', 'link_url AS o_url', $sql);
@@ -259,6 +255,10 @@
 		elseif( defined('WP_INSTALLING') && WP_INSTALLING)
 			$sql = pg4wp_installing( $sql, $logto);
 		
+		// WP 2.9.1 uses a comparison where text data is not quoted
+		$pattern = '/AND meta_value = (-?\d+)/';
+		$sql = preg_replace( $pattern, 'AND meta_value = \'$1\'', $sql);
+			
 		// The following handles a new "INTERVAL" call in Akismet 2.2.7
 		$sql = str_replace('INTERVAL 15 DAY', "'15 days'::interval", $sql);
 		$pattern = '/DATE_SUB[ ]*\(([^,]+),([^\)]+)\)/';
