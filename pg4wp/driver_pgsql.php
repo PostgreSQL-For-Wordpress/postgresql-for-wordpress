@@ -134,10 +134,10 @@
 			$sql = preg_replace( $pattern, 'ROUND(DATE_PART(\'epoch\',$1))', $sql);
 			
 			$date_funcs = array(
+				'DAYOFMONTH('	=> 'EXTRACT(DAY FROM ',
 				'YEAR('			=> 'EXTRACT(YEAR FROM ',
 				'MONTH('		=> 'EXTRACT(MONTH FROM ',
 				'DAY('			=> 'EXTRACT(DAY FROM ',
-				'DAYOFMONTH('	=> 'EXTRACT(DAY FROM ',
 			);
 			
 			$sql = str_replace( 'ORDER BY post_date DESC', 'ORDER BY YEAR(post_date) DESC, MONTH(post_date) DESC', $sql);
