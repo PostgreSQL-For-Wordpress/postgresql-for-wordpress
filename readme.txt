@@ -4,7 +4,7 @@ Donate link: http://www.hawkix.net/faire-un-don/
 Tags: database, postgresql, PostgreSQL, postgres, mysql
 Requires at least: 2.5.1
 Tested up to: 2.8.6
-Stable tag: 1.1.0rc3
+Stable tag: 1.1.0rc4
 
 PostgreSQL for WordPress is a special 'plugin' enabling WordPress to be used with a PostgreSQL database.
 
@@ -49,6 +49,9 @@ No question yet, please contact me if you have any.
 There is no screenshot for this plugin
 
 == Changelog ==
+
+= 1.1.0rc4 =
+* Corrected a typo in permalinks handling
 
 = 1.1.0rc3 =
 * Reordered the date_funcs array (Thanks to Boris HUISGEN for reporting the problem and submitting a patch)
