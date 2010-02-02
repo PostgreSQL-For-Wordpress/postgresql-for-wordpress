@@ -158,7 +158,7 @@
 				$sql = str_replace( 'USE INDEX (comment_date_gmt)', '', $sql);
 			
 			// HB : timestamp fix for permalinks
-			$sql = str_replace( 'post_date_gmt > 1970', 'post_date_gmt > to_timestamp (\‘1970\')', $sql);
+			$sql = str_replace( 'post_date_gmt > 1970', 'post_date_gmt > to_timestamp (\'1970\')', $sql);
 			
 			// ZdMultiLang support hacks
 			$sql = preg_replace( '/post_type="([^"]+)"/', 'post_type=\'$1\'', $sql);
