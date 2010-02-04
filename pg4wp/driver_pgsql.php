@@ -29,7 +29,7 @@
 	function wpsql_numrows($result)
 		{ return pg_num_rows($result); }
 	function wpsql_num_fields($result)
-		{ return 1; }
+		{ return pg_num_fields($result); }
 	function wpsql_fetch_field($result)
 		{ return 'tablename'; }
 	function wpsql_fetch_object($result)
