@@ -15,7 +15,7 @@ define( 'PG4WP_ROOT', dirname( __FILE__).'/plugins/pg4wp');
 define( 'PG4WP_DEBUG', false);
 // If you just want to log queries that generate errors, leave PG4WP_DEBUG to "false"
 // and set this to true 
-define( 'PG4WP_LOG_ERRORS', true);
+define( 'PG4WP_LOG_ERRORS', false);
 
 // Logs are put in the pg4wp directory
 define( 'PG4WP_LOG', PG4WP_ROOT.'/logs/');
