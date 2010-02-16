@@ -25,7 +25,7 @@ If you need/wish support for another database, please feel free to contact the a
 
 == Installation ==
 
-This plugin can't be enabled through the control panel.
+Whereas it appears in the control panel, enabling/disabling this plugin through the control panel won't do anything.
 You have to install it before setting up your WordPress installation for things to work properly. 
 
 This section describes how to install the plugin and get it working.
@@ -50,6 +50,7 @@ There is no screenshot for this plugin
 
 == Changelog ==
 
+* PG4WP now appears in WordPress control panel and can be enabled/disabled but this has no real effect
 * Added a correct plugin header into db.php to have correct informations shown in WordPress plugin Directory
 
 = 1.1.0 =
