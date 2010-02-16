@@ -50,6 +50,8 @@ There is no screenshot for this plugin
 
 == Changelog ==
 
+* Added a correct plugin header into db.php to have correct informations shown in WordPress plugin Directory
+
 = 1.1.0 =
 * This release is identical to 1.1.0rc4, just has error logging deactivated in the distribution
 

@@ -1,9 +1,13 @@
 <?php
-/**
- * @package PostgreSQL_For_Wordpress
- * @version $Id$
- * @author	Hawk__, www.hawkix.net
- */
+/*
+Plugin Name: PostgreSQL for WordPress (PG4WP)
+Plugin URI: http://www.hawkix.net
+Description: PG4WP is a special 'plugin' enabling WordPress to use a PostgreSQL database.
+Version: 1.1.0
+Author: Hawk__
+Author URI: http://www.hawkix.net
+License: GPLv2 or newer.
+*/
 
 // You can choose the driver to load here
 define('DB_DRIVER', 'pgsql'); // 'pgsql' or 'mysql' are supported for now
