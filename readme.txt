@@ -3,7 +3,7 @@ Contributors: Hawk__ (http://www.hawkix.net/)
 Donate link: http://www.hawkix.net/faire-un-don/
 Tags: database, postgresql, PostgreSQL, postgres, mysql
 Requires at least: 2.5.1
-Tested up to: 2.8.6
+Tested up to: 2.9.2
 Stable tag: 1.1.0
 
 PostgreSQL for WordPress is a special 'plugin' enabling WordPress to be used with a PostgreSQL database.
