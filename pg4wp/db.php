@@ -8,6 +8,8 @@ Author: Hawk__
 Author URI: http://www.hawkix.net
 License: GPLv2 or newer.
 */
+if( !defined('PG4WP_ROOT'))
+{
 
 // You can choose the driver to load here
 define('DB_DRIVER', 'pgsql'); // 'pgsql' or 'mysql' are supported for now
@@ -39,3 +41,5 @@ $replaces = array(
 	'?>'		=> '',
 );
 eval( str_replace( array_keys($replaces), array_values($replaces), file_get_contents(ABSPATH.'/wp-includes/wp-db.php')));
+
+} // Protection against multiple loading
