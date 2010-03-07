@@ -141,7 +141,10 @@
 			);
 			
 			$sql = str_replace( 'ORDER BY post_date DESC', 'ORDER BY YEAR(post_date) DESC, MONTH(post_date) DESC', $sql);
+			$sql = str_replace( 'ORDER BY post_date ASC', 'ORDER BY YEAR(post_date) ASC, MONTH(post_date) ASC', $sql);
 			$sql = str_replace( array_keys($date_funcs), array_values($date_funcs), $sql);
+			$curryear = date( 'Y');
+			$sql = str_replace( 'FROM \''.$curryear, 'FROM TIMESTAMP \''.$curryear, $sql);
 			
 			// MySQL 'IF' conversion
 			$pattern = '/IF[ ]*\(([^,]+),([^,]+),([^\)]+)\)/';

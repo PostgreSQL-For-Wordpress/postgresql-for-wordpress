@@ -50,6 +50,7 @@ There is no screenshot for this plugin
 
 == Changelog ==
 
+* Improved dates functions handling
 * PG4WP now appears in WordPress control panel and can be enabled/disabled but this has no real effect
 * Added a correct plugin header into db.php to have correct informations shown in WordPress plugin Directory
 
