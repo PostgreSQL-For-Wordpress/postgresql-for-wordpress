@@ -20,7 +20,7 @@ define( 'PG4WP_ROOT', dirname( __FILE__).'/plugins/pg4wp');
 // Set this to 'true' and check that `pg4wp` is writable if you want debug logs to be written
 define( 'PG4WP_DEBUG', false);
 // If you just want to log queries that generate errors, leave PG4WP_DEBUG to "false"
-// and set this to true 
+// and set this to true
 define( 'PG4WP_LOG_ERRORS', true);
 
 // Logs are put in the pg4wp directory
@@ -37,10 +37,6 @@ require_once( PG4WP_ROOT.'/driver_'.DB_DRIVER.'.php');
 // This loads up the wpdb class applying the appropriate changes to it, DON'T TOUCH !
 $replaces = array(
 	'define( '	=> '// define( ',
-	' OBJECT_K'	=> ' \'OBJECT_K\'',
-	' OBJECT'	=> ' \'OBJECT\'',
-	' ARRAY_A'	=> ' \'ARRAY_A\'',
-	' ARRAY_N'	=> ' \'ARRAY_N\'',
 	'class wpdb'	=> 'class wpdb2',
 	'new wpdb'	=> 'new wpdb2',
 	'mysql_'	=> 'wpsql_',
@@ -48,5 +44,5 @@ $replaces = array(
 	'?>'		=> '',
 );
 eval( str_replace( array_keys($replaces), array_values($replaces), file_get_contents(ABSPATH.'/wp-includes/wp-db.php')));
-
+require_once( ABSPATH.'/wp-includes/wp-db.php');
 } // Protection against multiple loading
