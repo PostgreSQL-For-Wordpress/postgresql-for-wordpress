@@ -120,6 +120,8 @@
 			{
 				$sql = $GLOBALS['pg4wp_numrows'];
 			}
+			// Handle COUNT(*)...ORDER BY...
+			$sql = preg_replace( '/COUNT(.+)ORDER BY.+', 'COUNT$1', $sql);
 			
 			$pattern = '/LIMIT[ ]+(\d+),[ ]*(\d+)/';
 			$sql = preg_replace($pattern, 'LIMIT $2 OFFSET $1', $sql);
