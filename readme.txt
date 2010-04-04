@@ -50,6 +50,7 @@ There is no screenshot for this plugin
 
 == Changelog ==
 
+* Improved db.php to remove notices and possible fatal errors
 * Preliminary support for Wordpress 3.0
 * Improved dates functions handling
 * PG4WP now appears in WordPress control panel and can be enabled/disabled but this has no real effect

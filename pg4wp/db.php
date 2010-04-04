@@ -36,6 +36,13 @@ require_once( PG4WP_ROOT.'/driver_'.DB_DRIVER.'.php');
 
 // This loads up the wpdb class applying the appropriate changes to it, DON'T TOUCH !
 $replaces = array(
+	'define( '	=> '// define( ',
+	' OBJECT_K'	=> ' \'OBJECT_K\'',
+	' OBJECT'	=> ' \'OBJECT\'',
+	' ARRAY_A'	=> ' \'ARRAY_A\'',
+	' ARRAY_N'	=> ' \'ARRAY_N\'',
+	'class wpdb'	=> 'class wpdb2',
+	'new wpdb'	=> 'new wpdb2',
 	'mysql_'	=> 'wpsql_',
 	'<?php'		=> '',
 	'?>'		=> '',
