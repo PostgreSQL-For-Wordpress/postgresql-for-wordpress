@@ -149,8 +149,8 @@
 			$sql = str_replace( 'FROM \''.$curryear, 'FROM TIMESTAMP \''.$curryear, $sql);
 			
 			// MySQL 'IF' conversion
-			$pattern = '/IF[ ]*\(([^,]+),([^,]+),([^\)]+)\)/';
-			$sql = preg_replace( $pattern, 'CASE WHEN $1 THEN $2 ELSE $3 END', $sql);
+			$pattern = '/ IF[ ]*\(([^,]+),([^,]+),([^\)]+)\)/';
+			$sql = preg_replace( $pattern, ' CASE WHEN $1 THEN $2 ELSE $3 END', $sql);
 			
 			$sql = str_replace('GROUP BY '.$table_prefix.'posts."ID"', '' , $sql);
 			$sql = str_replace("!= ''", '<> 0', $sql);
