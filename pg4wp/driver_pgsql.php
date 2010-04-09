@@ -96,12 +96,11 @@
 		$logto = 'queries';
 		// This is used to catch the number of rows returned by the last "SELECT" REQUEST
 		$catchnumrows = false;
+		// The end of the query may be protected against changes
+		$end = '';
 		
 		// Remove unusefull spaces
 		$initial = $sql = trim($sql);
-		
-		// Remove illegal characters
-		$sql = str_replace('`', '', $sql);
 		
 		if( 0 === strpos($sql, 'SELECT'))
 		{
@@ -125,8 +124,6 @@
 			
 			$pattern = '/LIMIT[ ]+(\d+),[ ]*(\d+)/';
 			$sql = preg_replace($pattern, 'LIMIT $2 OFFSET $1', $sql);
-			
-			$sql = str_replace('INTERVAL 120 MINUTE', "'120 minutes'::interval", $sql);
 			
 			$pattern = '/DATE_ADD[ ]*\(([^,]+),([^\)]+)\)/';
 			$sql = preg_replace( $pattern, '($1 + $2)', $sql);
@@ -229,6 +226,8 @@
 			{
 				// Remove 'ON DUPLICATE KEY UPDATE...' and following
 				$sql = substr( $sql, 0, $pos);
+				// Remove illegal characters
+				$sql = str_replace('`', '', $sql);
 				// Get the elements we need (table name, first field, value)
 				$pattern = '/INSERT INTO (\w+)\s+\(([^,]+).+VALUES\s+\(([^,]+)/';
 				preg_match($pattern, $sql, $matches);
@@ -239,6 +238,9 @@
 			if( preg_match('/^.{1}/us',$sql,$ar) != 1)
 				$sql = utf8_encode($sql);
 			
+			// This will avoid modifications to anything following 'VALUES('
+			list($sql,$end) = explode( ' VALUES(', $sql, 2);
+			$end = ' VALUES('.$end;
 		} // INSERT
 		elseif( 0 === strpos( $sql, 'DELETE' ))
 		{
@@ -267,10 +269,14 @@
 		$pattern = '/AND meta_value = (-?\d+)/';
 		$sql = preg_replace( $pattern, 'AND meta_value = \'$1\'', $sql);
 			
-		// The following handles a new "INTERVAL" call in Akismet 2.2.7
-		$sql = str_replace('INTERVAL 15 DAY', "'15 days'::interval", $sql);
+		// Generic "INTERVAL xx DAY|HOUR|MINUTE|SECOND" handle
+		$pattern = '/INTERVAL[ ]+(\d+)[ ]+(DAY|HOUR|MINUTE|SECOND)/';
+		$sql = preg_replace( $pattern, "'\$1 \$2'::interval", $sql);
 		$pattern = '/DATE_SUB[ ]*\(([^,]+),([^\)]+)\)/';
 		$sql = preg_replace( $pattern, '($1::timestamp - $2)', $sql);
+		
+		// Remove illegal characters
+		$sql = str_replace('`', '', $sql);
 		
 		// Field names with CAPITALS need special handling
 		if( false !== strpos($sql, 'ID'))
@@ -312,6 +318,9 @@
 			);
 			$sql = str_replace( array_keys($zdml_conv), array_values($zdml_conv), $sql);
 		}
+		
+		// Put back the end of the query if it was separated
+		$sql .= $end;
 		
 		if( PG4WP_DEBUG)
 		{
