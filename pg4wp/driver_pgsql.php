@@ -238,9 +238,9 @@
 			if( preg_match('/^.{1}/us',$sql,$ar) != 1)
 				$sql = utf8_encode($sql);
 			
-			// This will avoid modifications to anything following 'VALUES('
-			list($sql,$end) = explode( ' VALUES(', $sql, 2);
-			$end = ' VALUES('.$end;
+			// This will avoid modifications to anything following 'VALUES'
+			list($sql,$end) = explode( ' VALUES', $sql, 2);
+			$end = ' VALUES'.$end;
 		} // INSERT
 		elseif( 0 === strpos( $sql, 'DELETE' ))
 		{
