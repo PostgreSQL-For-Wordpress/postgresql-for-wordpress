@@ -51,7 +51,7 @@ There is no screenshot for this plugin
 == Changelog ==
 
 * Implemented a generic "INTERVAL xx DAY|HOUR|MINUTE|SECOND" handler
-* Prepare workaround for undesirable effects (works with new content for now)
+* Backticks and capital text containing 'ID' now work 
 * Improved db.php to remove notices and possible fatal errors
 * Preliminary support for Wordpress 3.0
 * Improved dates functions handling
