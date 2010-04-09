@@ -179,7 +179,7 @@
 			$sql = preg_replace( $pattern, ' "$1" =', $sql);
 			
 			// For correct bactick removal
-			$pattern = '/[ ]*`([^`]+)`[ ]*=/';
+			$pattern = '/[ ]*`([^` ]+)`[ ]*=/';
 			$sql = preg_replace( $pattern, ' $1 =', $sql);
 
 			// WP 2.6.1 => 2.8 upgrade, removes a PostgreSQL error but there are some remaining
