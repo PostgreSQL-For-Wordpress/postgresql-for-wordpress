@@ -45,4 +45,10 @@ $replaces = array(
 );
 eval( str_replace( array_keys($replaces), array_values($replaces), file_get_contents(ABSPATH.'/wp-includes/wp-db.php')));
 require_once( ABSPATH.'/wp-includes/wp-db.php');
+
+if (! isset($wpdb)) {
+	// Create wpdb object if not already done
+	$wpdb = new wpdb2( DB_USER, DB_PASSWORD, DB_NAME, DB_HOST );
+}
+
 } // Protection against multiple loading

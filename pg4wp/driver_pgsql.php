@@ -70,14 +70,18 @@
 		$pg_password = $GLOBALS['pg4wp_password'];
 		$pg_server = $GLOBALS['pg4wp_server'];
 		if( empty( $pg_server))
-			$conn = pg_connect("user=$pg_user password=$pg_password dbname=$dbname");
+			$GLOBALS['pg4wp_conn'] = pg_connect("user=$pg_user password=$pg_password dbname=$dbname");
 		else
-			$conn = pg_connect("host=$pg_server user=$pg_user password=$pg_password dbname=$dbname");
+			$GLOBALS['pg4wp_conn'] = pg_connect("host=$pg_server user=$pg_user password=$pg_password dbname=$dbname");
 		// Now we should be connected, we "forget" about the connection parameters
 		$GLOBALS['pg4wp_user'] = '';
 		$GLOBALS['pg4wp_password'] = '';
 		$GLOBALS['pg4wp_server'] = '';
-		return $conn;
+		// Execute early transmitted commands if needed
+		if( isset($GLOBALS['pg4wp_pre_sql']) && !empty($GLOBALS['pg4wp_pre_sql']))
+			foreach( $GLOBALS['pg4wp_pre_sql'] as $sql2run)
+				wpsql_query( $sql2run);
+		return $GLOBALS['pg4wp_conn'];
 	}
 
 	function wpsql_fetch_array($result)
@@ -92,6 +96,12 @@
 	
 	function wpsql_query($sql)
 	{
+		if( !isset($GLOBALS['pg4wp_conn']))
+		{
+			// Catch SQL to be executed as soon as connected
+			$GLOBALS['pg4wp_pre_sql'][] = $sql;
+			return true;
+		}
 		global $table_prefix;
 		$logto = 'queries';
 		// This is used to catch the number of rows returned by the last "SELECT" REQUEST
