@@ -156,8 +156,8 @@
 			$curryear = date( 'Y');
 			$sql = str_replace( 'FROM \''.$curryear, 'FROM TIMESTAMP \''.$curryear, $sql);
 			
-			// MySQL 'IF' conversion
-			$pattern = '/ IF[ ]*\(([^,]+),([^,]+),([^\)]+)\)/';
+			// MySQL 'IF' conversion - Note : NULLIF doesn't need to be corrected
+			$pattern = '/ (?<!NULL)IF[ ]*\(([^,]+),([^,]+),([^\)]+)\)/';
 			$sql = preg_replace( $pattern, ' CASE WHEN $1 THEN $2 ELSE $3 END', $sql);
 			
 			$sql = str_replace('GROUP BY '.$table_prefix.'posts."ID"', '' , $sql);
