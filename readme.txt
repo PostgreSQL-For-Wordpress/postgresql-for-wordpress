@@ -3,7 +3,7 @@ Contributors: Hawk__ (http://www.hawkix.net/)
 Donate link: http://www.hawkix.net/faire-un-don/
 Tags: database, postgresql, PostgreSQL, postgres, mysql
 Requires at least: 2.5.1
-Tested up to: 3.0-beta1
+Tested up to: 3.2.1
 Stable tag: 1.1.0
 
 PostgreSQL for WordPress is a special 'plugin' enabling WordPress to be used with a PostgreSQL database.
@@ -14,7 +14,7 @@ Wordpress has always been locked into using mysql as its database storage engine
 
 But some people would like to use some other databases such as PostgreSQL. There are many different motivations behind this, sometimes people already have PostgreSQL on their server and don't want to install MySQL along PostgreSQL, or simply don't like MySQL and prefer using alternatives.
 
-PostgreSQL for WordPress (PG4WP) gives you the possibility tu install and use WordPress with a PostgreSQL database as a backend.
+PostgreSQL for WordPress (PG4WP) gives you the possibility to install and use WordPress with a PostgreSQL database as a backend.
 It works by replacing calls to MySQL specific functions with generic calls that maps them to another database functions.
 
 When needed, the original SQL queries are rewritten on the fly so that MySQL specific queries work fine with the backend database. 
@@ -38,9 +38,9 @@ This is because the database needs to be up and running before any plugin can be
 	You can modify this file to configure the database driver you wish to use
 	Currently you can set 'DB_DRIVER' to 'pgsql' or 'mysql'
 	
-	You can also activate DEBUG or ERROR logs
+	You can also activate DEBUG and/or ERROR logs
 
-1.	Point your Web Browser to your wordpress installation and go through the traditional WordPress installation routine.
+1.	Point your Web Browser to your WordPress installation and go through the traditional WordPress installation routine.
 
 == Frequently Asked Questions ==
 No question yet, please contact me if you have any.
@@ -50,10 +50,12 @@ There is no screenshot for this plugin
 
 == Changelog ==
 
+* Upgrading works with minor errors (PostgreSQL complains about already existing relations)
+	Tested successfully : 2.9.2 to 3.0.6 - 2.9.2 to 3.1.4 - 2.9.2 to 3.2.1
+* Support for Wordpress up to 3.2.1 (Installing WP 2.9.2, 3.0.6, 3.1.4 and 3.2.1 works smoothly)
 * Implemented a generic "INTERVAL xx DAY|HOUR|MINUTE|SECOND" handler
 * Backticks and capital text containing 'ID' now work 
 * Improved db.php to remove notices and possible fatal errors
-* Preliminary support for Wordpress 3.0
 * Improved dates functions handling
 * PG4WP now appears in WordPress control panel and can be enabled/disabled but this has no real effect
 * Added a correct plugin header into db.php to have correct informations shown in WordPress plugin Directory
