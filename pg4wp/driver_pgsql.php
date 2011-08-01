@@ -368,8 +368,8 @@
 		if( in_array( $t, array( '_seq', $table_prefix.'term_relationships_seq')))
 			return 0;
 		
-		if( $ins_field == '"cat_ID"' || $ins_field == 'rel_id')
-			$sql = "SELECT MAX($ins_field) FROM $ins_table";
+		if( $ins_field == '"cat_ID"' || $ins_field == 'rel_id' || $ins_field == 'term_id')
+			$sql = "SELECT MAX($ins_field) FROM ".$tbls[0];
 		else
 			$sql = "SELECT CURRVAL('$t')";
 		
