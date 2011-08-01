@@ -194,16 +194,6 @@
 			$logto = 'INSERT';
 			$sql = str_replace('(0,',"('0',", $sql);
 			$sql = str_replace('(1,',"('1',", $sql);
-			$pattern = '/INSERT INTO (\w+)\s+\([ a-zA-Z_"]+/';
-			preg_match($pattern, $sql, $matches);
-			$GLOBALS['pg4wp_ins_table'] = $matches[1];
-			$match_list = split(' ', $matches[0]);
-			if( $GLOBALS['pg4wp_ins_table'])
-			{
-				$GLOBALS['pg4wp_ins_field'] = trim($match_list[3],' ()	');
-				if(! $GLOBALS['pg4wp_ins_field'])
-					$GLOBALS['pg4wp_ins_field'] = trim($match_list[4],' ()	');
-			}
 			
 			// ZdMultiLang support hack
 			if( $GLOBALS['pg4wp_ins_table'] == $table_prefix.'zd_ml_trans')
@@ -328,6 +318,21 @@
 				'BlogDescription'	=> '"BlogDescription"',
 			);
 			$sql = str_replace( array_keys($zdml_conv), array_values($zdml_conv), $sql);
+		}
+		
+		// For insert ID catching
+		if( $logto == 'INSERT')
+		{
+			$pattern = '/INSERT INTO (\w+)\s+\([ a-zA-Z_"]+/';
+			preg_match($pattern, $sql, $matches);
+			$GLOBALS['pg4wp_ins_table'] = $matches[1];
+			$match_list = split(' ', $matches[0]);
+			if( $GLOBALS['pg4wp_ins_table'])
+			{
+				$GLOBALS['pg4wp_ins_field'] = trim($match_list[3],' ()	');
+				if(! $GLOBALS['pg4wp_ins_field'])
+					$GLOBALS['pg4wp_ins_field'] = trim($match_list[4],' ()	');
+			}
 		}
 		
 		// Put back the end of the query if it was separated
