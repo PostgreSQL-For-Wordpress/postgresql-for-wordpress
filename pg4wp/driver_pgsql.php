@@ -12,6 +12,9 @@
 *
 * This was originally based on usleepless's original 'mysql2pgsql.php' file, many thanks to him
 */
+	// Check pgsql extension is loaded
+	if ( !extension_loaded('pgsql') )
+		wp_die( 'Your PHP installation appears to be missing the PostgreSQL extension which is required by WordPress with PG4WP.' );
 
 	// Load up upgrade and install functions as required
 	if( defined( 'WP_INSTALLING') && WP_INSTALLING)
