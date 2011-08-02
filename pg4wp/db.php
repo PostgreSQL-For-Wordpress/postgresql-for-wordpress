@@ -3,19 +3,16 @@
 Plugin Name: PostgreSQL for WordPress (PG4WP)
 Plugin URI: http://www.hawkix.net
 Description: PG4WP is a special 'plugin' enabling WordPress to use a PostgreSQL database.
-Version: 1.1.0
+Version: 1.2.0b1
 Author: Hawk__
 Author URI: http://www.hawkix.net
 License: GPLv2 or newer.
 */
+
 if( !defined('PG4WP_ROOT'))
 {
-
 // You can choose the driver to load here
 define('DB_DRIVER', 'pgsql'); // 'pgsql' or 'mysql' are supported for now
-
-// This defines the directory where PG4WP files are
-define( 'PG4WP_ROOT', dirname( __FILE__).'/plugins/pg4wp');
 
 // Set this to 'true' and check that `pg4wp` is writable if you want debug logs to be written
 define( 'PG4WP_DEBUG', false);
@@ -23,32 +20,17 @@ define( 'PG4WP_DEBUG', false);
 // and set this to true
 define( 'PG4WP_LOG_ERRORS', true);
 
-// Logs are put in the pg4wp directory
-define( 'PG4WP_LOG', PG4WP_ROOT.'/logs/');
-// Check if the logs directory is needed and exists or create it if possible
-if( (PG4WP_DEBUG || PG4WP_LOG_ERRORS) &&
-	!file_exists( PG4WP_LOG) &&
-	is_writable(dirname( PG4WP_LOG)))
-	mkdir( PG4WP_LOG);
+// If you want to allow insecure configuration (from the author point of view) to work with PG4WP,
+// change this to true
+define( 'PG4WP_INSECURE', false);
 
-// Load the driver defined above
-require_once( PG4WP_ROOT.'/driver_'.DB_DRIVER.'.php');
+// This defines the directory where PG4WP files are loaded from
+//   2 places checked : wp-content and wp-content/plugins
+if( file_exists( ABSPATH.'/wp-content/pg4wp'))
+	define( 'PG4WP_ROOT', ABSPATH.'/wp-content/pg4wp');
+else
+	define( 'PG4WP_ROOT', ABSPATH.'/wp-content/plugins/pg4wp');
 
-// This loads up the wpdb class applying the appropriate changes to it, DON'T TOUCH !
-$replaces = array(
-	'define( '	=> '// define( ',
-	'class wpdb'	=> 'class wpdb2',
-	'new wpdb'	=> 'new wpdb2',
-	'mysql_'	=> 'wpsql_',
-	'<?php'		=> '',
-	'?>'		=> '',
-);
-eval( str_replace( array_keys($replaces), array_values($replaces), file_get_contents(ABSPATH.'/wp-includes/wp-db.php')));
-require_once( ABSPATH.'/wp-includes/wp-db.php');
-
-if (! isset($wpdb)) {
-	// Create wpdb object if not already done
-	$wpdb = new wpdb2( DB_USER, DB_PASSWORD, DB_NAME, DB_HOST );
-}
-
+// Here happens all the magic
+require_once( PG4WP_ROOT.'/core.php');
 } // Protection against multiple loading

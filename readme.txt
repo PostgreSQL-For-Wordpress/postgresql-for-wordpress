@@ -31,7 +31,7 @@ You have to install it before setting up your WordPress installation for things 
 This section describes how to install the plugin and get it working.
 This is because the database needs to be up and running before any plugin can be loaded.
 
-1.	Unzip the files and put the `pg4wp` directory in your `/wp-content/plugins` directory.
+1.	Unzip the files and put the `pg4wp` directory in your `/wp-content` directory.
 
 1.	Copy the `dp.php` from the `pg4wp` directory to `wp-content`
 	
@@ -50,6 +50,9 @@ There is no screenshot for this plugin
 
 == Changelog ==
 
+= 1.2.0b1 =
+* Added 'PG4WP_INSECURE' parameter for future use
+* Split 'db.php' to be just some kind of loader for PG4WP to ease upgrading
 * Improved Akismet compatibility
 * Upgrading works with minor errors (PostgreSQL complains about already existing relations)
 	Tested successfully : 2.9.2 to 3.0.6 - 2.9.2 to 3.1.4 - 2.9.2 to 3.2.1
@@ -133,6 +136,11 @@ There is no screenshot for this plugin
 * Importing WordPress eXtended RSS tested and seems to work
 
 == Upgrade Notice ==
+
+= 1.2.0 =
+This version provides support for Wordpress up to 3.2.1
+Upgrading to this version requires you to replace your existing `dp.php` with the one from the `pg4wp` directory.
+Note : since 1.2.0b1, it is recommended to put the `pg4wp` directory directly in `/wp-content`
 
 = 1.0 =
 Initial stable release, you should upgrade to this version if you have installed any older release
