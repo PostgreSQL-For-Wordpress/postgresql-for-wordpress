@@ -50,6 +50,7 @@ There is no screenshot for this plugin
 
 == Changelog ==
 
+* Improved Akismet compatibility
 * Upgrading works with minor errors (PostgreSQL complains about already existing relations)
 	Tested successfully : 2.9.2 to 3.0.6 - 2.9.2 to 3.1.4 - 2.9.2 to 3.2.1
 * Support for Wordpress up to 3.2.1 (Installing WP 2.9.2, 3.0.6, 3.1.4 and 3.2.1 works smoothly)
