@@ -277,6 +277,12 @@
 			$logto = 'SHOWTABLES';
 			$sql = 'SELECT tablename FROM pg_tables WHERE schemaname = \'public\';';
 		}
+		// Rewriting optimize table
+		elseif( 0 === strpos($sql, 'OPTIMIZE TABLE'))
+		{
+			$logto = 'OPTIMIZE';
+			$sql = str_replace( 'OPTIMIZE TABLE', 'VACUUM', $sql);
+		}
 		elseif( defined('WP_INSTALLING') && WP_INSTALLING)
 			$sql = pg4wp_installing( $sql, $logto);
 		
@@ -292,6 +298,9 @@
 		
 		// Remove illegal characters
 		$sql = str_replace('`', '', $sql);
+		
+		// Akismet sometimes doesn't write 'comment_ID' with 'ID' in capitals ...
+		$sql = str_replace(' comment_id ', ' comment_ID ', $sql);
 		
 		// Field names with CAPITALS need special handling
 		if( false !== strpos($sql, 'ID'))
