@@ -299,8 +299,9 @@
 		// Remove illegal characters
 		$sql = str_replace('`', '', $sql);
 		
-		// Akismet sometimes doesn't write 'comment_ID' with 'ID' in capitals ...
-		$sql = str_replace(' comment_id ', ' comment_ID ', $sql);
+		// Akismet sometimes doesn't write 'comment_ID' with 'ID' in capitals where needed ...
+		if( false !== strpos( $sql, $table_prefix.'comments'))
+			$sql = str_replace(' comment_id ', ' comment_ID ', $sql);
 		
 		// Field names with CAPITALS need special handling
 		if( false !== strpos($sql, 'ID'))
