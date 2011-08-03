@@ -16,10 +16,6 @@
 	if ( !extension_loaded('pgsql') )
 		wp_die( 'Your PHP installation appears to be missing the PostgreSQL extension which is required by WordPress with PG4WP.' );
 
-	// Load up upgrade and install functions as required
-	if( defined( 'WP_INSTALLING') && WP_INSTALLING)
-		require_once( PG4WP_ROOT.'/driver_pgsql_install.php');
-
 	// Initializing some variables
 	$GLOBALS['pg4wp_result'] = 0;
 	$GLOBALS['pg4wp_numrows'] = '10';
@@ -283,8 +279,12 @@
 			$logto = 'OPTIMIZE';
 			$sql = str_replace( 'OPTIMIZE TABLE', 'VACUUM', $sql);
 		}
-		elseif( defined('WP_INSTALLING') && WP_INSTALLING)
+		// Load up upgrade and install functions as required
+		elseif( 0 === strpos( $sql, 'CREATE') || (defined('WP_INSTALLING') && WP_INSTALLING))
+		{
+			require_once( PG4WP_ROOT.'/driver_pgsql_install.php');
 			$sql = pg4wp_installing( $sql, $logto);
+		}
 		
 		// WP 2.9.1 uses a comparison where text data is not quoted
 		$pattern = '/AND meta_value = (-?\d+)/';

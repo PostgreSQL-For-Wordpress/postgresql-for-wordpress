@@ -51,6 +51,7 @@ There is no screenshot for this plugin
 == Changelog ==
 
 = 1.2.0b1 =
+* Somewhat improved Wordpress plugins compatibility
 * Added 'PG4WP_INSECURE' parameter for future use
 * Split 'db.php' to be just some kind of loader for PG4WP to ease upgrading
 * Improved Akismet compatibility
