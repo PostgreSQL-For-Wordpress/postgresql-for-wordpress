@@ -50,7 +50,7 @@
 		{ if( $GLOBALS['pg4wp_user'] == '') return pg_last_error(); else return ''; }
 	function wpsql_fetch_assoc($result) { return pg_fetch_assoc($result); }
 	function wpsql_escape_string($s) { return pg_escape_string($s); }
-	function wpsql_get_server_info() { return '4.1.3'; } // Just want to fool wordpress ...
+	function wpsql_get_server_info() { return '5.0.30'; } // Just want to fool wordpress ...
 	function wpsql_result($result, $i, $fieldname)
 		{ return pg_fetch_result($result, $i, $fieldname); }
 
