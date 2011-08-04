@@ -101,7 +101,7 @@
 			$GLOBALS['pg4wp_pre_sql'][] = $sql;
 			return true;
 		}
-		global $table_prefix;
+		global $wpdb;
 		$logto = 'queries';
 		// This is used to catch the number of rows returned by the last "SELECT" REQUEST
 		$catchnumrows = false;
@@ -118,9 +118,9 @@
 			if( false !== strpos($sql, 'SQL_CALC_FOUND_ROWS'))
 			{
 				$catchnumrows = true;
-				$sql = str_replace('GROUP BY '.$table_prefix.'posts.ID', '' , $sql);
+				$sql = str_replace('GROUP BY '.$wpdb->prefix.'posts.ID', '' , $sql);
 				$GLOBALS['pg4wp_numrows'] = str_replace( 'SQL_CALC_FOUND_ROWS', 'DISTINCT', $sql);
-				$GLOBALS['pg4wp_numrows'] = preg_replace( '/SELECT DISTINCT.+FROM ('.$table_prefix.'posts)/', 'SELECT DISTINCT "ID" FROM $1', $GLOBALS['pg4wp_numrows']);
+				$GLOBALS['pg4wp_numrows'] = preg_replace( '/SELECT DISTINCT.+FROM ('.$wpdb->prefix.'posts)/', 'SELECT DISTINCT "ID" FROM $1', $GLOBALS['pg4wp_numrows']);
 				$GLOBALS['pg4wp_numrows'] = preg_replace( '/SELECT(.+)FROM/', 'SELECT COUNT($1) FROM', $GLOBALS['pg4wp_numrows']);
 				$GLOBALS['pg4wp_numrows'] = preg_replace( '/(ORDER BY|LIMIT).+/', '', $GLOBALS['pg4wp_numrows']);
 				$sql = str_replace('SQL_CALC_FOUND_ROWS', '', $sql);
@@ -159,7 +159,7 @@
 			$pattern = '/ (?<!NULL)IF[ ]*\(([^,]+),([^,]+),([^\)]+)\)/';
 			$sql = preg_replace( $pattern, ' CASE WHEN $1 THEN $2 ELSE $3 END', $sql);
 			
-			$sql = str_replace('GROUP BY '.$table_prefix.'posts."ID"', '' , $sql);
+			$sql = str_replace('GROUP BY '.$wpdb->prefix.'posts."ID"', '' , $sql);
 			$sql = str_replace("!= ''", '<> 0', $sql);
 			
 			// MySQL 'LIKE' is case insensitive by default, whereas PostgreSQL 'LIKE' is
@@ -206,14 +206,14 @@
 			$sql = str_replace('(1,',"('1',", $sql);
 			
 			// ZdMultiLang support hack
-			if( $GLOBALS['pg4wp_ins_table'] == $table_prefix.'zd_ml_trans')
+			if( $GLOBALS['pg4wp_ins_table'] == $wpdb->prefix.'zd_ml_trans')
 			{
 				preg_match( '/VALUES \([^\d]*(\d+)', $sql, $matches);
 				$GLOBALS['pg4wp_insid'] = $matches[1];
 			}
 			
 			// Fix inserts into wp_categories
-			if( false !== strpos($sql, 'INSERT INTO '.$table_prefix.'categories'))
+			if( false !== strpos($sql, 'INSERT INTO '.$wpdb->prefix.'categories'))
 			{
 				$sql = str_replace('"cat_ID",', '', $sql);
 				$sql = str_replace("VALUES ('0',", "VALUES(", $sql);
@@ -223,7 +223,7 @@
 			$sql = str_replace( "'0000-00-00 00:00:00'", 'now() AT TIME ZONE \'gmt\'', $sql);
 			
 			// Multiple values group when calling INSERT INTO don't always work
-			if( false !== strpos( $sql, $table_prefix.'options') && false !== strpos( $sql, '), ('))
+			if( false !== strpos( $sql, $wpdb->prefix.'options') && false !== strpos( $sql, '), ('))
 			{
 				$pattern = '/INSERT INTO.+VALUES/';
 				preg_match($pattern, $sql, $matches);
@@ -300,7 +300,7 @@
 		$sql = str_replace('`', '', $sql);
 		
 		// Akismet sometimes doesn't write 'comment_ID' with 'ID' in capitals where needed ...
-		if( false !== strpos( $sql, $table_prefix.'comments'))
+		if( false !== strpos( $sql, $wpdb->prefix.'comments'))
 			$sql = str_replace(' comment_id ', ' comment_ID ', $sql);
 		
 		// Field names with CAPITALS need special handling
@@ -333,7 +333,7 @@
 		$sql = str_replace( 'in ()', 'IN (NULL)', $sql);
 		
 		// ZdMultiLang support hack, some columns have capitals in their name, and that needs special handling for PostgreSQL
-		if( false !== strpos( $sql, $table_prefix.'zd_ml_langs'))
+		if( false !== strpos( $sql, $wpdb->prefix.'zd_ml_langs'))
 		{
 			$zdml_conv = array(
 				'LanguageName'		=> '"LanguageName"',
@@ -371,7 +371,7 @@
 		}
 		$GLOBALS['pg4wp_result'] = pg_query($sql);
 		if( (PG4WP_DEBUG || PG4WP_LOG_ERRORS) && $GLOBALS['pg4wp_result'] === false && $err = pg_last_error())
-			if( false === strpos($err, 'relation "'.$table_prefix.'options"'))
+			if( false === strpos($err, 'relation "'.$wpdb->prefix.'options"'))
 				error_log("Error running :\n$initial\n---- converted to ----\n$sql\n----\n$err\n---------------------\n", 3, PG4WP_LOG.'pg4wp_errors.log');
 		
 		return $GLOBALS['pg4wp_result'];
@@ -379,17 +379,17 @@
 	
 	function wpsql_insert_id($table)
 	{
-		global $table_prefix;
+		global $wpdb;
 		$ins_field = $GLOBALS['pg4wp_ins_field'];
 		
 		$tbls = split("\n", $GLOBALS['pg4wp_ins_table']); // Workaround for bad tablename
 		$t = $tbls[0] . '_seq';
 		
 		// ZdMultiLang support hack
-		if( $tbls[0] == $table_prefix.'zd_ml_trans')
+		if( $tbls[0] == $wpdb->prefix.'zd_ml_trans')
 			return $GLOBALS['pg4wp_insid'];
 		
-		if( in_array( $t, array( '_seq', $table_prefix.'term_relationships_seq')))
+		if( in_array( $t, array( '_seq', $wpdb->prefix.'term_relationships_seq')))
 			return 0;
 		
 		if( $ins_field == '"cat_ID"' || $ins_field == 'rel_id' || $ins_field == 'term_id')
