@@ -50,6 +50,8 @@ There is no screenshot for this plugin
 
 == Changelog ==
 
+* Some code optimizations
+
 = 1.2.0b1 =
 * Somewhat improved Wordpress plugins compatibility
 * Added 'PG4WP_INSECURE' parameter for future use

@@ -118,17 +118,11 @@
 			if( false !== strpos($sql, 'SQL_CALC_FOUND_ROWS'))
 			{
 				$catchnumrows = true;
-				$sql = str_replace('GROUP BY '.$wpdb->prefix.'posts.ID', '' , $sql);
-				$GLOBALS['pg4wp_numrows'] = str_replace( 'SQL_CALC_FOUND_ROWS', 'DISTINCT', $sql);
-				$GLOBALS['pg4wp_numrows'] = preg_replace( '/SELECT DISTINCT.+FROM ('.$wpdb->prefix.'posts)/', 'SELECT DISTINCT "ID" FROM $1', $GLOBALS['pg4wp_numrows']);
-				$GLOBALS['pg4wp_numrows'] = preg_replace( '/SELECT(.+)FROM/', 'SELECT COUNT($1) FROM', $GLOBALS['pg4wp_numrows']);
-				$GLOBALS['pg4wp_numrows'] = preg_replace( '/(ORDER BY|LIMIT).+/', '', $GLOBALS['pg4wp_numrows']);
 				$sql = str_replace('SQL_CALC_FOUND_ROWS', '', $sql);
 			}
 			elseif( false !== strpos($sql, 'FOUND_ROWS()'))
-			{
-				$sql = $GLOBALS['pg4wp_numrows'];
-			}
+				return $GLOBALS['pg4wp_numrows'];
+			
 			// Handle COUNT(*)...ORDER BY...
 			$sql = preg_replace( '/COUNT(.+)ORDER BY.+/', 'COUNT$1', $sql);
 			
@@ -374,6 +368,12 @@
 			if( false === strpos($err, 'relation "'.$wpdb->prefix.'options"'))
 				error_log("Error running :\n$initial\n---- converted to ----\n$sql\n----\n$err\n---------------------\n", 3, PG4WP_LOG.'pg4wp_errors.log');
 		
+		if( $catchnumrows && $GLOBALS['pg4wp_result'] !== false)
+		{
+			$GLOBALS['pg4wp_numrows'] = pg_num_rows( $GLOBALS['pg4wp_result']);
+			if( PG4WP_DEBUG)
+				error_log( "Catched number of rows for :\n$sql\nResult is :".$GLOBALS['pg4wp_numrows']."\n---------------------\n", 3, PG4WP_LOG.'pg4wp_NUMROWS.log');
+		}
 		return $GLOBALS['pg4wp_result'];
 	}
 	
