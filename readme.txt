@@ -25,10 +25,7 @@ If you need/wish support for another database, please feel free to contact the a
 
 == Installation ==
 
-Whereas it appears in the control panel, enabling/disabling this plugin through the control panel won't do anything.
-You have to install it before setting up your WordPress installation for things to work properly. 
-
-This section describes how to install the plugin and get it working.
+You have to install PG4WP *before* setting up your WordPress installation for things to work properly. 
 This is because the database needs to be up and running before any plugin can be loaded.
 
 1.	Unzip the files and put the `pg4wp` directory in your `/wp-content` directory.
@@ -50,6 +47,9 @@ There is no screenshot for this plugin
 
 == Changelog ==
 
+* Rewrote database connection handling so Wordpress installation can tell you when you username and password are wrong
+* Support for using an empty password for database connection
+	Note : this requires setting 'PG4WP_INSECURE' to true in `db.php` for PG4WP to accept this
 * Some code optimizations
 
 = 1.2.0b1 =

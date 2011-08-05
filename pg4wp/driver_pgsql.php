@@ -21,7 +21,8 @@
 	$GLOBALS['pg4wp_numrows'] = '10';
 	$GLOBALS['pg4wp_ins_table'] = '';
 	$GLOBALS['pg4wp_ins_field'] = '';
-	$GLOBALS['pg4wp_user'] = $GLOBALS['pg4wp_password'] = $GLOBALS['pg4wp_server'] = '';
+	$GLOBALS['pg4wp_connstr'] = '';
+	$GLOBALS['pg4wp_conn'] = false;
 	
 	function wpsql_num_rows($result)
 		{ return pg_num_rows($result); }
@@ -47,39 +48,50 @@
 	function wpsql_data_seek($result, $offset)
 		{ return pg_result_seek ( $result, $offset ); }
 	function wpsql_error()
-		{ if( $GLOBALS['pg4wp_user'] == '') return pg_last_error(); else return ''; }
+		{ if( $GLOBALS['pg4wp_conn']) return pg_last_error(); else return ''; }
 	function wpsql_fetch_assoc($result) { return pg_fetch_assoc($result); }
 	function wpsql_escape_string($s) { return pg_escape_string($s); }
 	function wpsql_get_server_info() { return '5.0.30'; } // Just want to fool wordpress ...
 	function wpsql_result($result, $i, $fieldname)
 		{ return pg_fetch_result($result, $i, $fieldname); }
 
-	// This is a fake connection
+	// This is a fake connection except during installation
 	function wpsql_connect($dbserver, $dbuser, $dbpass)
 	{
-		$GLOBALS['pg4wp_user'] = $dbuser;
-		$GLOBALS['pg4wp_password'] = $dbpass;
-		$GLOBALS['pg4wp_server'] = $dbserver;
+		$GLOBALS['pg4wp_connstr'] = '';
+		if( !empty( $dbserver))
+			$GLOBALS['pg4wp_connstr'] .= ' host='.$dbserver;
+		if( !empty( $dbuser))
+			$GLOBALS['pg4wp_connstr'] .= ' user='.$dbuser;
+		if( !empty( $dbpass))
+			$GLOBALS['pg4wp_connstr'] .= ' password='.$dbpass;
+		elseif( !PG4WP_INSECURE)
+			wp_die( 'Connecting to your PostgreSQL database without a password is considered insecure.
+					<br />If you want to do it anyway, please set "PG4WP_INSECURE" to true in your "db.php" file.' );
+		
+		// While installing, we test the connection to 'template0' (as we don't know the effective dbname yet)
+		if( defined('WP_INSTALLING') && WP_INSTALLING)
+			return wpsql_select_db( 'template1');
+		
 		return 1;
 	}
-
+	
+	// The effective connection happens here
 	function wpsql_select_db($dbname, $connection_id = 0)
 	{
-		$pg_user = $GLOBALS['pg4wp_user'];
-		$pg_password = $GLOBALS['pg4wp_password'];
-		$pg_server = $GLOBALS['pg4wp_server'];
-		if( empty( $pg_server))
-			$GLOBALS['pg4wp_conn'] = pg_connect("user=$pg_user password=$pg_password dbname=$dbname");
-		else
-			$GLOBALS['pg4wp_conn'] = pg_connect("host=$pg_server user=$pg_user password=$pg_password dbname=$dbname");
-		// Now we should be connected, we "forget" about the connection parameters
-		$GLOBALS['pg4wp_user'] = '';
-		$GLOBALS['pg4wp_password'] = '';
-		$GLOBALS['pg4wp_server'] = '';
+		$pg_connstr = $GLOBALS['pg4wp_connstr'].' dbname='.$dbname;
+
+		$GLOBALS['pg4wp_conn'] = pg_connect($pg_connstr);
+		
+		// Now we should be connected, we "forget" about the connection parameters (if this is not a "test" connection
+		if( !defined('WP_INSTALLING') || !WP_INSTALLING)
+			$GLOBALS['pg4wp_connstr'] = '';
+		
 		// Execute early transmitted commands if needed
 		if( isset($GLOBALS['pg4wp_pre_sql']) && !empty($GLOBALS['pg4wp_pre_sql']))
 			foreach( $GLOBALS['pg4wp_pre_sql'] as $sql2run)
 				wpsql_query( $sql2run);
+		
 		return $GLOBALS['pg4wp_conn'];
 	}
 
@@ -95,7 +107,7 @@
 	
 	function wpsql_query($sql)
 	{
-		if( !isset($GLOBALS['pg4wp_conn']))
+		if( !$GLOBALS['pg4wp_conn'])
 		{
 			// Catch SQL to be executed as soon as connected
 			$GLOBALS['pg4wp_pre_sql'][] = $sql;
