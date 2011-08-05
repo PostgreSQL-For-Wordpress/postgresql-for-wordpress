@@ -17,6 +17,7 @@
 		wp_die( 'Your PHP installation appears to be missing the PostgreSQL extension which is required by WordPress with PG4WP.' );
 
 	// Initializing some variables
+	$GLOBALS['pg4wp_version'] = '7.0';
 	$GLOBALS['pg4wp_result'] = 0;
 	$GLOBALS['pg4wp_numrows'] = '10';
 	$GLOBALS['pg4wp_ins_table'] = '';
@@ -83,7 +84,14 @@
 
 		$GLOBALS['pg4wp_conn'] = pg_connect($pg_connstr);
 		
-		// Now we should be connected, we "forget" about the connection parameters (if this is not a "test" connection
+		if( $GLOBALS['pg4wp_conn'])
+		{
+			$ver = pg_version($GLOBALS['pg4wp_conn']);
+			if( isset($ver['server']))
+				$GLOBALS['pg4wp_version'] = $ver['server'];
+		}
+		
+		// Now we should be connected, we "forget" about the connection parameters (if this is not a "test" connection)
 		if( !defined('WP_INSTALLING') || !WP_INSTALLING)
 			$GLOBALS['pg4wp_connstr'] = '';
 		
@@ -412,6 +420,6 @@
 		$res = pg_query($sql);
 		$data = pg_fetch_result($res, 0, 0);
 		if( PG4WP_DEBUG && $sql)
-			error_log("Getting : $sql => $data\n", 3, PG4WP_LOG.'pg4wp_insertid.log');
+			error_log("Getting inserted ID for '$t' : $sql => $data\n", 3, PG4WP_LOG.'pg4wp_insertid.log');
 		return $data;
 	}
