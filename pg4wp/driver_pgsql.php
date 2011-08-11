@@ -173,7 +173,7 @@
 			$pattern = '/ (?<!NULL)IF[ ]*\(([^,]+),([^,]+),([^\)]+)\)/';
 			$sql = preg_replace( $pattern, ' CASE WHEN $1 THEN $2 ELSE $3 END', $sql);
 			
-			$sql = str_replace('GROUP BY '.$wpdb->prefix.'posts."ID"', '' , $sql);
+			$sql = str_replace('GROUP BY '.$wpdb->prefix.'posts.ID', '' , $sql);
 			$sql = str_replace("!= ''", '<> 0', $sql);
 			
 			// MySQL 'LIKE' is case insensitive by default, whereas PostgreSQL 'LIKE' is
