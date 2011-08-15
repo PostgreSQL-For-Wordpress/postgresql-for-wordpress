@@ -186,11 +186,13 @@
 			// HB : timestamp fix for permalinks
 			$sql = str_replace( 'post_date_gmt > 1970', 'post_date_gmt > to_timestamp (\'1970\')', $sql);
 			
+/****
 			// ZdMultiLang support hacks
 			$sql = preg_replace( '/post_type="([^"]+)"/', 'post_type=\'$1\'', $sql);
 			$sql = str_replace( 'link_url o_url', 'link_url AS o_url', $sql);
 			$sql = str_replace( 'link_name o_name', 'link_name AS o_name', $sql);
 			$sql = str_replace( 'link_description o_desc', 'link_description AS o_desc', $sql);
+****/
 		} // SELECT
 		elseif( 0 === strpos($sql, 'UPDATE'))
 		{
@@ -219,12 +221,14 @@
 			$sql = str_replace('(0,',"('0',", $sql);
 			$sql = str_replace('(1,',"('1',", $sql);
 			
+/****
 			// ZdMultiLang support hack
 			if( $GLOBALS['pg4wp_ins_table'] == $wpdb->prefix.'zd_ml_trans')
 			{
 				preg_match( '/VALUES \([^\d]*(\d+)', $sql, $matches);
 				$GLOBALS['pg4wp_insid'] = $matches[1];
 			}
+****/
 			
 			// Fix inserts into wp_categories
 			if( false !== strpos($sql, 'INSERT INTO '.$wpdb->prefix.'categories'))
@@ -343,6 +347,7 @@
 		$sql = str_replace( 'IN ( \'\' )', 'IN (NULL)', $sql);
 		$sql = str_replace( 'IN ()', 'IN (NULL)', $sql);
 		
+/****
 		// ZdMultiLang 1.2.4 uses a lowercase 'in'
 		$sql = str_replace( 'in ()', 'IN (NULL)', $sql);
 		
@@ -357,6 +362,7 @@
 			);
 			$sql = str_replace( array_keys($zdml_conv), array_values($zdml_conv), $sql);
 		}
+****/
 		
 		// For insert ID catching
 		if( $logto == 'INSERT')
@@ -405,9 +411,11 @@
 		$tbls = split("\n", $GLOBALS['pg4wp_ins_table']); // Workaround for bad tablename
 		$t = $tbls[0] . '_seq';
 		
+/****
 		// ZdMultiLang support hack
 		if( $tbls[0] == $wpdb->prefix.'zd_ml_trans')
 			return $GLOBALS['pg4wp_insid'];
+****/
 		
 		if( in_array( $t, array( '_seq', $wpdb->prefix.'term_relationships_seq')))
 			return 0;
