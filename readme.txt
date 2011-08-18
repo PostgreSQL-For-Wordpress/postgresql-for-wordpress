@@ -15,9 +15,7 @@ Wordpress has always been locked into using mysql as its database storage engine
 But some people would like to use some other databases such as PostgreSQL. There are many different motivations behind this, sometimes people already have PostgreSQL on their server and don't want to install MySQL along PostgreSQL, or simply don't like MySQL and prefer using alternatives.
 
 PostgreSQL for WordPress (PG4WP) gives you the possibility to install and use WordPress with a PostgreSQL database as a backend.
-It works by replacing calls to MySQL specific functions with generic calls that maps them to another database functions.
-
-When needed, the original SQL queries are rewritten on the fly so that MySQL specific queries work fine with the backend database. 
+It works by replacing calls to MySQL specific functions with generic calls that maps them to another database functions and rewriting SQL queries on the fly when needed.
 
 Currently, support is focused on PostgreSQL, but other databases can be added quite easily by providing the appropriate 'driver'.
 MySQL driver is enclosed, which just does "nothing".
@@ -47,6 +45,8 @@ There is no screenshot for this plugin
 
 == Changelog ==
 
+- 1.2.0rc =
+* Fixed regressions that caused some Wordpress features to not work properly
 * Rewrote database connection handling so Wordpress installation can tell you when you username and password are wrong
 * Support for using an empty password for database connection
 	Note : this requires setting 'PG4WP_INSECURE' to true in `db.php` for PG4WP to accept this
