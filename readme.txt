@@ -1,18 +1,14 @@
 === PostgreSQL for WordPress (PG4WP) ===
 Contributors: Hawk__ (http://www.hawkix.net/)
-Donate link: http://www.hawkix.net/faire-un-don/
+Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=FPT8RPZGFX7GU
 Tags: database, postgresql, PostgreSQL, postgres, mysql
 Requires at least: 2.5.1
 Tested up to: 3.2.1
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 
 PostgreSQL for WordPress is a special 'plugin' enabling WordPress to be used with a PostgreSQL database.
 
 == Description ==
-
-Wordpress has always been locked into using mysql as its database storage engine.  There is a good discussion of 'why' [in the codex](http://codex.wordpress.org/Using_Alternative_Databases#Solutions/ "Codex Discussion")
-
-But some people would like to use some other databases such as PostgreSQL. There are many different motivations behind this, sometimes people already have PostgreSQL on their server and don't want to install MySQL along PostgreSQL, or simply don't like MySQL and prefer using alternatives.
 
 PostgreSQL for WordPress (PG4WP) gives you the possibility to install and use WordPress with a PostgreSQL database as a backend.
 It works by replacing calls to MySQL specific functions with generic calls that maps them to another database functions and rewriting SQL queries on the fly when needed.
@@ -45,7 +41,14 @@ There is no screenshot for this plugin
 
 == Changelog ==
 
-- 1.2.0rc =
+= 1.2.0 =
+* Error logging is disabled in the distribution
+* Added a handle for correct counting of users and roles
+* Added MONTH and YEAR to the 'INTERVAL...' handling code
+* Removed all ZdMultilang support hacks
+
+= 1.2.0rc =
+* Disabled all ZdMultilang support hacks
 * Fixed regressions that caused some Wordpress features to not work properly
 * Rewrote database connection handling so Wordpress installation can tell you when you username and password are wrong
 * Support for using an empty password for database connection
