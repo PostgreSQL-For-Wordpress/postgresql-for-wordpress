@@ -25,15 +25,6 @@
 		
 		// WP 2.7.1 compatibility
 		'int(4)'		=> 'smallint',
-		
-/****
-		// ZdMultiLang support hack
-		'term_id varchar(5)'	=> 'term_id int',
-		'BIGINT(20)'			=> 'int',
-		'character set utf8'	=> '',
-		'CHARACTER SET utf8'	=> '',
-		'UNSIGNED'				=> '', // ZdMultilang 1.2.5
-****/
 	);
 	
 	function pg4wp_installing( $sql, &$logto)

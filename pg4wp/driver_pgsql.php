@@ -146,6 +146,17 @@
 			// Handle COUNT(*)...ORDER BY...
 			$sql = preg_replace( '/COUNT(.+)ORDER BY.+/', 'COUNT$1', $sql);
 			
+			// In order for users counting to work...
+			$matches = array();
+			if( preg_match_all( '/COUNT[^C]+\),/',$sql, $matches))
+			{
+				foreach( $matches[0] as $num => $one)
+				{
+					$sub = substr( $one, 0, -1);
+					$sql = str_replace( $sub, $sub.' AS count'.$num, $sql);
+				}
+			}
+			
 			$pattern = '/LIMIT[ ]+(\d+),[ ]*(\d+)/';
 			$sql = preg_replace($pattern, 'LIMIT $2 OFFSET $1', $sql);
 			
@@ -186,13 +197,6 @@
 			// HB : timestamp fix for permalinks
 			$sql = str_replace( 'post_date_gmt > 1970', 'post_date_gmt > to_timestamp (\'1970\')', $sql);
 			
-/****
-			// ZdMultiLang support hacks
-			$sql = preg_replace( '/post_type="([^"]+)"/', 'post_type=\'$1\'', $sql);
-			$sql = str_replace( 'link_url o_url', 'link_url AS o_url', $sql);
-			$sql = str_replace( 'link_name o_name', 'link_name AS o_name', $sql);
-			$sql = str_replace( 'link_description o_desc', 'link_description AS o_desc', $sql);
-****/
 		} // SELECT
 		elseif( 0 === strpos($sql, 'UPDATE'))
 		{
@@ -220,15 +224,6 @@
 			$logto = 'INSERT';
 			$sql = str_replace('(0,',"('0',", $sql);
 			$sql = str_replace('(1,',"('1',", $sql);
-			
-/****
-			// ZdMultiLang support hack
-			if( $GLOBALS['pg4wp_ins_table'] == $wpdb->prefix.'zd_ml_trans')
-			{
-				preg_match( '/VALUES \([^\d]*(\d+)', $sql, $matches);
-				$GLOBALS['pg4wp_insid'] = $matches[1];
-			}
-****/
 			
 			// Fix inserts into wp_categories
 			if( false !== strpos($sql, 'INSERT INTO '.$wpdb->prefix.'categories'))
@@ -307,9 +302,9 @@
 		// WP 2.9.1 uses a comparison where text data is not quoted
 		$pattern = '/AND meta_value = (-?\d+)/';
 		$sql = preg_replace( $pattern, 'AND meta_value = \'$1\'', $sql);
-			
-		// Generic "INTERVAL xx DAY|HOUR|MINUTE|SECOND" handle
-		$pattern = '/INTERVAL[ ]+(\d+)[ ]+(DAY|HOUR|MINUTE|SECOND)/';
+		
+		// Generic "INTERVAL xx YEAR|MONTH|DAY|HOUR|MINUTE|SECOND" handler
+		$pattern = '/INTERVAL[ ]+(\d+)[ ]+(YEAR|MONTH|DAY|HOUR|MINUTE|SECOND)/';
 		$sql = preg_replace( $pattern, "'\$1 \$2'::interval", $sql);
 		$pattern = '/DATE_SUB[ ]*\(([^,]+),([^\)]+)\)/';
 		$sql = preg_replace( $pattern, '($1::timestamp - $2)', $sql);
@@ -346,23 +341,6 @@
 		$sql = str_replace( 'IN (\'\')', 'IN (NULL)', $sql);
 		$sql = str_replace( 'IN ( \'\' )', 'IN (NULL)', $sql);
 		$sql = str_replace( 'IN ()', 'IN (NULL)', $sql);
-		
-/****
-		// ZdMultiLang 1.2.4 uses a lowercase 'in'
-		$sql = str_replace( 'in ()', 'IN (NULL)', $sql);
-		
-		// ZdMultiLang support hack, some columns have capitals in their name, and that needs special handling for PostgreSQL
-		if( false !== strpos( $sql, $wpdb->prefix.'zd_ml_langs'))
-		{
-			$zdml_conv = array(
-				'LanguageName'		=> '"LanguageName"',
-				'LangPermalink'		=> '"LangPermalink"',
-				'BlogName'			=> '"BlogName"',
-				'BlogDescription'	=> '"BlogDescription"',
-			);
-			$sql = str_replace( array_keys($zdml_conv), array_values($zdml_conv), $sql);
-		}
-****/
 		
 		// For insert ID catching
 		if( $logto == 'INSERT')
@@ -410,12 +388,6 @@
 		
 		$tbls = split("\n", $GLOBALS['pg4wp_ins_table']); // Workaround for bad tablename
 		$t = $tbls[0] . '_seq';
-		
-/****
-		// ZdMultiLang support hack
-		if( $tbls[0] == $wpdb->prefix.'zd_ml_trans')
-			return $GLOBALS['pg4wp_insid'];
-****/
 		
 		if( in_array( $t, array( '_seq', $wpdb->prefix.'term_relationships_seq')))
 			return 0;
