@@ -163,13 +163,14 @@ WHERE pg_class.relname='$table_name' AND pg_attribute.attnum>=1 AND NOT pg_attri
 			}
 			
 			// Support for INDEX creation
-			$pattern = '/,\s+(UNIQUE |)KEY\s+([^\s]+)\s+\(([^\)]+)\)/';
+			$pattern = '/,\s+(UNIQUE |)KEY\s+([^\s]+)\s+\(((?:[\w]+(?:\([\d]+\))?[,]?)*)\)/';
 			if( preg_match_all( $pattern, $sql, $matches, PREG_SET_ORDER))
 				foreach( $matches as $match)
 				{
 					$unique = $match[1];
 					$index = $match[2];
 					$columns = $match[3];
+					$columns = preg_replace( '/\(\d+\)/', '', $columns);
 					// Workaround for index name duplicate
 					$index = $table.'_'.$index;
 					$sql .= "\nCREATE {$unique}INDEX $index ON $table ($columns);";
