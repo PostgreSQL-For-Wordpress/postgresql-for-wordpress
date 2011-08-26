@@ -292,6 +292,12 @@
 			$logto = 'OPTIMIZE';
 			$sql = str_replace( 'OPTIMIZE TABLE', 'VACUUM', $sql);
 		}
+		// Handle 'SET NAMES ... COLLATE ...'
+		elseif( false !== strpos($sql, 'COLLATE'))
+		{
+			$logto = 'SETNAMES';
+			$sql = "SET NAMES 'utf8'";
+		}
 		// Load up upgrade and install functions as required
 		elseif( 0 === strpos( $sql, 'CREATE') || (defined('WP_INSTALLING') && WP_INSTALLING))
 		{
