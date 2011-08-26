@@ -122,6 +122,7 @@
 			return true;
 		}
 		global $wpdb;
+		
 		$logto = 'queries';
 		// This is used to catch the number of rows returned by the last "SELECT" REQUEST
 		$catchnumrows = false;
@@ -197,6 +198,10 @@
 			// HB : timestamp fix for permalinks
 			$sql = str_replace( 'post_date_gmt > 1970', 'post_date_gmt > to_timestamp (\'1970\')', $sql);
 			
+			// Akismet sometimes doesn't write 'comment_ID' with 'ID' in capitals where needed ...
+			if( false !== strpos( $sql, $wpdb->comments))
+				$sql = str_replace(' comment_id ', ' comment_ID ', $sql);
+			
 		} // SELECT
 		elseif( 0 === strpos($sql, 'UPDATE'))
 		{
@@ -226,7 +231,7 @@
 			$sql = str_replace('(1,',"('1',", $sql);
 			
 			// Fix inserts into wp_categories
-			if( false !== strpos($sql, 'INSERT INTO '.$wpdb->prefix.'categories'))
+			if( false !== strpos($sql, 'INSERT INTO '.$wpdb->categories))
 			{
 				$sql = str_replace('"cat_ID",', '', $sql);
 				$sql = str_replace("VALUES ('0',", "VALUES(", $sql);
@@ -236,7 +241,7 @@
 			$sql = str_replace( "'0000-00-00 00:00:00'", 'now() AT TIME ZONE \'gmt\'', $sql);
 			
 			// Multiple values group when calling INSERT INTO don't always work
-			if( false !== strpos( $sql, $wpdb->prefix.'options') && false !== strpos( $sql, '), ('))
+			if( false !== strpos( $sql, $wpdb->options) && false !== strpos( $sql, '), ('))
 			{
 				$pattern = '/INSERT INTO.+VALUES/';
 				preg_match($pattern, $sql, $matches);
@@ -275,10 +280,14 @@
 			
 			// This handles removal of duplicate entries in table options
 			if( false !== strpos( $sql, 'DELETE o1 FROM '))
-				$sql = "DELETE FROM ${table_prefix}options WHERE option_id IN " .
-					"(SELECT o1.option_id FROM ${table_prefix}options AS o1, ${table_prefix}options AS o2 " .
+				$sql = "DELETE FROM $wpdb->options WHERE option_id IN " .
+					"(SELECT o1.option_id FROM $wpdb->options AS o1, $wpdb->options AS o2 " .
 					"WHERE o1.option_name = o2.option_name " .
 					"AND o1.option_id < o2.option_id)";
+			
+			// Akismet sometimes doesn't write 'comment_ID' with 'ID' in capitals where needed ...
+			if( false !== strpos( $sql, $wpdb->comments))
+				$sql = str_replace(' comment_id ', ' comment_ID ', $sql);
 		}
 		// Fix tables listing
 		elseif( 0 === strpos($sql, 'SHOW TABLES'))
@@ -317,10 +326,6 @@
 		
 		// Remove illegal characters
 		$sql = str_replace('`', '', $sql);
-		
-		// Akismet sometimes doesn't write 'comment_ID' with 'ID' in capitals where needed ...
-		if( false !== strpos( $sql, $wpdb->prefix.'comments'))
-			$sql = str_replace(' comment_id ', ' comment_ID ', $sql);
 		
 		// Field names with CAPITALS need special handling
 		if( false !== strpos($sql, 'ID'))
@@ -375,7 +380,7 @@
 		}
 		$GLOBALS['pg4wp_result'] = pg_query($sql);
 		if( (PG4WP_DEBUG || PG4WP_LOG_ERRORS) && $GLOBALS['pg4wp_result'] === false && $err = pg_last_error())
-			if( false === strpos($err, 'relation "'.$wpdb->prefix.'options"'))
+			if( false === strpos($err, 'relation "'.$wpdb->options.'"'))
 				error_log("Error running :\n$initial\n---- converted to ----\n$sql\n----\n$err\n---------------------\n", 3, PG4WP_LOG.'pg4wp_errors.log');
 		
 		if( $catchnumrows && $GLOBALS['pg4wp_result'] !== false)
