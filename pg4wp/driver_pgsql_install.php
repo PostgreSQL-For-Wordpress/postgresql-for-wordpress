@@ -80,6 +80,27 @@ WHERE bc.oid = i.indrelid
 					$newq .= ";ALTER TABLE $table RENAME COLUMN $col TO $newcol;";
 				$sql = $newq;
 			}
+			$pattern = '/ALTER TABLE\s+(\w+)\s+ADD COLUMN\s+([^\s]+)\s+([^ ]+)( unsigned|)\s+(NOT NULL|)\s*(default (.+)|)/';
+			if( 1 === preg_match( $pattern, $sql, $matches))
+			{
+				$table = $matches[1];
+				$col = $matches[2];
+				$type = $matches[3];
+				if( isset($GLOBALS['pg4wp_ttr'][$type]))
+					$type = $GLOBALS['pg4wp_ttr'][$type];
+				$unsigned = $matches[4];
+				$notnull = $matches[5];
+				$default = $matches[6];
+				$defval = $matches[7];
+				if( isset($GLOBALS['pg4wp_ttr'][$defval]))
+					$defval = $GLOBALS['pg4wp_ttr'][$defval];
+				$newq = "ALTER TABLE $table ADD COLUMN $col $type";
+				if( !empty($default))
+					$newq .= " DEFAULT $defval";
+				if( !empty($notnull))
+					$newq .= " NOT NULL";
+				$sql = $newq;
+			}
 			$pattern = '/ALTER TABLE\s+(\w+)\s+ADD (UNIQUE |)KEY\s+([^\s]+)\s+\(([^\)]+)\)/';
 			if( 1 === preg_match( $pattern, $sql, $matches))
 			{
