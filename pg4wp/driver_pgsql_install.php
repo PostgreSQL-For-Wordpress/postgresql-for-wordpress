@@ -29,7 +29,7 @@
 	
 	function pg4wp_installing( $sql, &$logto)
 	{
-		global $table_prefix;
+		global $wpdb;
 		
 		// SHOW INDEX emulation
 		if( 0 === strpos( $sql, 'SHOW INDEX'))
@@ -40,7 +40,8 @@
 			$table = $matches[1];
 $sql = 'SELECT bc.relname AS "Table",
 	CASE WHEN i.indisunique THEN \'0\' ELSE \'1\' END AS "Non_unique",
-	CASE WHEN i.indisprimary THEN \'PRIMARY\' WHEN bc.relname LIKE \'%usermeta\' AND ic.relname = \'umeta_key\' THEN \'meta_key\' ELSE ic.relname END AS "Key_name",
+	CASE WHEN i.indisprimary THEN \'PRIMARY\' WHEN bc.relname LIKE \'%usermeta\' AND ic.relname = \'umeta_key\'
+		THEN \'meta_key\' ELSE REPLACE( ic.relname, \''.$table.'_\', \'\') END AS "Key_name",
 	a.attname AS "Column_name",
 	NULL AS "Sub_part"
 FROM pg_class bc, pg_class ic, pg_index i, pg_attribute a
