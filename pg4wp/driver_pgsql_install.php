@@ -25,6 +25,12 @@
 		
 		// WP 2.7.1 compatibility
 		'int(4)'		=> 'smallint',
+		
+		// For WPMU (starting with WP 3.2)
+		'tinyint(2)'	=> 'smallint',
+		'tinyint(1)'	=> 'smallint',
+		"enum('0','1')"	=> 'smallint',
+		
 	);
 	
 	function pg4wp_installing( $sql, &$logto)
