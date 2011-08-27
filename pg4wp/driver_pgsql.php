@@ -308,7 +308,9 @@
 			$sql = "SET NAMES 'utf8'";
 		}
 		// Load up upgrade and install functions as required
-		elseif( 0 === strpos( $sql, 'CREATE') || (defined('WP_INSTALLING') && WP_INSTALLING))
+		$begin = substr( $sql, 0, 3);
+		$search = array( 'SHO', 'ALT', 'DES', 'CRE');
+		if( in_array($begin, $search))
 		{
 			require_once( PG4WP_ROOT.'/driver_pgsql_install.php');
 			$sql = pg4wp_installing( $sql, $logto);
