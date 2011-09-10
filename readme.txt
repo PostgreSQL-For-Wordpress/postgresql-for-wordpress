@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: database, postgresql, PostgreSQL, postgres, mysql
 Requires at least: 2.5.1
 Tested up to: 3.2.1
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 
 PostgreSQL for WordPress is a special 'plugin' enabling WordPress to be used with a PostgreSQL database.
 
@@ -19,10 +19,12 @@ If you need/wish support for another database, please feel free to contact the a
 
 == Installation ==
 
-You have to install PG4WP *before* setting up your WordPress installation for things to work properly. 
+You have to install PG4WP *before* configuring your WordPress installation for things to work properly. 
 This is because the database needs to be up and running before any plugin can be loaded.
 
-1.	Unzip the files and put the `pg4wp` directory in your `/wp-content` directory.
+1.  Place your WordPress files in the right place on your web server.
+
+1.	Unzip the files from PG4WP and put the `pg4wp` directory in your `/wp-content` directory.
 
 1.	Copy the `dp.php` from the `pg4wp` directory to `wp-content`
 	
@@ -40,6 +42,12 @@ No question yet, please contact me if you have any.
 There is no screenshot for this plugin
 
 == Changelog ==
+
+= 1.2.1 =
+* Corrected 'ON DUPLICATE KEY ...' handling (was not working at all)
+* Modified SQL_CALC_FOUND_ROWS handling for correct paging
+* Some conversion handling for WPMU to install correctly (WPMU not working yet though)
+* Improved installation/upgrade handling code (better detection of indexes, ADD COLUMN support, ...)
 
 = 1.2.0 =
 * Error logging is disabled in the distribution
