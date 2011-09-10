@@ -19,7 +19,7 @@
 	// Initializing some variables
 	$GLOBALS['pg4wp_version'] = '7.0';
 	$GLOBALS['pg4wp_result'] = 0;
-	$GLOBALS['pg4wp_numrows'] = '10';
+	$GLOBALS['pg4wp_numrows_query'] = '';
 	$GLOBALS['pg4wp_ins_table'] = '';
 	$GLOBALS['pg4wp_ins_field'] = '';
 	$GLOBALS['pg4wp_connstr'] = '';
@@ -142,7 +142,19 @@
 				$sql = str_replace('SQL_CALC_FOUND_ROWS', '', $sql);
 			}
 			elseif( false !== strpos($sql, 'FOUND_ROWS()'))
-				return $GLOBALS['pg4wp_numrows'];
+			{
+				// Here we need to convert the latest query into a COUNT query
+				$sql = $GLOBALS['pg4wp_numrows_query'];
+				echo '<pre>'.$sql.'</pre>';
+				// Remove any LIMIT ... clause (this is the blocking part)
+				$pattern = '/\s+LIMIT.+/';
+				$sql = preg_replace( $pattern, '', $sql);
+				echo '<pre>'.$sql.'</pre>';
+				// Now add the COUNT() statement
+				$pattern = '/SELECT\s+([^\s]+)\s+(FROM.+)/';
+				$sql = preg_replace( $pattern, 'SELECT COUNT($1) $2', $sql);
+				echo '<pre>'.$sql.'</pre>';
+			}
 			
 			// Handle COUNT(*)...ORDER BY...
 			$sql = preg_replace( '/COUNT(.+)ORDER BY.+/', 'COUNT$1', $sql);
@@ -387,9 +399,9 @@
 		
 		if( $catchnumrows && $GLOBALS['pg4wp_result'] !== false)
 		{
-			$GLOBALS['pg4wp_numrows'] = pg_num_rows( $GLOBALS['pg4wp_result']);
+			$GLOBALS['pg4wp_numrows_query'] = $sql;
 			if( PG4WP_DEBUG)
-				error_log( "Catched number of rows for :\n$sql\nResult is :".$GLOBALS['pg4wp_numrows']."\n---------------------\n", 3, PG4WP_LOG.'pg4wp_NUMROWS.log');
+				error_log( "Number of rows required for :\n$sql\n---------------------\n", 3, PG4WP_LOG.'pg4wp_NUMROWS.log');
 		}
 		return $GLOBALS['pg4wp_result'];
 	}
