@@ -121,6 +121,48 @@
 			$GLOBALS['pg4wp_pre_sql'][] = $sql;
 			return true;
 		}
+		
+		$sql = pg4wp_rewrite( $sql);
+		
+		$GLOBALS['pg4wp_result'] = pg_query($sql);
+		if( (PG4WP_DEBUG || PG4WP_LOG_ERRORS) && $GLOBALS['pg4wp_result'] === false && $err = pg_last_error())
+			if( false === strpos($err, 'relation "'.$wpdb->options.'"'))
+				error_log("Error running :\n$initial\n---- converted to ----\n$sql\n----\n$err\n---------------------\n", 3, PG4WP_LOG.'pg4wp_errors.log');
+		
+		if( $catchnumrows && $GLOBALS['pg4wp_result'] !== false)
+		{
+			$GLOBALS['pg4wp_numrows_query'] = $sql;
+			if( PG4WP_DEBUG)
+				error_log( "Number of rows required for :\n$sql\n---------------------\n", 3, PG4WP_LOG.'pg4wp_NUMROWS.log');
+		}
+		return $GLOBALS['pg4wp_result'];
+	}
+	
+	function wpsql_insert_id($table)
+	{
+		global $wpdb;
+		$ins_field = $GLOBALS['pg4wp_ins_field'];
+		
+		$tbls = split("\n", $GLOBALS['pg4wp_ins_table']); // Workaround for bad tablename
+		$t = $tbls[0] . '_seq';
+		
+		if( in_array( $t, array( '_seq', $wpdb->prefix.'term_relationships_seq')))
+			return 0;
+		
+		if( $ins_field == '"cat_ID"' || $ins_field == 'rel_id' || $ins_field == 'term_id')
+			$sql = "SELECT MAX($ins_field) FROM ".$tbls[0];
+		else
+			$sql = "SELECT CURRVAL('$t')";
+		
+		$res = pg_query($sql);
+		$data = pg_fetch_result($res, 0, 0);
+		if( PG4WP_DEBUG && $sql)
+			error_log("Getting inserted ID for '$t' : $sql => $data\n", 3, PG4WP_LOG.'pg4wp_insertid.log');
+		return $data;
+	}
+	
+	function pg4wp_rewrite( $sql)
+	{
 		global $wpdb;
 		
 		$logto = 'queries';
@@ -264,10 +306,8 @@
 			{
 				// Remove 'ON DUPLICATE KEY UPDATE...' and following
 				$sql = substr( $sql, 0, $pos);
-				// Remove illegal characters
-				$sql = str_replace('`', '', $sql);
-				// Get the elements we need (table name, first field, value)
-				$pattern = '/INSERT INTO (\w+)\s+\(([^,]+).+VALUES\s+\(([^,]+)/';
+				// Get the elements we need (table name, first field, corresponding value)
+				$pattern = '/INSERT INTO\s+([^\(]+)\(([^,]+)[^\(]+VALUES\s*\(([^,]+)/';
 				preg_match($pattern, $sql, $matches);
 				$sql = 'DELETE FROM '.$matches[1].' WHERE '.$matches[2].' = '.$matches[3].';'.$sql;
 			}
@@ -389,39 +429,5 @@
 			else
 				error_log("$sql\n---------------------\n", 3, PG4WP_LOG.'pg4wp_unmodified.log');
 		}
-		$GLOBALS['pg4wp_result'] = pg_query($sql);
-		if( (PG4WP_DEBUG || PG4WP_LOG_ERRORS) && $GLOBALS['pg4wp_result'] === false && $err = pg_last_error())
-			if( false === strpos($err, 'relation "'.$wpdb->options.'"'))
-				error_log("Error running :\n$initial\n---- converted to ----\n$sql\n----\n$err\n---------------------\n", 3, PG4WP_LOG.'pg4wp_errors.log');
-		
-		if( $catchnumrows && $GLOBALS['pg4wp_result'] !== false)
-		{
-			$GLOBALS['pg4wp_numrows_query'] = $sql;
-			if( PG4WP_DEBUG)
-				error_log( "Number of rows required for :\n$sql\n---------------------\n", 3, PG4WP_LOG.'pg4wp_NUMROWS.log');
-		}
-		return $GLOBALS['pg4wp_result'];
-	}
-	
-	function wpsql_insert_id($table)
-	{
-		global $wpdb;
-		$ins_field = $GLOBALS['pg4wp_ins_field'];
-		
-		$tbls = split("\n", $GLOBALS['pg4wp_ins_table']); // Workaround for bad tablename
-		$t = $tbls[0] . '_seq';
-		
-		if( in_array( $t, array( '_seq', $wpdb->prefix.'term_relationships_seq')))
-			return 0;
-		
-		if( $ins_field == '"cat_ID"' || $ins_field == 'rel_id' || $ins_field == 'term_id')
-			$sql = "SELECT MAX($ins_field) FROM ".$tbls[0];
-		else
-			$sql = "SELECT CURRVAL('$t')";
-		
-		$res = pg_query($sql);
-		$data = pg_fetch_result($res, 0, 0);
-		if( PG4WP_DEBUG && $sql)
-			error_log("Getting inserted ID for '$t' : $sql => $data\n", 3, PG4WP_LOG.'pg4wp_insertid.log');
-		return $data;
+		return $sql;
 	}
