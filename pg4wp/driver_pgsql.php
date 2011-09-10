@@ -145,15 +145,12 @@
 			{
 				// Here we need to convert the latest query into a COUNT query
 				$sql = $GLOBALS['pg4wp_numrows_query'];
-				echo '<pre>'.$sql.'</pre>';
 				// Remove any LIMIT ... clause (this is the blocking part)
 				$pattern = '/\s+LIMIT.+/';
 				$sql = preg_replace( $pattern, '', $sql);
-				echo '<pre>'.$sql.'</pre>';
 				// Now add the COUNT() statement
 				$pattern = '/SELECT\s+([^\s]+)\s+(FROM.+)/';
 				$sql = preg_replace( $pattern, 'SELECT COUNT($1) $2', $sql);
-				echo '<pre>'.$sql.'</pre>';
 			}
 			
 			// Handle COUNT(*)...ORDER BY...
