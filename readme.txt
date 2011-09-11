@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: database, postgresql, PostgreSQL, postgres, mysql
 Requires at least: 2.5.1
 Tested up to: 3.2.1
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 
 PostgreSQL for WordPress is a special 'plugin' enabling WordPress to be used with a PostgreSQL database.
 
@@ -42,6 +42,9 @@ No question yet, please contact me if you have any.
 There is no screenshot for this plugin
 
 == Changelog ==
+
+= 1.2.2 =
+* Corrected SQL_CALC_FOUND_ROWS handling, was broken by the latest code reorganisation
 
 = 1.2.1 =
 * Corrected 'ON DUPLICATE KEY ...' handling (was not working at all)

@@ -129,12 +129,6 @@
 			if( false === strpos($err, 'relation "'.$wpdb->options.'"'))
 				error_log("Error running :\n$initial\n---- converted to ----\n$sql\n----\n$err\n---------------------\n", 3, PG4WP_LOG.'pg4wp_errors.log');
 		
-		if( $catchnumrows && $GLOBALS['pg4wp_result'] !== false)
-		{
-			$GLOBALS['pg4wp_numrows_query'] = $sql;
-			if( PG4WP_DEBUG)
-				error_log( "Number of rows required for :\n$sql\n---------------------\n", 3, PG4WP_LOG.'pg4wp_NUMROWS.log');
-		}
 		return $GLOBALS['pg4wp_result'];
 	}
 	
@@ -166,8 +160,6 @@
 		global $wpdb;
 		
 		$logto = 'queries';
-		// This is used to catch the number of rows returned by the last "SELECT" REQUEST
-		$catchnumrows = false;
 		// The end of the query may be protected against changes
 		$end = '';
 		
@@ -180,12 +172,14 @@
 			// SQL_CALC_FOUND_ROWS doesn't exist in PostgreSQL but it's needed for correct paging
 			if( false !== strpos($sql, 'SQL_CALC_FOUND_ROWS'))
 			{
-				$catchnumrows = true;
 				$sql = str_replace('SQL_CALC_FOUND_ROWS', '', $sql);
+				$GLOBALS['pg4wp_numrows_query'] = $sql;
+				if( PG4WP_DEBUG)
+					error_log( "Number of rows required for :\n$sql\n---------------------\n", 3, PG4WP_LOG.'pg4wp_NUMROWS.log');
 			}
 			elseif( false !== strpos($sql, 'FOUND_ROWS()'))
 			{
-				// Here we need to convert the latest query into a COUNT query
+				// Here we convert the latest query into a COUNT query
 				$sql = $GLOBALS['pg4wp_numrows_query'];
 				// Remove any LIMIT ... clause (this is the blocking part)
 				$pattern = '/\s+LIMIT.+/';
