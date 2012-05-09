@@ -201,6 +201,9 @@
 				$sql = preg_replace( $pattern, 'SELECT COUNT($1) $2', $sql);
 			}
 			
+			// Handle CAST( ... AS CHAR)
+			$sql = preg_replace( '/CAST\((.+) AS CHAR\)/', 'CAST($1 AS TEXT)', $sql);
+			
 			// Handle COUNT(*)...ORDER BY...
 			$sql = preg_replace( '/COUNT(.+)ORDER BY.+/', 'COUNT$1', $sql);
 			
