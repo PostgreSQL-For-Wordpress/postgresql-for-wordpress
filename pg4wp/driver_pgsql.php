@@ -61,6 +61,11 @@
 	function wpsql_connect($dbserver, $dbuser, $dbpass)
 	{
 		$GLOBALS['pg4wp_connstr'] = '';
+		list($host, $port) = explode(':', $dbserver);
+		if( !empty( $host))
+			$GLOBALS['pg4wp_connstr'] .= ' host='.$host;
+		if( !empty( $port))
+			$GLOBALS['pg4wp_connstr'] .= ' port='.$port;
 		if( !empty( $dbserver))
 			$GLOBALS['pg4wp_connstr'] .= ' host='.$dbserver;
 		if( !empty( $dbuser))
