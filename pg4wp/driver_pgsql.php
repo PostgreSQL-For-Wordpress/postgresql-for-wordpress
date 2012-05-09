@@ -205,7 +205,7 @@
 			$sql = preg_replace( '/CAST\((.+) AS CHAR\)/', 'CAST($1 AS TEXT)', $sql);
 			
 			// Handle COUNT(*)...ORDER BY...
-			$sql = preg_replace( '/COUNT(.+)ORDER BY.+/', 'COUNT$1', $sql);
+			$sql = preg_replace( '/COUNT(.+)ORDER BY.+/s', 'COUNT$1', $sql);
 			
 			// In order for users counting to work...
 			$matches = array();
