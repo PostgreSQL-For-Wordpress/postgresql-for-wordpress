@@ -66,8 +66,6 @@
 			$GLOBALS['pg4wp_connstr'] .= ' host='.$host;
 		if( !empty( $port))
 			$GLOBALS['pg4wp_connstr'] .= ' port='.$port;
-		if( !empty( $dbserver))
-			$GLOBALS['pg4wp_connstr'] .= ' host='.$dbserver;
 		if( !empty( $dbuser))
 			$GLOBALS['pg4wp_connstr'] .= ' user='.$dbuser;
 		if( !empty( $dbpass))
