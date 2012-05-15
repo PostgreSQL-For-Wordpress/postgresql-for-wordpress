@@ -30,7 +30,7 @@
 		'tinyint(2)'	=> 'smallint',
 		'tinyint(1)'	=> 'smallint',
 		"enum('0','1')"	=> 'smallint',
-		
+		'COLLATE utf8_general_ci'	=> '',
 	);
 	
 	function pg4wp_installing( $sql, &$logto)
@@ -152,7 +152,7 @@ $sql = "SELECT pg_attribute.attname AS \"Field\",
 		ELSE 'YES'
 	END AS \"Null\",
 	CASE pg_type.typname
-		WHEN 'varchar' THEN substring(pg_attrdef.adsrc FROM '^\'(.*)\'.*$')
+		WHEN 'varchar' THEN substring(pg_attrdef.adsrc FROM '^''(.*)''.*$')
 		WHEN 'timestamp' THEN CASE WHEN pg_attrdef.adsrc LIKE '%now()%' THEN '0000-00-00 00:00:00' ELSE pg_attrdef.adsrc END
 		ELSE pg_attrdef.adsrc
 	END AS \"Default\"
