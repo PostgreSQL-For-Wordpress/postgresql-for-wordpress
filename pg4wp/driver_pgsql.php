@@ -368,7 +368,7 @@
 			$sql = str_replace( 'OPTIMIZE TABLE', 'VACUUM', $sql);
 		}
 		// Handle 'SET NAMES ... COLLATE ...'
-		elseif( false !== strpos($sql, 'COLLATE'))
+		elseif( 0 === strpos($sql, 'SET NAMES') && false !== strpos($sql, 'COLLATE'))
 		{
 			$logto = 'SETNAMES';
 			$sql = "SET NAMES 'utf8'";
@@ -406,7 +406,7 @@
 				$sql = preg_replace($pattern, '( ID', $sql);
 			$pattern = '/,ID/';
 				$sql = preg_replace($pattern, ', ID', $sql);
-			$pattern = '/[a-zA-Z_]+ID/';
+			$pattern = '/[0-9a-zA-Z_]+ID/';
 				$sql = preg_replace($pattern, '"$0"', $sql);
 			$pattern = '/\.ID/';
 				$sql = preg_replace($pattern, '."ID"', $sql);
