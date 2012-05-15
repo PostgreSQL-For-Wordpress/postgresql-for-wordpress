@@ -136,7 +136,7 @@
 			if( defined('WP_INSTALLING') && WP_INSTALLING)
 			{
 				global $table_prefix;
-				$ignore = strpos($err, 'relation "'.$table_prefix.'options"');
+				$ignore = strpos($err, 'relation "'.$table_prefix);
 			}
 			if( ! $ignore )
 				error_log('['.microtime(true)."] Error running :\n$initial\n---- converted to ----\n$sql\n----> $err\n---------------------\n", 3, PG4WP_LOG.'pg4wp_errors.log');
