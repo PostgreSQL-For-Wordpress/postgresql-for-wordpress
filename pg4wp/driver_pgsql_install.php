@@ -169,6 +169,7 @@ WHERE pg_class.relname='$table_name' AND pg_attribute.attnum>=1 AND NOT pg_attri
 		elseif( 0 === strpos($sql, 'CREATE TABLE'))
 		{
 			$logto = 'CREATE';
+			$sql = str_replace( 'CREATE TABLE IF NOT EXISTS ', 'CREATE TABLE ', $sql);
 			$pattern = '/CREATE TABLE [`]?(\w+)[`]?/';
 			preg_match($pattern, $sql, $matches);
 			$table = $matches[1];
