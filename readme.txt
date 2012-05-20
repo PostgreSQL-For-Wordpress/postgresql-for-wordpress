@@ -2,8 +2,8 @@
 Contributors: Hawk__ (http://www.hawkix.net/)
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=FPT8RPZGFX7GU
 Tags: database, postgresql, PostgreSQL, postgres, mysql
-Requires at least: 2.5.1
-Tested up to: 3.2.1
+Requires at least: 2.9.1
+Tested up to: 3.3.2
 Stable tag: 1.2.2
 
 PostgreSQL for WordPress is a special 'plugin' enabling WordPress to be used with a PostgreSQL database.
@@ -16,6 +16,13 @@ It works by replacing calls to MySQL specific functions with generic calls that 
 Currently, support is focused on PostgreSQL, but other databases can be added quite easily by providing the appropriate 'driver'.
 MySQL driver is enclosed, which just does "nothing".
 If you need/wish support for another database, please feel free to contact the author, writing a driver is not really hard if you know a bit about SQL and the database you want support for.
+
+If you want to use this plugin, you should be aware of the following :
+- WordPress with PG4WP is expected to be much slower than the original WordPress with MySQL because PG4WP does much SQL rewriting for any page view
+- Some WordPress plugins should work 'out of the box' but most plugins won't because they would need specific code in PG4WP
+
+You shouldn't expect any plugin specific code to be integrated into PG4WP except for plugins shipped with WordPress itself (such as Akismet).
+PG4WP 2.0 will have a mechanism to add plugin support.
 
 == Installation ==
 
@@ -42,6 +49,13 @@ No question yet, please contact me if you have any.
 There is no screenshot for this plugin
 
 == Changelog ==
+
+= 1.3.0b1 =
+* Added support for PostgreSQL 9.1+ (doesn't break compatibility with older versions)
+* Added support for specifying port in the server host (eg 'localhost:3128') (Patch from convict)
+* Added a handle for converting CAST(... AS CHAR) to CAST(... AS TEXT) (Problem pointed out by Aart Jan)
+* Added a filter to remove 'IF NOT EXISTS' for 'CREATE TABLE' queries
+* Enhancements for WPMU support
 
 = 1.2.2 =
 * Corrected SQL_CALC_FOUND_ROWS handling, was broken by the latest code reorganisation
