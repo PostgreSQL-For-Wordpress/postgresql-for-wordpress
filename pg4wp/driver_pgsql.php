@@ -280,10 +280,6 @@
 			// WP 2.6.1 => 2.8 upgrade, removes a PostgreSQL error but there are some remaining
 			$sql = str_replace( "post_date = '0000-00-00 00:00:00'", "post_date IS NULL", $sql);
 			
-			// Correct quoting for PostgreSQL 9.1+ compatibility
-			$sql = str_replace( "\\'", "''", $sql);
-			$sql = str_replace( '\"', '"', $sql);
-			
 			// This will avoid modifications to anything following ' SET '
 			list($sql,$end) = explode( ' SET ', $sql, 2);
 			$end = ' SET '.$end;
@@ -328,10 +324,6 @@
 			// To avoid Encoding errors when inserting data coming from outside
 			if( preg_match('/^.{1}/us',$sql,$ar) != 1)
 				$sql = utf8_encode($sql);
-			
-			// Correct quoting for PostgreSQL 9.1+ compatibility
-			$sql = str_replace( "\\'", "''", $sql);
-			$sql = str_replace( '\"', '"', $sql);
 			
 			// This will avoid modifications to anything following ' VALUES'
 			list($sql,$end) = explode( ' VALUES', $sql, 2);
@@ -438,6 +430,10 @@
 		
 		// Put back the end of the query if it was separated
 		$sql .= $end;
+		
+		// Correct quoting for PostgreSQL 9.1+ compatibility
+		$sql = str_replace( "\\'", "''", $sql);
+		$sql = str_replace( '\"', '"', $sql);
 		
 		if( PG4WP_DEBUG)
 		{
