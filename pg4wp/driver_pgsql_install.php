@@ -207,6 +207,15 @@ WHERE pg_class.relname='$table_name' AND pg_attribute.attnum>=1 AND NOT pg_attri
 			// Now remove handled indexes
 			$sql = preg_replace( $pattern, '', $sql);
 		}// CREATE TABLE
+		elseif( 0 === strpos($sql, 'DROP TABLE'))
+		{
+			$logto = 'DROPTABLE';
+			$pattern = '/DROP TABLE.+ [`]?(\w+)[`]?$/';
+			preg_match($pattern, $sql, $matches);
+			$table = $matches[1];
+			$seq = $table . '_seq';
+			$sql .= ";\nDROP SEQUENCE IF EXISTS $seq;";
+		}// DROP TABLE
 		
 		return $sql;
 	}

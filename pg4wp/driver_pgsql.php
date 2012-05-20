@@ -372,7 +372,7 @@
 		}
 		// Load up upgrade and install functions as required
 		$begin = substr( $sql, 0, 3);
-		$search = array( 'SHO', 'ALT', 'DES', 'CRE');
+		$search = array( 'SHO', 'ALT', 'DES', 'CRE', 'DRO');
 		if( in_array($begin, $search))
 		{
 			require_once( PG4WP_ROOT.'/driver_pgsql_install.php');
