@@ -313,12 +313,17 @@
 			// consisting in deleting the row before inserting it
 			if( false !== $pos = strpos( $sql, 'ON DUPLICATE KEY'))
 			{
-				// Remove 'ON DUPLICATE KEY UPDATE...' and following
-				$sql = substr( $sql, 0, $pos);
 				// Get the elements we need (table name, first field, corresponding value)
 				$pattern = '/INSERT INTO\s+([^\(]+)\(([^,]+)[^\(]+VALUES\s*\(([^,]+)/';
 				preg_match($pattern, $sql, $matches);
-				$sql = 'DELETE FROM '.$matches[1].' WHERE '.$matches[2].' = '.$matches[3].';'.$sql;
+				$table = trim( $matches[1], ' `');
+				if( !in_array(trim($matches[1],'` '), array($wpdb->posts,$wpdb->comments)))
+				{
+					// Remove 'ON DUPLICATE KEY UPDATE...' and following
+					$sql = substr( $sql, 0, $pos);
+					// Add a delete query to handle the maybe existing data
+					$sql = 'DELETE FROM '.$table.' WHERE '.$matches[2].' = '.$matches[3].';'.$sql;
+				}
 			}
 			
 			// To avoid Encoding errors when inserting data coming from outside
