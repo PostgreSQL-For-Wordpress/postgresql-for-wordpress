@@ -144,26 +144,41 @@
 		return $GLOBALS['pg4wp_result'];
 	}
 	
-	function wpsql_insert_id($table)
+	function wpsql_insert_id($lnk = NULL)
 	{
 		global $wpdb;
 		$ins_field = $GLOBALS['pg4wp_ins_field'];
+		$table = $GLOBALS['pg4wp_ins_table'];
 		
-		$tbls = split("\n", $GLOBALS['pg4wp_ins_table']); // Workaround for bad tablename
-		$t = $tbls[0] . '_seq';
+		$seq = $table . '_seq';
 		
-		if( in_array( $t, array( '_seq', $wpdb->prefix.'term_relationships_seq')))
-			return 0;
-		
-		if( $ins_field == '"cat_ID"' || $ins_field == 'rel_id' || $ins_field == 'term_id')
-			$sql = "SELECT MAX($ins_field) FROM ".$tbls[0];
+		// Table 'term_relationships' doesn't have a sequence
+		if( $table == $wpdb->term_relationships || 'post_author' == $ins_field)
+		{
+			$sql = 'NO QUERY';
+			$data = 0;
+		}
 		else
-			$sql = "SELECT CURRVAL('$t')";
-		
-		$res = pg_query($sql);
-		$data = pg_fetch_result($res, 0, 0);
+		{
+			$sql = "SELECT CURRVAL('$seq')";
+			
+			$res = pg_query($sql);
+			if( false !== $res)
+				$data = pg_fetch_result($res, 0, 0);
+			elseif( PG4WP_DEBUG || PG4WP_ERROR_LOG)
+			{
+				if( PG4WP_DEBUG)
+					$lastq = $GLOBALS['pg4wp_last_insert'];
+				else
+					$lastq = 'UNKNOWN';
+				$log = '['.microtime(true)."] wpsql_insert_id() was called with '$table' and '$ins_field'".
+						" and generated an error. The latest INSERT query was :\n'$lastq'\n";
+				error_log( $log, 3, PG4WP_LOG.'pg4wp_errors.log');
+			}
+		}
 		if( PG4WP_DEBUG && $sql)
-			error_log( '['.microtime(true)."] Getting inserted ID for '$t' : $sql => $data\n", 3, PG4WP_LOG.'pg4wp_insertid.log');
+			error_log( '['.microtime(true)."] Getting inserted ID for '$table' ('$ins_field') : $sql => $data\n", 3, PG4WP_LOG.'pg4wp_insertid.log');
+			
 		return $data;
 	}
 	
@@ -423,6 +438,9 @@
 		$sql = str_replace( 'IN ( \'\' )', 'IN (NULL)', $sql);
 		$sql = str_replace( 'IN ()', 'IN (NULL)', $sql);
 		
+		// Put back the end of the query if it was separated
+		$sql .= $end;
+		
 		// For insert ID catching
 		if( $logto == 'INSERT')
 		{
@@ -436,10 +454,9 @@
 				if(! $GLOBALS['pg4wp_ins_field'])
 					$GLOBALS['pg4wp_ins_field'] = trim($match_list[4],' ()	');
 			}
+			if( PG4WP_DEBUG)
+				$GLOBALS['pg4wp_last_insert'] = $sql;
 		}
-		
-		// Put back the end of the query if it was separated
-		$sql .= $end;
 		
 		// Correct quoting for PostgreSQL 9.1+ compatibility
 		$sql = str_replace( "\\'", "''", $sql);
