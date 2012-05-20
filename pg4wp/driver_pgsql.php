@@ -52,7 +52,7 @@
 		{ if( $GLOBALS['pg4wp_conn']) return pg_last_error(); else return ''; }
 	function wpsql_fetch_assoc($result) { return pg_fetch_assoc($result); }
 	function wpsql_escape_string($s) { return pg_escape_string($s); }
-	function wpsql_real_escape_string($s,$c) { return pg_escape_string($s); }
+	function wpsql_real_escape_string($s,$c=NULL) { return pg_escape_string($s); }
 	function wpsql_get_server_info() { return '5.0.30'; } // Just want to fool wordpress ...
 	function wpsql_result($result, $i, $fieldname)
 		{ return pg_fetch_result($result, $i, $fieldname); }
