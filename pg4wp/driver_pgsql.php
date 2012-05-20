@@ -328,6 +328,11 @@
 			// This will avoid modifications to anything following ' VALUES'
 			list($sql,$end) = explode( ' VALUES', $sql, 2);
 			$end = ' VALUES'.$end;
+			
+			// When installing, the sequence for table terms has to be updated
+			if( defined('WP_INSTALLING') && WP_INSTALLING && false !== strpos($sql, 'INSERT INTO `'.$wpdb->terms.'`'))
+				$end .= ';SELECT setval(\''.$wpdb->terms.'_seq\', (SELECT MAX(term_id) FROM '.$wpdb->terms.')+1);';
+			
 		} // INSERT
 		elseif( 0 === strpos( $sql, 'DELETE' ))
 		{
