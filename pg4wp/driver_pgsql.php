@@ -22,6 +22,7 @@
 	$GLOBALS['pg4wp_numrows_query'] = '';
 	$GLOBALS['pg4wp_ins_table'] = '';
 	$GLOBALS['pg4wp_ins_field'] = '';
+	$GLOBALS['pg4wp_last_insert'] = '';
 	$GLOBALS['pg4wp_connstr'] = '';
 	$GLOBALS['pg4wp_conn'] = false;
 	
@@ -149,14 +150,25 @@
 		global $wpdb;
 		$ins_field = $GLOBALS['pg4wp_ins_field'];
 		$table = $GLOBALS['pg4wp_ins_table'];
+		$lastq = $GLOBALS['pg4wp_last_insert'];
 		
 		$seq = $table . '_seq';
 		
 		// Table 'term_relationships' doesn't have a sequence
-		if( $table == $wpdb->term_relationships || 'post_author' == $ins_field)
+		if( $table == $wpdb->term_relationships)
 		{
 			$sql = 'NO QUERY';
 			$data = 0;
+		}
+		// When using WP_Import plugin, ID is defined in the query
+		elseif('post_author' == $ins_field && false !== strpos($lastq,'ID'))
+		{
+			$sql = 'ID was in query ';
+			$pattern = '/.+\'(\d+).+$/';
+			preg_match($pattern, $lastq, $matches);
+			$data = $matches[1];
+			// We should update the sequence on the next non-INSERT query
+			$GLOBALS['pg4wp_queued_query'] = "SELECT SETVAL('$seq',(SELECT MAX(\"ID\") FROM $table)+1);";
 		}
 		else
 		{
@@ -167,10 +179,6 @@
 				$data = pg_fetch_result($res, 0, 0);
 			elseif( PG4WP_DEBUG || PG4WP_ERROR_LOG)
 			{
-				if( PG4WP_DEBUG)
-					$lastq = $GLOBALS['pg4wp_last_insert'];
-				else
-					$lastq = 'UNKNOWN';
 				$log = '['.microtime(true)."] wpsql_insert_id() was called with '$table' and '$ins_field'".
 						" and generated an error. The latest INSERT query was :\n'$lastq'\n";
 				error_log( $log, 3, PG4WP_LOG.'pg4wp_errors.log');
@@ -454,8 +462,12 @@
 				if(! $GLOBALS['pg4wp_ins_field'])
 					$GLOBALS['pg4wp_ins_field'] = trim($match_list[4],' ()	');
 			}
-			if( PG4WP_DEBUG)
-				$GLOBALS['pg4wp_last_insert'] = $sql;
+			$GLOBALS['pg4wp_last_insert'] = $sql;
+		}
+		elseif( isset($GLOBALS['pg4wp_queued_query']))
+		{
+			pg_query($GLOBALS['pg4wp_queued_query']);
+			unset($GLOBALS['pg4wp_queued_query']);
 		}
 		
 		// Correct quoting for PostgreSQL 9.1+ compatibility
