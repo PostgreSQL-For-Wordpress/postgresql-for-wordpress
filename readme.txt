@@ -2,9 +2,10 @@
 Contributors: Hawk__ (http://www.hawkix.net/)
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=FPT8RPZGFX7GU
 Tags: database, postgresql, PostgreSQL, postgres, mysql
-Requires at least: 2.9.1
-Tested up to: 3.3.2
-Stable tag: 1.2.2
+Requires at least: 2.9.2
+Tested up to: 3.4
+Stable tag: 1.3.0
+License: GPLv2 or later
 
 PostgreSQL for WordPress is a special 'plugin' enabling WordPress to be used with a PostgreSQL database.
 
@@ -18,8 +19,8 @@ MySQL driver is enclosed, which just does "nothing".
 If you need/wish support for another database, please feel free to contact the author, writing a driver is not really hard if you know a bit about SQL and the database you want support for.
 
 If you want to use this plugin, you should be aware of the following :
-- WordPress with PG4WP is expected to be much slower than the original WordPress with MySQL because PG4WP does much SQL rewriting for any page view
-- Some WordPress plugins should work 'out of the box' but most plugins won't because they would need specific code in PG4WP
+- WordPress with PG4WP is expected to be slower than the original WordPress with MySQL because PG4WP does much SQL rewriting for any page view
+- Some WordPress plugins should work 'out of the box' but many plugins won't because they would need specific code in PG4WP
 
 You shouldn't expect any plugin specific code to be integrated into PG4WP except for plugins shipped with WordPress itself (such as Akismet).
 PG4WP 2.0 will have a mechanism to add plugin support.
@@ -33,7 +34,7 @@ This is because the database needs to be up and running before any plugin can be
 
 1.	Unzip the files from PG4WP and put the `pg4wp` directory in your `/wp-content` directory.
 
-1.	Copy the `dp.php` from the `pg4wp` directory to `wp-content`
+1.	Copy the `db.php` from the `pg4wp` directory to `wp-content`
 	
 	You can modify this file to configure the database driver you wish to use
 	Currently you can set 'DB_DRIVER' to 'pgsql' or 'mysql'
@@ -43,12 +44,32 @@ This is because the database needs to be up and running before any plugin can be
 1.	Point your Web Browser to your WordPress installation and go through the traditional WordPress installation routine.
 
 == Frequently Asked Questions ==
-No question yet, please contact me if you have any.
+
+= I have an error adding a new category =
+
+You should try to run `SELECT setval('wp_terms_seq', (SELECT MAX(term_id) FROM wp_terms)+1);` to correct the sequence number for the `wp_terms` table.
+
+Note : you should replace wp_ with the appropriate table prefix if you changed it in your WordPress installation
+
+= Does plugin `put any plugin name here` work with PG4WP ? =
+
+There is no simple answer to this question.
+Plugins not doing any database calls will certainly work.
+
+Database-intensive plugins may work, but most of them would require specific code in PG4WP to work.
+
+You should backup your setup (at least database) and try to install the plugin to see if it works or not.
+Whether it worked or not, you should tell me the result of your test, so that I can create some kind of listing of working/not working plugins.
 
 == Screenshots ==
 There is no screenshot for this plugin
 
 == Changelog ==
+
+= 1.3.0 =
+* Some cleanup in old code that is not needed anymore
+* Enhanced wordpress-importer compatibility
+* Optimizations in wpsql_insert_id()
 
 = 1.3.0b1 =
 * Added support for PostgreSQL 9.1+ (doesn't break compatibility with older versions)
@@ -75,7 +96,7 @@ There is no screenshot for this plugin
 = 1.2.0rc =
 * Disabled all ZdMultilang support hacks
 * Fixed regressions that caused some Wordpress features to not work properly
-* Rewrote database connection handling so Wordpress installation can tell you when you username and password are wrong
+* Rewrote database connection handling so Wordpress installation can tell you when your username and password are wrong
 * Support for using an empty password for database connection
 	Note : this requires setting 'PG4WP_INSECURE' to true in `db.php` for PG4WP to accept this
 * Some code optimizations
@@ -176,7 +197,7 @@ Note : since 1.2.0b1, it is recommended to put the `pg4wp` directory directly in
 = 1.0 =
 Initial stable release, you should upgrade to this version if you have installed any older release
 
-== Licence ==
+== License ==
 PG4WP is provided "as-is" with no warranty in the hope it can be useful.
 
 PG4WP is licensed under the [GNU GPL](http://www.gnu.org/licenses/gpl.html "GNU GPL") v2 or any newer version at your choice.
