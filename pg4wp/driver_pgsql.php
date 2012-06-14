@@ -300,9 +300,6 @@
 			$pattern = '/[ ]*([^ ]*ID[^ ]*)[ ]*=/';
 			$sql = preg_replace( $pattern, ' "$1" =', $sql);
 			
-			// WP 2.6.1 => 2.8 upgrade, removes a PostgreSQL error but there are some remaining
-			$sql = str_replace( "post_date = '0000-00-00 00:00:00'", "post_date IS NULL", $sql);
-			
 			// This will avoid modifications to anything following ' SET '
 			list($sql,$end) = explode( ' SET ', $sql, 2);
 			$end = ' SET '.$end;
