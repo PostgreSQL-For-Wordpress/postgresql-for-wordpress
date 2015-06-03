@@ -175,13 +175,18 @@ WHERE '.$where : '').';';
 					$newq .= " NOT NULL";
 				$sql = $newq;
 			}
-			$pattern = '/ALTER TABLE\s+(\w+)\s+ADD (UNIQUE |)KEY\s+([^\s]+)\s+\(([^\)]+)\)/';
+			$pattern = '/ALTER TABLE\s+(\w+)\s+ADD (UNIQUE |)KEY\s+([^\s]+)\s+\(((?:[^\(\)]+|\([^\(\)]+\))+)\)/';
 			if( 1 === preg_match( $pattern, $sql, $matches))
 			{
 				$table = $matches[1];
 				$unique = $matches[2];
 				$index = $matches[3];
 				$columns = $matches[4];
+
+				// Remove prefix indexing
+				// Rarely used and apparently unnecessary for current uses
+				$columns = preg_replace( '/\([^\)]*\)/', '', $columns);
+
 				// Workaround for index name duplicate
 				$index = $table.'_'.$index;
 				$sql = "CREATE {$unique}INDEX $index ON $table ($columns)";
