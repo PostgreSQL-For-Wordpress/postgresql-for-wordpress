@@ -79,6 +79,7 @@ WHERE '.$where : '').';';
 				$pattern = '/SHOW INDEX FROM\s+(\w+)/';
 				preg_match( $pattern, $sql, $matches);
 				$table = $matches[1];
+				// Note:  Row order must be in column index position order
 $sql = 'SELECT bc.relname AS "Table",
 	CASE WHEN i.indisunique THEN \'0\' ELSE \'1\' END AS "Non_unique",
 	CASE WHEN i.indisprimary THEN \'PRIMARY\' WHEN bc.relname LIKE \'%usermeta\' AND ic.relname = \'umeta_key\'
@@ -91,7 +92,16 @@ WHERE bc.oid = i.indrelid
 	AND (i.indkey[0] = a.attnum OR i.indkey[1] = a.attnum OR i.indkey[2] = a.attnum OR i.indkey[3] = a.attnum OR i.indkey[4] = a.attnum OR i.indkey[5] = a.attnum OR i.indkey[6] = a.attnum OR i.indkey[7] = a.attnum)
 	AND a.attrelid = bc.oid
 	AND bc.relname = \''.$table.'\'
-	ORDER BY a.attname;';
+	ORDER BY "Key_name", CASE a.attnum
+		WHEN i.indkey[0] THEN 0
+		WHEN i.indkey[1] THEN 1
+		WHEN i.indkey[2] THEN 2
+		WHEN i.indkey[3] THEN 3
+		WHEN i.indkey[4] THEN 4
+		WHEN i.indkey[5] THEN 5
+		WHEN i.indkey[6] THEN 6
+		WHEN i.indkey[7] THEN 7
+	END;';
 			}
 			// SHOW TABLES emulation
 			elseif( preg_match('/SHOW\s+(FULL\s+)?TABLES\s+(?:LIKE\s+(.+)|WHERE\s+(.+))?/i', $sql, $matches))
