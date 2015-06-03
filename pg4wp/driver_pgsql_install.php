@@ -32,6 +32,9 @@
 		'tinyint(1)'	=> 'smallint',
 		"enum('0','1')"	=> 'smallint',
 		'COLLATE utf8_general_ci'	=> '',
+
+		// For flash-album-gallery plugin
+		'tinyint'		=> 'smallint',
 	);
 	
 	function pg4wp_installing( $sql, &$logto)
