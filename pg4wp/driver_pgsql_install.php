@@ -41,8 +41,15 @@
 		// Emulate SHOW commands
 		if( 0 === strpos( $sql, 'SHOW') || 0 === strpos( $sql, 'show'))
 		{
+			// SHOW VARIABLES LIKE emulation for sql_mode
+			// Used by nextgen-gallery plugin
+			if( 0 === strpos( $sql, "SHOW VARIABLES LIKE 'sql_mode'"))
+			{
+				// Act like MySQL default configuration, where sql_mode is ""
+				$sql = 'SELECT \'sql_mode\' AS "Variable_name", \'\' AS "Value";';
+			}
 			// SHOW COLUMNS emulation
-			if( preg_match('/SHOW\s+(FULL\s+)?COLUMNS\s+(?:FROM\s+|IN\s+)`?(\w+)`?(?:\s+LIKE\s+(.+)|\s+WHERE\s+(.+))?/i', $sql, $matches))
+			elseif( preg_match('/SHOW\s+(FULL\s+)?COLUMNS\s+(?:FROM\s+|IN\s+)`?(\w+)`?(?:\s+LIKE\s+(.+)|\s+WHERE\s+(.+))?/i', $sql, $matches))
 			{
 				$logto = 'SHOWCOLUMN';
 				$full = $matches[1];

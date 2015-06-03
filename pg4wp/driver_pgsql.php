@@ -270,6 +270,10 @@
 			// MySQL 'IF' conversion - Note : NULLIF doesn't need to be corrected
 			$pattern = '/ (?<!NULL)IF[ ]*\(([^,]+),([^,]+),([^\)]+)\)/';
 			$sql = preg_replace( $pattern, ' CASE WHEN $1 THEN $2 ELSE $3 END', $sql);
+
+			// Act like MySQL default configuration, where sql_mode is ""
+			$pattern = '/@@SESSION.sql_mode/';
+			$sql = preg_replace( $pattern, "''", $sql);
 			
 			$sql = str_replace('GROUP BY '.$wpdb->prefix.'posts.ID', '' , $sql);
 			$sql = str_replace("!= ''", '<> 0', $sql);
