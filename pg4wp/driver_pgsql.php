@@ -375,6 +375,18 @@
 					"(SELECT o1.option_id FROM $wpdb->options AS o1, $wpdb->options AS o2 " .
 					"WHERE o1.option_name = o2.option_name " .
 					"AND o1.option_id < o2.option_id)";
+			// Rewrite _transient_timeout multi-table delete query
+			elseif( 0 === strpos( $sql, 'DELETE a, b FROM wp_options a, wp_options b'))
+			{
+				$where = substr( $sql, strpos($sql, 'WHERE ') + 6);
+				$where = rtrim( $where, " \t\n\r;");
+				// Fix string/number comparison by adding check and cast
+				$where = str_replace( 'AND b.option_value', 'AND b.option_value ~ \'^[0-9]+$\' AND CAST(b.option_value AS BIGINT)', $where);
+				// Mirror WHERE clause to delete both sides of self-join.
+				$where2 = strtr( $where, array('a.' => 'b.', 'b.' => 'a.'));
+				$sql = 'DELETE FROM wp_options a USING wp_options b WHERE '.
+					'('.$where.') OR ('.$where2.');';
+			}
 			
 			// Akismet sometimes doesn't write 'comment_ID' with 'ID' in capitals where needed ...
 			if( false !== strpos( $sql, $wpdb->comments))
