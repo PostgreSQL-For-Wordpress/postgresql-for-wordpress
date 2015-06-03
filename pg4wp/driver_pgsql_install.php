@@ -38,13 +38,40 @@
 	{
 		global $wpdb;
 		
-		// SHOW INDEX emulation
-		if( 0 === strpos( $sql, 'SHOW INDEX'))
+		// Emulate SHOW commands
+		if( 0 === strpos( $sql, 'SHOW') || 0 === strpos( $sql, 'show'))
 		{
-			$logto = 'SHOWINDEX';
-			$pattern = '/SHOW INDEX FROM\s+(\w+)/';
-			preg_match( $pattern, $sql, $matches);
-			$table = $matches[1];
+			// SHOW COLUMNS emulation
+			if( preg_match('/SHOW\s+(FULL\s+)?COLUMNS\s+(?:FROM\s+|IN\s+)`?(\w+)`?(?:\s+LIKE\s+(.+)|\s+WHERE\s+(.+))?/i', $sql, $matches))
+			{
+				$logto = 'SHOWCOLUMN';
+				$full = $matches[1];
+				$table = $matches[2];
+				$like = $matches[3];
+				$where = $matches[4];
+// Wrap as sub-query to emulate WHERE behavior
+$sql = ($where ? 'SELECT * FROM (' : '').
+'SELECT column_name as "Field",
+	data_type as "Type",'.($full ? '
+	NULL as "Collation",' : '').'
+	is_nullable as "Null",
+	\'\' as "Key",
+	column_default as "Default",
+	\'\' as "Extra"'.($full ? ',
+	\'select,insert,update,references\' as "Privileges",
+	\'\' as "Comment"' : '').'
+FROM information_schema.columns
+WHERE table_name = \''.$table.'\''.($like ? '
+	AND column_name LIKE '.$like : '').($where ? ') AS columns
+WHERE '.$where : '').';';
+			}
+			// SHOW INDEX emulation
+			elseif( 0 === strpos( $sql, 'SHOW INDEX'))
+			{
+				$logto = 'SHOWINDEX';
+				$pattern = '/SHOW INDEX FROM\s+(\w+)/';
+				preg_match( $pattern, $sql, $matches);
+				$table = $matches[1];
 $sql = 'SELECT bc.relname AS "Table",
 	CASE WHEN i.indisunique THEN \'0\' ELSE \'1\' END AS "Non_unique",
 	CASE WHEN i.indisprimary THEN \'PRIMARY\' WHEN bc.relname LIKE \'%usermeta\' AND ic.relname = \'umeta_key\'
@@ -58,6 +85,22 @@ WHERE bc.oid = i.indrelid
 	AND a.attrelid = bc.oid
 	AND bc.relname = \''.$table.'\'
 	ORDER BY a.attname;';
+			}
+			// SHOW TABLES emulation
+			elseif( preg_match('/SHOW\s+(FULL\s+)?TABLES\s+(?:LIKE\s+(.+)|WHERE\s+(.+))?/i', $sql, $matches))
+			{
+				$logto = 'SHOWTABLES';
+				$full = $matches[1];
+				$like = $matches[2];
+				$where = $matches[3];
+// Wrap as sub-query to emulate WHERE behavior
+$sql = ($where ? 'SELECT * FROM (' : '').
+'SELECT table_name as "Tables_in_'.$wpdb->dbname.'"'.($full ? ',
+	table_type AS "Table_type"' : '').'
+FROM information_schema.tables'.($like ? '
+WHERE table_name LIKE '.$like : '').($where ? ') AS tables
+WHERE '.$where : '').';';
+			}
 		}
 		// Table alteration
 		elseif( 0 === strpos( $sql, 'ALTER TABLE'))

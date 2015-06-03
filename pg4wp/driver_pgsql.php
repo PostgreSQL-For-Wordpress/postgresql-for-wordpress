@@ -411,7 +411,7 @@
 			$sql = "SET NAMES 'utf8'";
 		}
 		// Load up upgrade and install functions as required
-		$begin = substr( $sql, 0, 3);
+		$begin = strtoupper( substr( $sql, 0, 3));
 		$search = array( 'SHO', 'ALT', 'DES', 'CRE', 'DRO');
 		if( in_array($begin, $search))
 		{
