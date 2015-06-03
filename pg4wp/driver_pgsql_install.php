@@ -20,6 +20,7 @@
 		'unsigned'		=> '',
 		'gmt datetime NOT NULL default \'0000-00-00 00:00:00\''	=> 'gmt timestamp NOT NULL DEFAULT timezone(\'gmt\'::text, now())',
 		'default \'0000-00-00 00:00:00\''	=> 'DEFAULT now()',
+		'\'0000-00-00 00:00:00\''	=> 'now()',
 		'datetime'		=> 'timestamp',
 		'DEFAULT CHARACTER SET utf8'	=> '',
 		
@@ -85,6 +86,13 @@ WHERE bc.oid = i.indrelid
 				if( $col != $newname)
 					$newq .= ";ALTER TABLE $table RENAME COLUMN $col TO $newcol;";
 				$sql = $newq;
+			}
+			$pattern = '/ALTER TABLE\s+(\w+)\s+ALTER COLUMN\s+/';
+			if( 1 === preg_match( $pattern, $sql))
+			{
+				// Translate default values
+				$sql = str_replace(
+					array_keys($GLOBALS['pg4wp_ttr']), array_values($GLOBALS['pg4wp_ttr']), $sql);
 			}
 			$pattern = '/ALTER TABLE\s+(\w+)\s+ADD COLUMN\s+([^\s]+)\s+([^ ]+)( unsigned|)\s+(NOT NULL|)\s*(default (.+)|)/';
 			if( 1 === preg_match( $pattern, $sql, $matches))
