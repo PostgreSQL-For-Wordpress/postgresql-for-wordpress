@@ -355,6 +355,13 @@
 					$sql = 'DELETE FROM '.$table.' WHERE '.$matches[2].' = '.$matches[3].';'.$sql;
 				}
 			}
+			elseif( 0 === strpos($sql, 'INSERT IGNORE'))
+			{
+				// Note:  Requires PostgreSQL 9.0 and USAGE privilege.
+				// Could do query-specific rewrite using SELECT without FROM
+				// as in http://stackoverflow.com/a/13342031
+				$sql = 'DO $$BEGIN INSERT'.substr($sql, 13).'; EXCEPTION WHEN unique_violation THEN END;$$;';
+			}
 			
 			// To avoid Encoding errors when inserting data coming from outside
 			if( preg_match('/^.{1}/us',$sql,$ar) != 1)
