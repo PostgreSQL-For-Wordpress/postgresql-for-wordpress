@@ -226,6 +226,10 @@
 				$pattern = '/SELECT\s+([^\s]+)\s+(FROM.+)/';
 				$sql = preg_replace( $pattern, 'SELECT COUNT($1) $2', $sql);
 			}
+
+			// Convert CONVERT to CAST
+			$pattern = '/CONVERT\(([^()]*(\(((?>[^()]+)|(?-2))*\))?[^()]*),\s*([^\s]+)\)/x';
+			$sql = preg_replace( $pattern, 'CAST($1 AS $4)', $sql);
 			
 			// Handle CAST( ... AS CHAR)
 			$sql = preg_replace( '/CAST\((.+) AS CHAR\)/', 'CAST($1 AS TEXT)', $sql);
