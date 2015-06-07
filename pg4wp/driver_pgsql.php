@@ -249,6 +249,9 @@
 			
 			$pattern = '/DATE_ADD[ ]*\(([^,]+),([^\)]+)\)/';
 			$sql = preg_replace( $pattern, '($1 + $2)', $sql);
+
+			$pattern = '/GROUP_CONCAT\(([^()]*(\(((?>[^()]+)|(?-2))*\))?[^()]*)\)/x';
+			$sql = preg_replace( $pattern, "string_agg($1, ',')", $sql);
 			
 			// UNIX_TIMESTAMP in MYSQL returns an integer
 			$pattern = '/UNIX_TIMESTAMP\(([^\)]+)\)/';
