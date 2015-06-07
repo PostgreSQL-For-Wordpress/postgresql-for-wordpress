@@ -307,8 +307,8 @@
 			$sql = str_replace( "'0000-00-00 00:00:00'", 'now() AT TIME ZONE \'gmt\'', $sql);
 
 			// For correct ID quoting
-			$pattern = '/[ ]*([^ ]*ID[^ ]*)[ ]*=/';
-			$sql = preg_replace( $pattern, ' "$1" =', $sql);
+			$pattern = '/(,|\s)[ ]*([^ \']*ID[^ \']*)[ ]*=/';
+			$sql = preg_replace( $pattern, '$1 "$2" =', $sql);
 			
 			// This will avoid modifications to anything following ' SET '
 			list($sql,$end) = explode( ' SET ', $sql, 2);
