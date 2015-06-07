@@ -129,7 +129,7 @@ WHERE '.$where : '').';';
 				$table = $matches[1];
 				$col = $matches[2];
 				$newname = $matches[3];
-				$type = $matches[4];
+				$type = strtolower($matches[4]);
 				if( isset($GLOBALS['pg4wp_ttr'][$type]))
 					$type = $GLOBALS['pg4wp_ttr'][$type];
 				$unsigned = $matches[5];
@@ -159,7 +159,7 @@ WHERE '.$where : '').';';
 			{
 				$table = $matches[1];
 				$col = $matches[2];
-				$type = $matches[3];
+				$type = strtolower($matches[3]);
 				if( isset($GLOBALS['pg4wp_ttr'][$type]))
 					$type = $GLOBALS['pg4wp_ttr'][$type];
 				$unsigned = $matches[4];
