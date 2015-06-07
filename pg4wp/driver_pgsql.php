@@ -292,6 +292,11 @@
 			if( false !== strpos( $sql, $wpdb->comments))
 				$sql = str_replace(' comment_id ', ' comment_ID ', $sql);
 			
+			// MySQL supports strings as names, PostgreSQL needs identifiers.
+			// Limit to after closing parenthesis to reduce false-positives
+			// Currently only an issue for nextgen-gallery plugin
+			$pattern = '/\) AS \'([^\'])\'/';
+			$sql = preg_replace( $pattern, ') AS "$1"', $sql);
 		} // SELECT
 		elseif( 0 === strpos($sql, 'UPDATE'))
 		{
