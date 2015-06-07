@@ -123,7 +123,7 @@ WHERE '.$where : '').';';
 		elseif( 0 === strpos( $sql, 'ALTER TABLE'))
 		{
 			$logto = 'ALTER';
-			$pattern = '/ALTER TABLE\s+(\w+)\s+CHANGE COLUMN\s+([^\s]+)\s+([^\s]+)\s+([^ ]+)( unsigned|)\s+(NOT NULL|)\s*(default (.+)|)/';
+			$pattern = '/ALTER TABLE\s+(\w+)\s+CHANGE COLUMN\s+([^\s]+)\s+([^\s]+)\s+([^ ]+)( unsigned|)\s*(NOT NULL|)\s*(default (.+)|)/';
 			if( 1 === preg_match( $pattern, $sql, $matches))
 			{
 				$table = $matches[1];
