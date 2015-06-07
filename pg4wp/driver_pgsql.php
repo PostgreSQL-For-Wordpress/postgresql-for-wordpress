@@ -227,6 +227,24 @@
 				$sql = preg_replace( $pattern, 'SELECT COUNT($1) $2', $sql);
 			}
 
+			// Ensure that ORDER BY column appears in SELECT DISTINCT fields
+			$pattern = '/^SELECT DISTINCT.*ORDER BY\s+(\S+)/';
+			if( preg_match( $pattern, $sql, $matches) &&
+					strpos( $sql, $matches[1]) > strpos( $sql, 'ORDER BY') &&
+					false === strpos( $sql, '*'))
+			{
+				if( false !== strpos( $sql, 'GROUP BY'))
+				{
+					$pattern = '/ FROM /';
+					$sql = preg_replace( $pattern, ', MIN('.$matches[1].') AS '.$matches[1].' FROM ', $sql, 1);
+				}
+				else
+				{
+					$pattern = '/ FROM /';
+					$sql = preg_replace( $pattern, ', '.$matches[1].' FROM ', $sql, 1);
+				}
+			}
+
 			// Convert CONVERT to CAST
 			$pattern = '/CONVERT\(([^()]*(\(((?>[^()]+)|(?-2))*\))?[^()]*),\s*([^\s]+)\)/x';
 			$sql = preg_replace( $pattern, 'CAST($1 AS $4)', $sql);
