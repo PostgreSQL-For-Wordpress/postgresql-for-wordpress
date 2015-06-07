@@ -412,6 +412,15 @@
 		elseif( 0 === strpos( $sql, 'DELETE' ))
 		{
 			$logto = 'DELETE';
+
+			// ORDER BY is not supported in DELETE queries, and not required
+			// when LIMIT is not present
+			if( false !== strpos( $sql, 'ORDER BY') && false === strpos( $sql, 'LIMIT'))
+			{
+				$pattern = '/ORDER BY \S+ (ASC|DESC)?/';
+				$sql = preg_replace( $pattern, '', $sql);
+			}
+
 			// LIMIT is not allowed in DELETE queries
 			$sql = str_replace( 'LIMIT 1', '', $sql);
 			$sql = str_replace( ' REGEXP ', ' ~ ', $sql);
