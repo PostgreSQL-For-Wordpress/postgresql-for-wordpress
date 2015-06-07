@@ -303,6 +303,9 @@
 			$pattern = '/[ ]*`([^` ]+)`[ ]*=/';
 			$sql = preg_replace( $pattern, ' $1 =', $sql);
 
+			// Those are used when we need to set the date to now() in gmt time
+			$sql = str_replace( "'0000-00-00 00:00:00'", 'now() AT TIME ZONE \'gmt\'', $sql);
+
 			// For correct ID quoting
 			$pattern = '/[ ]*([^ ]*ID[^ ]*)[ ]*=/';
 			$sql = preg_replace( $pattern, ' "$1" =', $sql);
