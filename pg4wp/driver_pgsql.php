@@ -183,7 +183,9 @@
 			elseif( PG4WP_DEBUG || PG4WP_ERROR_LOG)
 			{
 				$log = '['.microtime(true)."] wpsql_insert_id() was called with '$table' and '$ins_field'".
-						" and generated an error. The latest INSERT query was :\n'$lastq'\n";
+						" and returned the error:\n".pg_last_error().
+						"\nFor the query:\n".$sql.
+						"\nThe latest INSERT query was :\n'$lastq'\n";
 				error_log( $log, 3, PG4WP_LOG.'pg4wp_errors.log');
 			}
 		}
