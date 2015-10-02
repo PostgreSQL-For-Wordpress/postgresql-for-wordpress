@@ -321,7 +321,21 @@
 			// Akismet sometimes doesn't write 'comment_ID' with 'ID' in capitals where needed ...
 			if( false !== strpos( $sql, $wpdb->comments))
 				$sql = str_replace(' comment_id ', ' comment_ID ', $sql);
-			
+
+			// MySQL allows integers to be used as boolean expressions
+			// where 0 is false and all other values are true.
+			//
+			// Although this could occur anywhere with any number, so far it
+			// has only been observed as top-level expressions in the WHERE
+			// clause and only with 0.  For performance, limit current
+			// replacements to that.
+			$pattern_after_where = '(?:\s*$|\s+(GROUP|HAVING|ORDER|LIMIT|PROCEDURE|INTO|FOR|LOCK))';
+			$pattern = '/(WHERE\s+)0(\s+AND|\s+OR|' . $pattern_after_where . ')/';
+			$sql = preg_replace( $pattern, '$1false$2', $sql);
+
+			$pattern = '/(AND\s+|OR\s+)0(' . $pattern_after_where . ')/';
+			$sql = preg_replace( $pattern, '$1false$2', $sql);
+
 			// MySQL supports strings as names, PostgreSQL needs identifiers.
 			// Limit to after closing parenthesis to reduce false-positives
 			// Currently only an issue for nextgen-gallery plugin
