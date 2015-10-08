@@ -21,17 +21,20 @@ if( (PG4WP_DEBUG || PG4WP_LOG_ERRORS) &&
 require_once( PG4WP_ROOT.'/driver_'.DB_DRIVER.'.php');
 
 // This loads up the wpdb class applying appropriate changes to it
-$replaces = array(
-	'define( '	=> '// define( ',
-	'class wpdb'	=> 'class wpdb2',
-	'new wpdb'	=> 'new wpdb2',
-	'mysql_'	=> 'wpsql_',
-	'<?php'		=> '',
-	'?>'		=> '',
-);
+/** removing replace crap
+* $replaces = array(
+*	'define( '	=> '// define( ',
+*	'class wpdb'	=> 'class wpdb2',
+*	'new wpdb'	=> 'new wpdb2',
+*	'mysql_'	=> 'wpsql_',
+*	'<?php'		=> '',
+*	'?>'		=> '',
+*);
+*/
 // Ensure class uses the replaced mysql_ functions rather than mysqli_
 define( 'WP_USE_EXT_MYSQL', true);
-eval( str_replace( array_keys($replaces), array_values($replaces), file_get_contents(ABSPATH.'/wp-includes/wp-db.php')));
+//eval( str_replace( array_keys($replaces), array_values($replaces), file_get_contents(ABSPATH.'/wp-includes/wp-db.php')));
+require_once (PG4WP_ROOT. '/wp-db-pg.php');
 
 // Create wpdb object if not already done
 if (! isset($wpdb))
