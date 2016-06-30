@@ -57,8 +57,8 @@
 				$logto = 'SHOWCOLUMN';
 				$full = $matches[1];
 				$table = $matches[2];
-				$like = $matches[3];
-				$where = $matches[4];
+				$like = isset($matches[3]) ? $matches[3] : FALSE;
+				$where = isset($matches[4]) ? $matches[4] : FALSE;
 // Wrap as sub-query to emulate WHERE behavior
 $sql = ($where ? 'SELECT * FROM (' : '').
 'SELECT column_name as "Field",
