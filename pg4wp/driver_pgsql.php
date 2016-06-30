@@ -197,6 +197,7 @@
 	
 	function pg4wp_rewrite( $sql)
 	{
+		// Note:  Can be called from constructor before $wpdb is set
 		global $wpdb;
 		
 		$logto = 'queries';
@@ -305,7 +306,10 @@
 			$pattern = '/@@SESSION.sql_mode/';
 			$sql = preg_replace( $pattern, "''", $sql);
 			
-			$sql = str_replace('GROUP BY '.$wpdb->prefix.'posts.ID', '' , $sql);
+			if( isset($wpdb))
+			{
+				$sql = str_replace('GROUP BY '.$wpdb->prefix.'posts.ID', '' , $sql);
+			}
 			$sql = str_replace("!= ''", '<> 0', $sql);
 			
 			// MySQL 'LIKE' is case insensitive by default, whereas PostgreSQL 'LIKE' is
@@ -319,7 +323,7 @@
 			$sql = str_replace( 'post_date_gmt > 1970', 'post_date_gmt > to_timestamp (\'1970\')', $sql);
 			
 			// Akismet sometimes doesn't write 'comment_ID' with 'ID' in capitals where needed ...
-			if( false !== strpos( $sql, $wpdb->comments))
+			if( isset($wpdb) && false !== strpos( $sql, $wpdb->comments))
 				$sql = str_replace(' comment_id ', ' comment_ID ', $sql);
 
 			// MySQL allows integers to be used as boolean expressions
