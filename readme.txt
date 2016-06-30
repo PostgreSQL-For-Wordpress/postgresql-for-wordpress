@@ -41,6 +41,8 @@ This is because the database needs to be up and running before any plugin can be
 	
 	You can also activate DEBUG and/or ERROR logs
 
+1.	Create `wp-config.php` from `wp-config-sample.php` if it does not already exist (PG4WP does not currently intercept database connection setup).
+
 1.	Point your Web Browser to your WordPress installation and go through the traditional WordPress installation routine.
 
 == Frequently Asked Questions ==
