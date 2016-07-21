@@ -64,6 +64,7 @@
 	// This is a fake connection except during installation
 	function wpsql_connect($dbserver, $dbuser, $dbpass)
 	{
+		global $wpdb;
 		$GLOBALS['pg4wp_connstr'] = '';
 		$hostport = explode(':', $dbserver);
 		if( !empty( $hostport[0]))
@@ -77,7 +78,8 @@
 		elseif( !PG4WP_INSECURE)
 			wp_die( 'Connecting to your PostgreSQL database without a password is considered insecure.
 					<br />If you want to do it anyway, please set "PG4WP_INSECURE" to true in your "db.php" file.' );
-		
+
+		$wpdb->pdbconnstr = $GLOBALS['pg4wp_connstr'];
 		// While installing, we test the connection to 'template1' (as we don't know the effective dbname yet)
 		if( defined('WP_INSTALLING') && WP_INSTALLING)
 			return wpsql_select_db( 'template1');
@@ -88,6 +90,8 @@
 	// The effective connection happens here
 	function wpsql_select_db($dbname, $connection_id = 0)
 	{
+		global $wpdb;
+		$GLOBALS['pg4wp_connstr'] = $GLOBALS['pg4wp_connstr'] ?: $wpdb->pdbconnstr;
 		$pg_connstr = $GLOBALS['pg4wp_connstr'].' dbname='.$dbname;
 
 		$GLOBALS['pg4wp_conn'] = pg_connect($pg_connstr);
