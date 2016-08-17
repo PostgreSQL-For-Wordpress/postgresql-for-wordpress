@@ -26,6 +26,11 @@
 	$GLOBALS['pg4wp_connstr'] = '';
 	$GLOBALS['pg4wp_conn'] = false;
 	
+
+	function wpsql_ping($conn) {
+		return(pg_ping($conn));
+	}
+
 	function wpsql_num_rows($result)
 		{ return pg_num_rows($result); }
 	function wpsql_numrows($result)
@@ -77,12 +82,9 @@
 		elseif( !PG4WP_INSECURE)
 			wp_die( 'Connecting to your PostgreSQL database without a password is considered insecure.
 					<br />If you want to do it anyway, please set "PG4WP_INSECURE" to true in your "db.php" file.' );
-		
-		// While installing, we test the connection to 'template1' (as we don't know the effective dbname yet)
-		if( defined('WP_INSTALLING') && WP_INSTALLING)
-			return wpsql_select_db( 'template1');
-		
-		return 1;
+
+		// as of WordPress 4.6, a true resource must be returned
+		return pg_connect( $GLOBALS['pg4wp_connstr'].' dbname=template1');
 	}
 	
 	// The effective connection happens here
