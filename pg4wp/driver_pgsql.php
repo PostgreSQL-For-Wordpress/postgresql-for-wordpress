@@ -25,12 +25,9 @@
 	$GLOBALS['pg4wp_last_insert'] = '';
 	$GLOBALS['pg4wp_connstr'] = '';
 	$GLOBALS['pg4wp_conn'] = false;
-	
 
-	function wpsql_ping($conn) {
-		return(pg_ping($conn));
-	}
-
+	function wpsql_ping($conn)
+		{ return pg_ping($conn); }
 	function wpsql_num_rows($result)
 		{ return pg_num_rows($result); }
 	function wpsql_numrows($result)
