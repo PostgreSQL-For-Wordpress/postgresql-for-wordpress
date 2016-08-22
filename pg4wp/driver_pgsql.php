@@ -63,7 +63,6 @@
 		{ return pg_fetch_result($result, $i, $fieldname); }
 ****/
 
-	// This is a fake connection except during installation
 	function wpsql_connect($dbserver, $dbuser, $dbpass)
 	{
 		$GLOBALS['pg4wp_connstr'] = '';
