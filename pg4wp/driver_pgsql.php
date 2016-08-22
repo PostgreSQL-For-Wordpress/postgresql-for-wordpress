@@ -80,8 +80,10 @@
 			wp_die( 'Connecting to your PostgreSQL database without a password is considered insecure.
 					<br />If you want to do it anyway, please set "PG4WP_INSECURE" to true in your "db.php" file.' );
 
-		// as of WordPress 4.6, a true resource must be returned
-		return pg_connect( $GLOBALS['pg4wp_connstr'].' dbname=template1');
+		// PostgreSQL must connect to a specific database (unlike MySQL)
+		// Guess at one here and reconnect as required in wpsql_select_db
+		$dbname = defined('DB_NAME') && DB_NAME ? DB_NAME : 'template1';
+		return wpsql_select_db( $dbname);
 	}
 	
 	// The effective connection happens here
@@ -89,6 +91,7 @@
 	{
 		$pg_connstr = $GLOBALS['pg4wp_connstr'].' dbname='.$dbname;
 
+		// Note:  pg_connect returns existing connection for same connstr
 		$GLOBALS['pg4wp_conn'] = pg_connect($pg_connstr);
 		
 		if( $GLOBALS['pg4wp_conn'])
