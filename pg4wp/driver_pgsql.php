@@ -82,7 +82,7 @@
 		// PostgreSQL must connect to a specific database (unlike MySQL)
 		// Guess at one here and reconnect as required in wpsql_select_db
 		$dbname = defined('DB_NAME') && DB_NAME ? DB_NAME : 'template1';
-		return wpsql_select_db( $dbname);
+		return pg_connect( $GLOBALS['pg4wp_connstr'].' dbname='.$dbname);
 	}
 	
 	// The effective connection happens here
