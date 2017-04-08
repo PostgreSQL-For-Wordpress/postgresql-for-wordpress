@@ -105,7 +105,7 @@
 			$GLOBALS['pg4wp_connstr'] = '';
 		
 		// Execute early transmitted commands if needed
-		if( isset($GLOBALS['pg4wp_pre_sql']) && !empty($GLOBALS['pg4wp_pre_sql']))
+		if( !empty($GLOBALS['pg4wp_pre_sql']))
 			foreach( $GLOBALS['pg4wp_pre_sql'] as $sql2run)
 				wpsql_query( $sql2run);
 		
