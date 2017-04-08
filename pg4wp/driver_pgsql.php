@@ -91,15 +91,15 @@
 		$pg_connstr = $GLOBALS['pg4wp_connstr'].' dbname='.$dbname;
 
 		// Note:  pg_connect returns existing connection for same connstr
-		$GLOBALS['pg4wp_conn'] = pg_connect($pg_connstr);
-		
-		if( $GLOBALS['pg4wp_conn'])
-		{
-			$ver = pg_version($GLOBALS['pg4wp_conn']);
-			if( isset($ver['server']))
-				$GLOBALS['pg4wp_version'] = $ver['server'];
-		}
-		
+		$GLOBALS['pg4wp_conn'] = $conn = pg_connect($pg_connstr);
+
+		if( !$conn)
+			return $conn;
+
+		$ver = pg_version($conn);
+		if( isset($ver['server']))
+			$GLOBALS['pg4wp_version'] = $ver['server'];
+
 		// Now we should be connected, we "forget" about the connection parameters (if this is not a "test" connection)
 		if( !defined('WP_INSTALLING') || !WP_INSTALLING)
 			$GLOBALS['pg4wp_connstr'] = '';
@@ -109,7 +109,7 @@
 			foreach( $GLOBALS['pg4wp_pre_sql'] as $sql2run)
 				wpsql_query( $sql2run);
 		
-		return $GLOBALS['pg4wp_conn'];
+		return $conn;
 	}
 
 	function wpsql_fetch_array($result)
