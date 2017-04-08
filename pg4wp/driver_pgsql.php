@@ -109,6 +109,8 @@
 			foreach( $GLOBALS['pg4wp_pre_sql'] as $sql2run)
 				wpsql_query( $sql2run);
 		
+		pg4wp_init($conn);
+
 		return $conn;
 	}
 
@@ -571,6 +573,35 @@
 				error_log( '['.microtime(true)."] $sql\n---------------------\n", 3, PG4WP_LOG.'pg4wp_unmodified.log');
 		}
 		return $sql;
+	}
+
+	// Database initialization
+	function pg4wp_init()
+	{
+		// Provide (mostly) MySQL-compatible field function
+		// Note:  MySQL accepts heterogeneous argument types.  No easy fix.
+		//        Can define version with typed first arg to cover some cases.
+		// Note:  ROW_NUMBER+unnest doesn't guarantee order, but is simple/fast.
+		//        If it breaks, try https://stackoverflow.com/a/8767450
+		$result = pg_query(<<<SQL
+CREATE OR REPLACE FUNCTION field(anyelement, VARIADIC anyarray)
+	RETURNS BIGINT AS
+$$
+SELECT rownum
+FROM (SELECT ROW_NUMBER() OVER () AS rownum, elem
+	FROM unnest($2) elem) numbered
+WHERE numbered.elem = $1
+UNION ALL
+SELECT 0
+$$
+	LANGUAGE SQL IMMUTABLE;
+SQL
+);
+		if( (PG4WP_DEBUG || PG4WP_LOG_ERRORS) && $result === false )
+		{
+			$err = pg_last_error();
+			error_log('['.microtime(true)."] Error creating MySQL-compatible field function: $err\n", 3, PG4WP_LOG.'pg4wp_errors.log');
+		}
 	}
 
 /*
