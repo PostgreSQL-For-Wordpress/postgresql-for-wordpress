@@ -329,6 +329,18 @@
 			if( isset($wpdb) && false !== strpos( $sql, $wpdb->comments))
 				$sql = str_replace(' comment_id ', ' comment_ID ', $sql);
 
+			// MySQL treats a HAVING clause without GROUP BY like WHERE
+			if( false !== strpos($sql, 'HAVING') && false === strpos($sql, 'GROUP BY'))
+			{
+				if( false === strpos($sql, 'WHERE'))
+					$sql = str_replace('HAVING', 'WHERE', $sql);
+				else
+				{
+					$pattern = '/WHERE\s+(.*?)\s+HAVING\s+(.*?)(\s*(?:ORDER|LIMIT|PROCEDURE|INTO|FOR|LOCK|$))/';
+					$sql = preg_replace( $pattern, 'WHERE ($1) AND ($2) $3', $sql);
+				}
+			}
+
 			// MySQL allows integers to be used as boolean expressions
 			// where 0 is false and all other values are true.
 			//
