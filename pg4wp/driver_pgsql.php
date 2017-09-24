@@ -299,6 +299,10 @@
 
 			$pattern = '/GROUP_CONCAT\(([^()]*(\(((?>[^()]+)|(?-2))*\))?[^()]*)\)/x';
 			$sql = preg_replace( $pattern, "string_agg($1, ',')", $sql);
+
+			// Convert MySQL RAND function to PostgreSQL RANDOM function
+			$pattern = '/RAND[ ]*\([ ]*\)/';
+			$sql = preg_replace( $pattern, 'RANDOM()', $sql);
 			
 			// UNIX_TIMESTAMP in MYSQL returns an integer
 			$pattern = '/UNIX_TIMESTAMP\(([^\)]+)\)/';
