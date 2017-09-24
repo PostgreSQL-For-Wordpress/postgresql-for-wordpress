@@ -198,6 +198,20 @@
 		return $data;
 	}
 	
+	// Convert MySQL FIELD function to CASE statement
+	// https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_field
+	// Other implementations:  https://stackoverflow.com/q/1309624
+	function pg4wp_rewrite_field($matches)
+	{
+		$case = 'CASE ' . trim($matches[1]);
+		$comparands = explode(',', $matches[2]);
+		foreach($comparands as $i => $comparand) {
+			$case .= ' WHEN ' . trim($comparand) . ' THEN ' . ($i + 1);
+		}
+		$case .= ' ELSE 0 END';
+		return $case;
+	}
+
 	function pg4wp_rewrite( $sql)
 	{
 		// Note:  Can be called from constructor before $wpdb is set
@@ -281,19 +295,6 @@
 			$pattern = '/DATE_ADD[ ]*\(([^,]+),([^\)]+)\)/';
 			$sql = preg_replace( $pattern, '($1 + $2)', $sql);
 
-			// Convert MySQL FIELD function to CASE statement
-			// https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_field
-			// Other implementations:  https://stackoverflow.com/q/1309624
-			function pg4wp_rewrite_field($matches)
-			{
-				$case = 'CASE ' . trim($matches[1]);
-				$comparands = explode(',', $matches[2]);
-				foreach($comparands as $i => $comparand) {
-					$case .= ' WHEN ' . trim($comparand) . ' THEN ' . ($i + 1);
-				}
-				$case .= ' ELSE 0 END';
-				return $case;
-			}
 			$pattern = '/FIELD[ ]*\(([^\),]+),([^\)]+)\)/';
 			$sql = preg_replace_callback( $pattern, 'pg4wp_rewrite_field', $sql);
 
