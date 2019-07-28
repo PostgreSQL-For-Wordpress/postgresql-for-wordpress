@@ -387,6 +387,11 @@
 			$logto = 'UPDATE';
 			$pattern = '/LIMIT[ ]+\d+/';
 			$sql = preg_replace($pattern, '', $sql);
+
+            // Fix update wp_options
+            $pattern = "/UPDATE `wp_options` SET `option_value` = NULL WHERE `option_name` = '(.+)'/";
+            $match = "UPDATE `wp_options` SET `option_value` = '' WHERE `option_name` = '$1'";
+            $sql = preg_replace($pattern, $match, $sql);
 			
 			// For correct bactick removal
 			$pattern = '/[ ]*`([^` ]+)`[ ]*=/';
