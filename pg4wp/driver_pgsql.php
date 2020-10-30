@@ -446,10 +446,8 @@
 			}
 			elseif( 0 === strpos($sql, 'INSERT IGNORE'))
 			{
-				// Note:  Requires PostgreSQL 9.0 and USAGE privilege.
-				// Could do query-specific rewrite using SELECT without FROM
-				// as in http://stackoverflow.com/a/13342031
-				$sql = 'DO $$BEGIN INSERT'.substr($sql, 13).'; EXCEPTION WHEN unique_violation THEN END;$$;';
+				// Note:  Requires PostgreSQL 9.5
+				$sql = 'INSERT'.substr($sql, 13).' ON CONFLICT DO NOTHING';
 			}
 			
 			// To avoid Encoding errors when inserting data coming from outside
