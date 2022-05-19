@@ -1,0 +1,42 @@
+version: "2.0"
+services:
+  db:
+    image: postgres:14.1-alpine
+    restart: always
+    networks:
+      - wordpress
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes: 
+      - db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+  wordpress:
+    restart: always
+    networks:
+      - wordpress
+    environment:
+      WORDPRESS_DB_CHARSET: ''
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: postgres
+      WORDPRESS_DB_PASSWORD: postgres
+      WORDPRESS_DB_NAME: postgres
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BUILD_ENV: dev
+    container_name: wordpress
+    ports:
+      - "8082:80"
+    links:
+      - db
+    depends_on:
+      - db
+volumes:
+  db:
+
+networks:
+  wordpress:
+    driver: bridge

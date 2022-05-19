@@ -63,6 +63,11 @@ Database-intensive plugins may work, but most of them would require specific cod
 You should backup your setup (at least database) and try to install the plugin to see if it works or not.
 Whether it worked or not, you should tell me the result of your test, so that I can create some kind of listing of working/not working plugins.
 
+== Creating a image and using in Docker or Kubernetes ==
+
+* [Versão em Português (BR)](contrib/nerd4ever/readme.md)
+* [English version (EN)](contrib/nerd4ever/readme_en.md)
+
 == Screenshots ==
 There is no screenshot for this plugin
 
