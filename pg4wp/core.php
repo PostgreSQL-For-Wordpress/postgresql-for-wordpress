@@ -29,7 +29,7 @@ $replaces = array(
 	'<?php'		=> '',
 	'?>'		=> '',
 );
-eval( str_replace( array_keys($replaces), array_values($replaces), file_get_contents(ABSPATH.'/wp-includes/wp-db.php')));
+eval( str_replace( array_keys($replaces), array_values($replaces), file_get_contents(ABSPATH.'/wp-includes/class-wpdb.php')));
 
 // Create wpdb object if not already done
 if (! isset($wpdb))
