@@ -133,7 +133,7 @@
 		$initial = $sql;
 		$sql = pg4wp_rewrite( $sql);
 		
-		$GLOBALS['pg4wp_result'] = pg_query($sql);
+		$GLOBALS['pg4wp_result'] = @pg_query($sql);
 		if( (PG4WP_DEBUG || PG4WP_LOG_ERRORS) && $GLOBALS['pg4wp_result'] === false && $err = pg_last_error())
 		{
 			$ignore = false;
