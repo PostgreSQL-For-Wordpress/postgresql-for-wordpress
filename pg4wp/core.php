@@ -9,6 +9,17 @@
 * This file does all the initialisation tasks
 */
 
+// This is required by class-wpdb so we must load it first
+require_once ABSPATH . '/wp-includes/cache.php';
+require_once ABSPATH . '/wp-includes/l10n.php';
+
+if (!function_exists('wpsql_is_resource')) {
+    function wpsql_is_resource($object)
+    {
+        return $object !== false && $object !== null;
+    }
+}
+
 // Logs are put in the pg4wp directory
 define( 'PG4WP_LOG', PG4WP_ROOT.'/logs/');
 // Check if the logs directory is needed and exists or create it if possible
@@ -26,13 +37,22 @@ $replaces = array(
 	'class wpdb'	=> 'class wpdb2',
 	'new wpdb'	=> 'new wpdb2',
 	'mysql_'	=> 'wpsql_',
+	'is_resource'	=> 'wpsql_is_resource',
 	'<?php'		=> '',
 	'?>'		=> '',
 );
+
 // Ensure class uses the replaced mysql_ functions rather than mysqli_
-define( 'WP_USE_EXT_MYSQL', true);
-eval( str_replace( array_keys($replaces), array_values($replaces), file_get_contents(ABSPATH.'/wp-includes/wp-db.php')));
+if (!defined('WP_USE_EXT_MYSQL')) {
+	define('WP_USE_EXT_MYSQL', true);
+}
+if (WP_USE_EXT_MYSQL != true) {
+	throw new \Exception("PG4SQL CANNOT BE ENABLED WITH MYSQLI, REMOVE ANY WP_USE_EXT_MYSQL configuration");
+}
+
+eval(str_replace(array_keys($replaces), array_values($replaces), file_get_contents(ABSPATH . '/wp-includes/class-wpdb.php')));
 
 // Create wpdb object if not already done
-if (! isset($wpdb) && defined('DB_USER'))
+if (! isset($wpdb) && defined('DB_USER')) {
 	$wpdb = new wpdb2( DB_USER, DB_PASSWORD, DB_NAME, DB_HOST );
+}
