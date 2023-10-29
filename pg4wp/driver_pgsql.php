@@ -39,7 +39,7 @@
 	function wpsql_fetch_object($result)
 		{ return pg_fetch_object($result); }
 	function wpsql_free_result($result)
-		{ return pg_free_result($result); }
+		{ return ($result === null) ? true : pg_free_result($result); }
 	function wpsql_affected_rows()
 	{
 		if( $GLOBALS['pg4wp_result'] === false)
@@ -52,11 +52,12 @@
 	function wpsql_data_seek($result, $offset)
 		{ return pg_result_seek ( $result, $offset ); }
 	function wpsql_error()
-		{ if( $GLOBALS['pg4wp_conn']) return pg_last_error(); else return ''; }
+		{ if( $GLOBALS['pg4wp_conn']) return pg_last_error($GLOBALS['pg4wp_conn']); else return ''; }
 	function wpsql_fetch_assoc($result) { return pg_fetch_assoc($result); }
 	function wpsql_escape_string($s) { return pg_escape_string($s); }
-	function wpsql_real_escape_string($s,$c=NULL) { return pg_escape_string($s); }
-	function wpsql_get_server_info() { return '5.0.30'; } // Just want to fool wordpress ...
+	function wpsql_real_escape_string($s,$c=NULL) { return pg_escape_string($GLOBALS['pg4wp_conn'],$s); }
+	function wpsql_get_server_info() { return '8.0.35'; } // Just want to fool wordpress ...
+	function wpsql_get_client_info() { return '8.0.35'; } // Just want to fool wordpress ...
 	
 /**** Modified version of wpsql_result() is at the bottom of this file
 	function wpsql_result($result, $i, $fieldname)
@@ -136,8 +137,8 @@
 		$initial = $sql;
 		$sql = pg4wp_rewrite( $sql);
 		
-		$GLOBALS['pg4wp_result'] = pg_query($sql);
-		if( (PG4WP_DEBUG || PG4WP_LOG_ERRORS) && $GLOBALS['pg4wp_result'] === false && $err = pg_last_error())
+		$GLOBALS['pg4wp_result'] = pg_query($GLOBALS['pg4wp_conn'], $sql);
+		if( (PG4WP_DEBUG || PG4WP_LOG_ERRORS) && $GLOBALS['pg4wp_result'] === false && $err = pg_last_error($GLOBALS['pg4wp_conn']))
 		{
 			$ignore = false;
 			if( defined('WP_INSTALLING') && WP_INSTALLING)
@@ -239,12 +240,15 @@
 			{
 				// Here we convert the latest query into a COUNT query
 				$sql = $GLOBALS['pg4wp_numrows_query'];
-				// Remove any LIMIT ... clause (this is the blocking part)
-				$pattern = '/\s+LIMIT.+/';
-				$sql = preg_replace( $pattern, '', $sql);
-				// Now add the COUNT() statement
-				$pattern = '/SELECT\s+([^\s]+)\s+(FROM.+)/';
-				$sql = preg_replace( $pattern, 'SELECT COUNT($1) $2', $sql);
+
+				// Remove the LIMIT clause if it exists
+				$sql = preg_replace('/\s+LIMIT\s+\d+(\s*,\s*\d+)?/i', '', $sql);
+
+				// Remove the ORDER BY clause if it exists
+				$sql = preg_replace('/\s+ORDER\s+BY\s+[^)]+/i', '', $sql);
+	
+				// Replace the fields in the SELECT clause with COUNT(*)
+				$sql = preg_replace('/SELECT\s+.*?\s+FROM\s+/is', 'SELECT COUNT(*) FROM ', $sql, 1);
 			}
 
 			// Ensure that ORDER BY column appears in SELECT DISTINCT fields
@@ -501,7 +505,7 @@
 			}
 			
 			// Akismet sometimes doesn't write 'comment_ID' with 'ID' in capitals where needed ...
-			if( false !== strpos( $sql, $wpdb->comments))
+			if(isset($wpdb) && $wpdb->comments && false !== strpos( $sql, $wpdb->comments))
 				$sql = str_replace(' comment_id ', ' comment_ID ', $sql);
 		}
 		// Fix tables listing
@@ -620,7 +624,7 @@
 		//        Can define version with typed first arg to cover some cases.
 		// Note:  ROW_NUMBER+unnest doesn't guarantee order, but is simple/fast.
 		//        If it breaks, try https://stackoverflow.com/a/8767450
-		$result = pg_query(<<<SQL
+		$result = pg_query($GLOBALS['pg4wp_conn'],<<<SQL
 CREATE OR REPLACE FUNCTION field(anyelement, VARIADIC anyarray)
 	RETURNS BIGINT AS
 $$
@@ -657,6 +661,10 @@ SQL
 	
 	function wpsql_errno( $connection) {
 		$result = pg_get_result($connection);
+		if ($result === false) {
+			return false;
+		}
+
 		$result_status = pg_result_status($result);
 		return pg_result_error_field($result_status, PGSQL_DIAG_SQLSTATE);
 	}
