@@ -183,7 +183,7 @@
 			$res = pg_query($sql);
 			if( false !== $res)
 				$data = pg_fetch_result($res, 0, 0);
-			elseif( PG4WP_DEBUG || PG4WP_ERROR_LOG)
+			elseif( PG4WP_DEBUG || PG4WP_LOG)
 			{
 				$log = '['.microtime(true)."] wpsql_insert_id() was called with '$table' and '$ins_field'".
 						" and returned the error:\n".pg_last_error().
