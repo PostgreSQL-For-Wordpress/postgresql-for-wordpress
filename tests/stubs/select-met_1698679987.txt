@@ -1,0 +1,1 @@
+{"mysql":"SELECT meta_value FROM wp_sitemeta WHERE meta_key = 'blog_count' AND site_id = 1","postgresql":"SELECT meta_value FROM wp_sitemeta WHERE meta_key = 'blog_count' AND site_id = 1"}

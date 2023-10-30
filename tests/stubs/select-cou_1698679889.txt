@@ -1,0 +1,1 @@
+{"mysql":"\n\t\t\tSELECT  COUNT(*)\n\t\t\tFROM wp_terms AS t  INNER JOIN wp_term_taxonomy AS tt ON t.term_id = tt.term_id\n\t\t\tWHERE tt.taxonomy IN ('category')\n\t\t\t\n\t\t\t\n\t\t","postgresql":"SELECT  COUNT(*)\n\t\t\tFROM wp_terms AS t  INNER JOIN wp_term_taxonomy AS tt ON t.term_id = tt.term_id\n\t\t\tWHERE tt.taxonomy IN ('category')"}

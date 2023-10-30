@@ -1,0 +1,1 @@
+{"mysql":"SELECT autoload FROM wp_options WHERE option_name = '_transient_is_multi_author'","postgresql":"SELECT autoload FROM wp_options WHERE option_name = '_transient_is_multi_author'"}

@@ -1,0 +1,1 @@
+{"mysql":"SELECT * FROM wp_users WHERE user_login = 'root' LIMIT 1","postgresql":"SELECT * FROM wp_users WHERE user_login = 'root' LIMIT 1"}

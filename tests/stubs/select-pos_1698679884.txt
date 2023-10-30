@@ -1,0 +1,1 @@
+{"mysql":"SELECT post_name FROM wp_posts WHERE post_name = 'new-post-123' AND post_type = 'post' AND ID != 55 LIMIT 1","postgresql":"SELECT post_name FROM wp_posts WHERE post_name = 'new-post-123' AND post_type = 'post' AND \"ID\" != 55 LIMIT 1"}

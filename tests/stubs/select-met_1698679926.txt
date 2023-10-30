@@ -1,0 +1,1 @@
+{"mysql":"SELECT meta_id FROM wp_postmeta WHERE meta_key = '_edit_lock' AND post_id = 57","postgresql":"SELECT meta_id FROM wp_postmeta WHERE meta_key = '_edit_lock' AND post_id = 57"}

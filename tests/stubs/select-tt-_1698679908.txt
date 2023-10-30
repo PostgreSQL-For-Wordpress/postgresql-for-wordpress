@@ -1,0 +1,1 @@
+{"mysql":"SELECT tt.term_taxonomy_id FROM wp_term_taxonomy AS tt INNER JOIN wp_terms AS t ON tt.term_id = t.term_id WHERE tt.taxonomy = 'post_tag' AND t.term_id = 3","postgresql":"SELECT tt.term_taxonomy_id FROM wp_term_taxonomy AS tt INNER JOIN wp_terms AS t ON tt.term_id = t.term_id WHERE tt.taxonomy = 'post_tag' AND t.term_id = 3"}

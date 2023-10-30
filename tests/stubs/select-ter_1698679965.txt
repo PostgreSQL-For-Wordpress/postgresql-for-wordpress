@@ -1,0 +1,1 @@
+{"mysql":"SELECT term_id, taxonomy FROM wp_term_taxonomy WHERE term_taxonomy_id IN (1)","postgresql":"SELECT term_id, taxonomy FROM wp_term_taxonomy WHERE term_taxonomy_id IN (1)"}

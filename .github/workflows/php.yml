@@ -1,0 +1,21 @@
+name: PHP Composer
+
+on:
+  push:
+    branches: [ "v2", "v3" ]
+  pull_request:
+    branches: [ "v2", "v3" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Run Tests
+      run: ./tests/tools/phpunit.phar tests/

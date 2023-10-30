@@ -1,0 +1,1 @@
+{"mysql":"\n\t\t\t\tSELECT SQL_CALC_FOUND_ROWS wp_users.ID\n\t\t\t\tFROM wp_users\n\t\t\t\tWHERE 1=1\n\t\t\t\tORDER BY user_login ASC\n\t\t\t\tLIMIT 0, 20\n\t\t\t","postgresql":"SELECT  wp_users.\"ID\" , user_login\n\t\t\t\tFROM wp_users\n\t\t\t\tWHERE 1=1\n\t\t\t\tORDER BY user_login ASC\n\t\t\t\tLIMIT 20 OFFSET 0"}

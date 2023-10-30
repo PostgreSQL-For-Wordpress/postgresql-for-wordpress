@@ -1,0 +1,1 @@
+{"mysql":"UPDATE `wp_postmeta` SET `meta_value` = '1698679741:1' WHERE `post_id` = 55 AND `meta_key` = '_edit_lock' AND `meta_value` = '1698679874:1'","postgresql":"UPDATE wp_postmeta SET meta_value = '1698679741:1' WHERE post_id = 55 AND meta_key = '_edit_lock' AND meta_value = '1698679874:1'"}
