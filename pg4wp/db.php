@@ -14,7 +14,7 @@ if(!defined('PG4WP_ROOT')) {
 
     // You can choose the driver to load here
     if (!defined('DB_DRIVER')) {
-        define('DB_DRIVER', pgsql);
+        define('DB_DRIVER', 'pgsql');
     }
 
     // Set this to 'true' and check that `pg4wp` is writable if you want debug logs to be written
