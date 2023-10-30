@@ -29,6 +29,8 @@ This is because the database needs to be up and running before any plugin can be
 
 1.  Place your WordPress files in the right place on your web server.
 
+1.  Download the latest release From the [releases page](https://github.com/PostgreSQL-For-Wordpress/postgresql-for-wordpress/releases)
+
 1.	Unzip the files from PG4WP and put the `pg4wp` directory in your `/wp-content` directory.
 
 1.	Copy the `db.php` from the `pg4wp` directory to `wp-content`
