@@ -16,11 +16,11 @@ class SelectSQLRewriter extends AbstractSQLRewriter
                 error_log('[' . microtime(true) . "] Number of rows required for :\n$sql\n---------------------\n", 3, PG4WP_LOG . 'pg4wp_NUMROWS.log');
             }
         }
-        
+
         if(false !== strpos($sql, 'FOUND_ROWS()')) {
             // Here we convert the latest query into a COUNT query
             $sql = $GLOBALS['pg4wp_numrows_query'];
-            
+
             // Remove the LIMIT clause if it exists
             $sql = preg_replace('/\s+LIMIT\s+\d+(\s*,\s*\d+)?/i', '', $sql);
 
@@ -232,6 +232,26 @@ class SelectSQLRewriter extends AbstractSQLRewriter
         return $postgresSql;
     }
 
+    /**
+     * Transforms a given SQL query to include a GROUP BY clause if the SELECT statement has both aggregate
+     * and non-aggregate columns. This function is specifically designed to work with PostgreSQL.
+     *
+     * In PostgreSQL, a query that uses aggregate functions must group by all columns in the SELECT list that
+     * are not part of the aggregate functions. Failing to do so results in a syntax error. This function
+     * automatically adds a GROUP BY clause to meet this PostgreSQL requirement when both aggregate (COUNT, SUM,
+     * AVG, MIN, MAX) and non-aggregate columns are present.
+     *
+     * @param string $sql The SQL query string to be transformed.
+     *
+     * @return string The transformed SQL query string with appropriate GROUP BY clause if required.
+     *
+     * @throws Exception If the SQL query cannot be parsed or modified.
+     *
+     * @example
+     * Input:  SELECT COUNT(id), username FROM users;
+     * Output: SELECT COUNT(id), username FROM users GROUP BY username;
+     *
+     */
     protected function ensureGroupByOrAggregate(string $sql): string
     {
         // Check for system or session variables
@@ -239,7 +259,7 @@ class SelectSQLRewriter extends AbstractSQLRewriter
             return $sql;
         }
 
-        // Regular expression to capture main SQL components
+        // Regular expression to capture main SQL components.
         $regex = '/(SELECT\s+)(.*?)(\s+FROM\s+)([^ ]+)(\s+WHERE\s+.*?(?= ORDER BY | GROUP BY | LIMIT |$))?(ORDER BY.*?(?= LIMIT |$))?(LIMIT.*?$)?/is';
 
         // Capture main SQL components using regex
@@ -247,22 +267,26 @@ class SelectSQLRewriter extends AbstractSQLRewriter
             return $sql;
         }
 
-        $selectClause = $matches[2] ?? '';
-        $fromClause = $matches[4] ?? '';
-        $whereClause = $matches[5] ?? '';
-        $orderClause = $matches[6] ?? '';
-        $limitClause = $matches[7] ?? '';
+        $selectClause = trim($matches[2]) ?? '';
+        $fromClause = trim($matches[4]) ?? '';
+        $whereClause = trim($matches[5]) ?? '';
+        $orderClause = trim($matches[6]) ?? '';
+        $limitClause = trim($matches[7]) ?? '';
 
         if (empty($selectClause) || empty($fromClause)) {
             return $sql;
         }
 
-        $columns = explode(',', $selectClause);
+        // Regular expression to match commas not within parentheses
+        $pattern = '/,(?![^\(]*\))/';
+        // Split columns using a comma, and then trim each element
+        $columns = array_map('trim', preg_split($pattern, $selectClause));
+
         $aggregateColumns = [];
         $nonAggregateColumns = [];
 
         foreach ($columns as $col) {
-            $col = trim($col);
+            // Check for aggregate functions in the column
             if (preg_match('/(COUNT|SUM|AVG|MIN|MAX)\s*?\(/i', $col)) {
                 $aggregateColumns[] = $col;
             } else {
@@ -275,23 +299,25 @@ class SelectSQLRewriter extends AbstractSQLRewriter
             return $sql;
         }
 
-        $groupByClause = "GROUP BY " . implode(", ", $nonAggregateColumns);
 
         // Assemble new SQL query
         $postgresSql = "SELECT $selectClause FROM $fromClause";
 
-        if (!empty(trim($whereClause))) {
-            $postgresSql .= " $whereClause";
+        if (!empty($whereClause)) {
+            $postgresSql .= ' ' . $whereClause;
         }
 
-        $postgresSql .= " $groupByClause";
-
-        if (!empty(trim($orderClause))) {
-            $postgresSql .= " $orderClause";
+        $groupByClause = "GROUP BY " . implode(", ", $nonAggregateColumns);
+        if (!empty($groupByClause)) {
+            $postgresSql .= ' ' . $groupByClause;
         }
 
-        if (!empty(trim($limitClause))) {
-            $postgresSql .= " $limitClause";
+        if (!empty($orderClause)) {
+            $postgresSql .= ' ' . $orderClause;
+        }
+
+        if (!empty($limitClause)) {
+            $postgresSql .= ' ' . $limitClause;
         }
 
         return $postgresSql;
