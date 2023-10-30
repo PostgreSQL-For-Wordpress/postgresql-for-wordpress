@@ -267,11 +267,11 @@ class SelectSQLRewriter extends AbstractSQLRewriter
             return $sql;
         }
 
-        $selectClause = trim($matches[2]) ?? '';
-        $fromClause = trim($matches[4]) ?? '';
-        $whereClause = trim($matches[5]) ?? '';
-        $orderClause = trim($matches[6]) ?? '';
-        $limitClause = trim($matches[7]) ?? '';
+        $selectClause = trim($matches[2] ?? '');
+        $fromClause = trim($matches[4] ?? '');
+        $whereClause = trim($matches[5] ?? '');
+        $orderClause = trim($matches[6] ?? '');
+        $limitClause = trim($matches[7] ?? '');
 
         if (empty($selectClause) || empty($fromClause)) {
             return $sql;
