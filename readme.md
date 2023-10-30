@@ -15,12 +15,33 @@ If you want to use this plugin, you should be aware of the following :
 - WordPress with PG4WP is expected to be slower than the original WordPress with MySQL because PG4WP does much SQL rewriting for any page view
 - Some WordPress plugins should work 'out of the box' but many plugins won't because they would need specific code in PG4WP
 
+### Supported Wordpress Versions
+
+This plugin has been tested against Wordpress 6.3.2
+
+### Supported PHP versions
+
+This plugin requires PHP 8.1 or greater
+
+### Supported PostgreSQL versions
+
+This plugin has been tested on PostgreSQL 14.2
+
 ### Plugin Support
 
 You shouldn't expect any plugin specific code to be integrated into PG4WP except for plugins shipped with WordPress itself (such as Akismet).
 PG4WP 2.0 will have a mechanism to add plugin support.
 
-Table of tested plugins and themes coming soon....
+| Plugin                 | Version     | Working   |
+| -----------            | ----------- | --------- |
+| Debug Bar              | 1.1.4       | Confirmed |
+| Yoast Duplicate Post   | 4.2         | Confirmed |
+
+### Theme Support
+
+| Theme                 | Version     | Working   |
+| -----------           | ----------- | --------- |
+| Twenty Twenty-Three   | 1.2         | Confirmed |
 
 ### Installation
 
