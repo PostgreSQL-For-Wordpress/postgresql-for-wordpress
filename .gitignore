@@ -1,2 +1,2 @@
 logs
-tests/tools/.phpunit.result.cache
+.phpunit.result.cache

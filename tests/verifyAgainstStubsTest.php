@@ -1,8 +1,13 @@
 <?php declare(strict_types=1);
 use PHPUnit\Framework\TestCase;
 
-const ABSPATH = __DIR__ . "/../";
-const WPINC = "wp-includes";
+if (!defined('ABSPATH')) {
+    define('ABSPATH', __DIR__ . "/../");
+}
+
+if (!defined('WPINC')) {
+    define('WPINC', 'wp-includes');
+}
 
 require_once __DIR__ . "/../pg4wp/db.php";
 
