@@ -1,0 +1,1 @@
+{"mysql":"\n\t\t\tSELECT  COUNT(*)\n\t\t\tFROM wp_comments \n\t\t\tWHERE ( ( comment_approved = '0' OR comment_approved = '1' ) ) AND user_id = 1\n\t\t\t\n\t\t\tORDER BY wp_comments.comment_date_gmt DESC\n\t\t\t\n\t\t","postgresql":"SELECT  COUNT(*)\n\t\t\tFROM wp_comments \n\t\t\tWHERE ( ( comment_approved = '0' OR comment_approved = '1' ) ) AND user_id = 1\n\t\t\t\n\t\t\t"}

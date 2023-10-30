@@ -1,0 +1,1 @@
+{"mysql":"SELECT @@SESSION.sql_mode","postgresql":"SELECT ''"}

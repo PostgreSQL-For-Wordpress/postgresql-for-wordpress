@@ -1,0 +1,1 @@
+{"mysql":"SELECT option_name, option_value FROM wp_options WHERE autoload = 'yes'","postgresql":"SELECT option_name, option_value FROM wp_options WHERE autoload = 'yes'"}

@@ -1,0 +1,1 @@
+{"mysql":"SELECT meta_id FROM wp_sitemeta WHERE meta_key = '_site_transient_wp_remote_block_patterns_0dc4db57500f00dee60778de7fb84b69' AND site_id = 1","postgresql":"SELECT meta_id FROM wp_sitemeta WHERE meta_key = '_site_transient_wp_remote_block_patterns_0dc4db57500f00dee60778de7fb84b69' AND site_id = 1"}

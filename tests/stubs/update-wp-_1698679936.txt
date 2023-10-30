@@ -1,0 +1,1 @@
+{"mysql":"UPDATE `wp_posts` SET `comment_count` = 1 WHERE `ID` = 55","postgresql":"UPDATE wp_posts SET comment_count = 1 WHERE  \"ID\" = 55"}

@@ -1,0 +1,1 @@
+{"mysql":"UPDATE `wp_posts` SET `guid` = 'http:\/\/example.com\/site\/?p=56' WHERE `ID` = 56","postgresql":"UPDATE wp_posts SET guid = 'http:\/\/example.com\/site\/?p=56' WHERE  \"ID\" = 56"}

@@ -1,0 +1,1 @@
+{"mysql":"SELECT * FROM wp_blogs WHERE blog_id IN (1)","postgresql":"SELECT * FROM wp_blogs WHERE blog_id IN (1)"}

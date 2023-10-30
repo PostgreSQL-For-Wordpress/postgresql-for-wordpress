@@ -1,0 +1,1 @@
+{"mysql":"\n\t\tSELECT ID, post_name, post_parent, post_type\n\t\tFROM wp_posts\n\t\tWHERE post_name IN ('test-page')\n\t\tAND post_type IN ('page','attachment')\n\t","postgresql":"SELECT \"ID\" , post_name, post_parent, post_type\n\t\tFROM wp_posts\n\t\tWHERE post_name IN ('test-page')\n\t\tAND post_type IN ('page','attachment')"}

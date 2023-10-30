@@ -1,0 +1,1 @@
+{"mysql":"SELECT autoload FROM wp_options WHERE option_name = 'post_tag_children'","postgresql":"SELECT autoload FROM wp_options WHERE option_name = 'post_tag_children'"}

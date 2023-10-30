@@ -1,0 +1,1 @@
+{"mysql":"SELECT wp_posts.* FROM wp_posts WHERE ID IN (3,49,53,57)","postgresql":"SELECT wp_posts.* FROM wp_posts WHERE \"ID\" IN (3,49,53,57)"}

@@ -1,0 +1,1 @@
+{"mysql":"SELECT option_value FROM wp_options WHERE option_name = 'default_term_category' LIMIT 1","postgresql":"SELECT option_value FROM wp_options WHERE option_name = 'default_term_category' LIMIT 1"}

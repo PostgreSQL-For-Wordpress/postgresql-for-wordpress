@@ -1,0 +1,1 @@
+{"mysql":"SELECT post_id, meta_key, meta_value FROM wp_postmeta WHERE post_id IN (55,51,17,11,7) ORDER BY meta_id ASC","postgresql":"SELECT post_id, meta_key, meta_value, meta_id FROM wp_postmeta WHERE post_id IN (55,51,17,11,7) ORDER BY meta_id ASC"}

@@ -1,0 +1,1 @@
+{"mysql":"SELECT user_id, meta_key, meta_value FROM wp_usermeta WHERE user_id IN (1) ORDER BY umeta_id ASC","postgresql":"SELECT user_id, meta_key, meta_value, umeta_id FROM wp_usermeta WHERE user_id IN (1) ORDER BY umeta_id ASC"}
