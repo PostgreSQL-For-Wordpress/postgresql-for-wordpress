@@ -22,6 +22,16 @@ final class verifyAgainstStubsTest extends TestCase
             $data = json_decode(file_get_contents(self::STUBS_DIRECTORY . "/" . $file), true);
             $this->assertSame(pg4wp_rewrite($data['mysql']), $data['postgresql']);
         }
+    }
 
+    protected function setUp(): void
+    {
+        global $wpdb;
+        $wpdb = new class() {
+            public $categories = "wp_categories";
+            public $comments = "wp_comments";
+            public $prefix = "wp_";
+            public $options = "wp_options";
+        };
     }
 }
