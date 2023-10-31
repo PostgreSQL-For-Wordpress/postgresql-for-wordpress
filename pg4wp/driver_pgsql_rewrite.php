@@ -71,18 +71,26 @@ function pg4wp_rewrite($sql)
     // Put back the end of the query if it was separated
     $sql .= $end;
 
-    // For insert ID catching
+    // For insert ID caching
     if($logto == 'INSERT') {
-        $pattern = '/INSERT INTO (\w+)\s+\([ a-zA-Z_"]+/';
+        $pattern = '/INSERT INTO "?([\w_]+)"? \(([^)]+)\)/i';
         preg_match($pattern, $sql, $matches);
-        $GLOBALS['pg4wp_ins_table'] = $matches[1];
-        $match_list = explode(' ', $matches[0]);
-        if($GLOBALS['pg4wp_ins_table']) {
-            $GLOBALS['pg4wp_ins_field'] = trim($match_list[3], ' ()	');
-            if(!$GLOBALS['pg4wp_ins_field']) {
-                $GLOBALS['pg4wp_ins_field'] = trim($match_list[4], ' ()	');
+
+        if (isset($matches[1])) {
+            $GLOBALS['pg4wp_ins_table'] = $matches[1];
+        }
+
+        if (isset($matches[2])) {
+            $columns_str = $matches[2];
+            $columns = explode(',', $columns_str);
+            $columns = array_map(function ($column) {
+                return trim(trim($column), '"');
+            }, $columns);
+            if (isset($columns[0])) {
+                $GLOBALS['pg4wp_ins_field'] = $columns[0];
             }
         }
+
         $GLOBALS['pg4wp_last_insert'] = $sql;
     } elseif(isset($GLOBALS['pg4wp_queued_query'])) {
         pg_query($GLOBALS['pg4wp_queued_query']);
