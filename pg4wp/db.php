@@ -1,11 +1,11 @@
 <?php
 /*
 Plugin Name: PostgreSQL for WordPress (PG4WP)
-Plugin URI: http://www.hawkix.net
-Description: PG4WP is a special 'plugin' enabling WordPress to use a PostgreSQL database.
-Version: 1.3.1+
-Author: Hawk__
-Author URI: http://www.hawkix.net
+Plugin URI: https://github.com/PostgreSQL-For-Wordpress/postgresql-for-wordpress
+Description: PG4WP is a special plugin enabling WordPress to use a PostgreSQL database.
+Version: v2.2
+Author: PostgreSQL-For-Wordpress
+Author URI: https://github.com/PostgreSQL-For-Wordpress
 License: GPLv2 or newer.
 */
 
