@@ -42,6 +42,8 @@ PG4WP 2.0 will have a mechanism to add plugin support.
 | Theme                 | Version     | Working   |
 | -----------           | ----------- | --------- |
 | Twenty Twenty-Three   | 1.2         | Confirmed |
+| Twenty Twenty-Two     | 1.5         | Confirmed |
+| Twenty Twenty-One     | 1.9         | Confirmed |
 
 ### Installation
 
