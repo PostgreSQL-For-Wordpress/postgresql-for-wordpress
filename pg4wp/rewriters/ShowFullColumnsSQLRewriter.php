@@ -15,7 +15,8 @@ class ShowFullColumnsSQLRewriter extends AbstractSQLRewriter
      * @param string $sql The SQL statement
      * @return string|null The table name if found, or null otherwise
      */
-    protected function extractTableNameFromShowColumns($sql) {
+    protected function extractTableNameFromShowColumns($sql)
+    {
         $pattern = "/SHOW FULL COLUMNS FROM ['\"`]?([^'\"`]+)['\"`]?/i";
         if (preg_match($pattern, $sql, $matches)) {
             return $matches[1];
@@ -29,7 +30,8 @@ class ShowFullColumnsSQLRewriter extends AbstractSQLRewriter
      * @param string $tableName The table name
      * @return string The generated SQL query
      */
-    function generatePostgresShowColumns($tableName) {
+    public function generatePostgresShowColumns($tableName)
+    {
         $sql = <<<SQL
             SELECT 
                 a.attname AS "Field",
