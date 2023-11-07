@@ -12,7 +12,7 @@ spl_autoload_register(function ($className) {
 function createSQLRewriter(string $sql): AbstractSQLRewriter
 {
     $sql = trim($sql);
-    if (preg_match('/^(SELECT|INSERT|UPDATE|DELETE|SHOW TABLES|OPTIMIZE TABLE|SET NAMES|SHOW FULL COLUMNS)\b/i', $sql, $matches)) {
+    if (preg_match('/^(SELECT|INSERT|UPDATE|DELETE|DESCRIBE|ALTER TABLE|CREATE TABLE|DROP TABLE|SHOW INDEX|SHOW VARIABLES|SHOW TABLES|OPTIMIZE TABLE|SET NAMES|SHOW FULL COLUMNS)\b/i', $sql, $matches)) {
         // Convert to a format suitable for class names (e.g., "SHOW TABLES" becomes "ShowTables")
         $type = str_replace(' ', '', ucwords(str_replace('_', ' ', strtolower($matches[1]))));
         $className = $type . 'SQLRewriter';
@@ -61,7 +61,6 @@ function pg4wp_rewrite($sql)
         default:
     }
 
-    $sql = loadInstallFunctions($sql, $logto);
     $sql = correctMetaValue($sql);
     $sql = handleInterval($sql);
     $sql = cleanAndCapitalize($sql);
@@ -103,24 +102,6 @@ function pg4wp_rewrite($sql)
         } else {
             error_log('[' . microtime(true) . "] $sql\n---------------------\n", 3, PG4WP_LOG . 'pg4wp_unmodified.log');
         }
-    }
-    return $sql;
-}
-
-/**
- * Load upgrade and install functions as required.
- *
- * @param string $sql SQL query string
- * @param string $logto Logging type
- * @return string Modified SQL query string
- */
-function loadInstallFunctions($sql, &$logto)
-{
-    $begin = strtoupper(substr($sql, 0, 3));
-    $search = array('SHO', 'ALT', 'DES', 'CRE', 'DRO');
-    if (in_array($begin, $search)) {
-        require_once(PG4WP_ROOT . '/driver_pgsql_install.php');
-        $sql = pg4wp_installing($sql, $logto);
     }
     return $sql;
 }

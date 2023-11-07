@@ -1,11 +1,11 @@
 <?php
 /*
 Plugin Name: PostgreSQL for WordPress (PG4WP)
-Plugin URI: https://github.com/PostgreSQL-For-Wordpress/postgresql-for-wordpress
-Description: PG4WP is a special plugin enabling WordPress to use a PostgreSQL database.
-Version: v2.2
-Author: PostgreSQL-For-Wordpress
-Author URI: https://github.com/PostgreSQL-For-Wordpress
+Plugin URI: http://www.hawkix.net
+Description: PG4WP is a special 'plugin' enabling WordPress to use a PostgreSQL database.
+Version: 1.3.1+
+Author: Hawk__
+Author URI: http://www.hawkix.net
 License: GPLv2 or newer.
 */
 
@@ -36,14 +36,26 @@ if(!defined('PG4WP_ROOT')) {
 
     // This defines the directory where PG4WP files are loaded from
     //   3 places checked : wp-content, wp-content/plugins and the base directory
-    if(file_exists(ABSPATH . '/wp-content/pg4wp')) {
-        define('PG4WP_ROOT', ABSPATH . '/wp-content/pg4wp');
-    } elseif(file_exists(ABSPATH . '/wp-content/plugins/pg4wp')) {
-        define('PG4WP_ROOT', ABSPATH . '/wp-content/plugins/pg4wp');
-    } elseif(file_exists(ABSPATH . '/pg4wp')) {
-        define('PG4WP_ROOT', ABSPATH . '/pg4wp');
+    if(file_exists(ABSPATH . 'wp-content/pg4wp')) {
+        define('PG4WP_ROOT', ABSPATH . 'wp-content/pg4wp');
+    } elseif(file_exists(ABSPATH . 'wp-content/plugins/pg4wp')) {
+        define('PG4WP_ROOT', ABSPATH . 'wp-content/plugins/pg4wp');
+    } elseif(file_exists(ABSPATH . 'pg4wp')) {
+        define('PG4WP_ROOT', ABSPATH . 'pg4wp');
     } else {
         die('PG4WP file directory not found');
+    }
+
+    // Logs are put in the pg4wp directory
+    if (!defined('PG4WP_LOG'))
+    { 
+        define('PG4WP_LOG', PG4WP_ROOT . '/logs/');
+    }
+    // Check if the logs directory is needed and exists or create it if possible
+    if((PG4WP_DEBUG || PG4WP_LOG_ERRORS) &&
+        !file_exists(PG4WP_LOG) &&
+        is_writable(dirname(PG4WP_LOG))) {
+        mkdir(PG4WP_LOG);
     }
 
     // Here happens all the magic
