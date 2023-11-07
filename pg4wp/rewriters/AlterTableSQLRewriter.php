@@ -122,5 +122,3 @@ class AlterTableSQLRewriter extends AbstractSQLRewriter
         return $sql;
     }
 }
-
-

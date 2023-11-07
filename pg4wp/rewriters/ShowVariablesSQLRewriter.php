@@ -15,7 +15,8 @@ class ShowVariablesSQLRewriter extends AbstractSQLRewriter
      * @param string $sql The SQL statement
      * @return string|null The table name if found, or null otherwise
      */
-    protected function extractVariableName($sql) {
+    protected function extractVariableName($sql)
+    {
         $pattern = "/SHOW VARIABLES LIKE ['\"`]?([^'\"`]+)['\"`]?/i";
         if (preg_match($pattern, $sql, $matches)) {
             return $matches[1];
@@ -29,7 +30,8 @@ class ShowVariablesSQLRewriter extends AbstractSQLRewriter
      * @param string $tableName The table name
      * @return string The generated SQL query
      */
-    function generatePostgres($sql, $variableName) {
+    public function generatePostgres($sql, $variableName)
+    {
         if ($variableName == "sql_mode") {
             // Act like MySQL default configuration, where sql_mode is ""
             return "SELECT '$variableName' AS \"Variable_name\", '' AS \"Value\";";

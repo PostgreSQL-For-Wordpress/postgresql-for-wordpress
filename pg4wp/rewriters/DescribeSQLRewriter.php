@@ -15,7 +15,8 @@ class DescribeSQLRewriter extends AbstractSQLRewriter
      * @param string $sql The SQL statement
      * @return string|null The table name if found, or null otherwise
      */
-    protected function extractTableName($sql) {
+    protected function extractTableName($sql)
+    {
         $pattern = "/DESCRIBE ['\"`]?([^'\"`]+)['\"`]?/i";
         if (preg_match($pattern, $sql, $matches)) {
             return $matches[1];
@@ -29,7 +30,8 @@ class DescribeSQLRewriter extends AbstractSQLRewriter
      * @param string $tableName The table name
      * @return string The generated SQL query
      */
-    function generatePostgresDescribeTable($tableName) {
+    public function generatePostgresDescribeTable($tableName)
+    {
         $sql = <<<SQL
             SELECT  
                 f.attnum AS number,  

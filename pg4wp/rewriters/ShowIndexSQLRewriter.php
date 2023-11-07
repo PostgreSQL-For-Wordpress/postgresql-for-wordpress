@@ -15,7 +15,8 @@ class ShowIndexSQLRewriter extends AbstractSQLRewriter
      * @param string $sql The SQL statement
      * @return string|null The table name if found, or null otherwise
      */
-    protected function extractVariableName($sql) {
+    protected function extractVariableName($sql)
+    {
         $pattern = "/SHOW INDEX FROM ['\"`]?([^'\"`]+)['\"`]?/i";
         if (preg_match($pattern, $sql, $matches)) {
             return $matches[1];
@@ -29,7 +30,8 @@ class ShowIndexSQLRewriter extends AbstractSQLRewriter
      * @param string $tableName The table name
      * @return string The generated SQL query
      */
-    function generatePostgresShowIndexFrom($tableName) {
+    public function generatePostgresShowIndexFrom($tableName)
+    {
         $sql = <<<SQL
         SELECT bc.relname AS "Table",
             CASE WHEN i.indisunique THEN '0' ELSE '1' END AS "Non_unique",
