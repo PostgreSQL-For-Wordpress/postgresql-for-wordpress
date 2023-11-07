@@ -174,7 +174,7 @@ function pg4wp_init()
     $result = pg_query($connection, $sql);
 
     if ((PG4WP_DEBUG || PG4WP_LOG_ERRORS) && $result === false) {
-        $error = pg_last_error();
+        $error = pg_last_error($connection);
         error_log("[" . microtime(true) . "] Error creating MySQL-compatible field function: $error\n", 3, PG4WP_LOG . 'pg4wp_errors.log');
     }
 }
