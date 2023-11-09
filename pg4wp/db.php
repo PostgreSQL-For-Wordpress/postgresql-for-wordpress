@@ -3,7 +3,7 @@
 Plugin Name: PostgreSQL for WordPress (PG4WP)
 Plugin URI: https://github.com/PostgreSQL-For-Wordpress/postgresql-for-wordpress
 Description: PG4WP is a special plugin enabling WordPress to use a PostgreSQL database.
-Version: v2.2
+Version: v3.0.0
 Author: PostgreSQL-For-Wordpress
 Author URI: https://github.com/PostgreSQL-For-Wordpress
 License: GPLv2 or newer.
