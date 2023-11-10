@@ -162,10 +162,9 @@ function pg4wp_create_field_function($connection) {
  * @param string $database The name of the database to select.
  * @return bool Returns TRUE on success or FALSE on failure.
  */
-function wpsqli_select_db($connection, $database)
+function wpsqli_select_db(&$connection, $database)
 {
     $pg_connstr = $GLOBALS['pg4wp_connstr'] . ' dbname=' . $database;
-
     $GLOBALS['pg4wp_conn'] = $connection = pg_connect($pg_connstr);
 
     // Return FALSE if connection failed
@@ -205,7 +204,7 @@ function wpsqli_select_db($connection, $database)
  * @param PgSql\Connection $connection The pg connection resource to be closed.
  * @return bool Returns TRUE on successful closure, FALSE on failure.
  */
-function wpsqli_close($connection)
+function wpsqli_close(&$connection)
 {
     // Closing a connection in PostgreSQL is straightforward.
     return pg_close($connection);
@@ -226,7 +225,7 @@ function wpsqli_close($connection)
  * @param string $cipher A list of allowable ciphers to use for SSL encryption.
  * @return bool Returns TRUE on success or FALSE on failure.
  */
-function wpsqli_ssl_set($connection, $key, $cert, $ca, $capath, $cipher)
+function wpsqli_ssl_set(&$connection, $key, $cert, $ca, $capath, $cipher)
 {
     $connection->sslkey = $key;
     $connection->sslcert = $cert;
@@ -264,7 +263,7 @@ function wpsqli_get_client_info()
  * @param PgSql\Connection $connection The pg connection resource.
  * @return string The version of the PostgreSQL server.
  */
-function wpsqli_get_server_info($connection)
+function wpsqli_get_server_info(&$connection)
 {
     // mysqli_get_server_info => pg_version (resource $connection): array
     // This function retrieves an array that includes server version.
@@ -283,7 +282,7 @@ function wpsqli_get_server_info($connection)
  * @param PgSql\Connection $connection The pg connection resource.
  * @return string A string describing the connection type and server host information.
  */
-function wpsqli_host_info($connection)
+function wpsqli_host_info(&$connection)
 {
     throw new \Exception("PG4WP: Not Yet Implemented");
     // mysqli_get_host_info => No direct equivalent. Host information is part of the connection string in PostgreSQL.
@@ -303,7 +302,7 @@ function wpsqli_host_info($connection)
  * @param PgSql\Connection $connection The pg connection resource.
  * @return bool Returns TRUE on success or FALSE on failure.
  */
-function wpsqli_ping($connection)
+function wpsqli_ping(&$connection)
 {
     return pg_ping($connection);
 }
@@ -319,7 +318,7 @@ function wpsqli_ping($connection)
  * @param PgSql\Connection $connection The pg connection resource.
  * @return int The thread ID for the current connection.
  */
-function wpsqli_thread_id($connection)
+function wpsqli_thread_id(&$connection)
 {
     throw new \Exception("PG4WP: Not Yet Implemented");
     // mysqli_thread_id => No direct equivalent. PostgreSQL does not provide thread ID in the same manner as MySQL.
@@ -353,7 +352,7 @@ function wpsqli_thread_safe()
  * @param PgSql\Connection $connection The pg connection resource.
  * @return string A string describing the server status or FALSE on failure.
  */
-function wpsqli_stat($connection)
+function wpsqli_stat(&$connection)
 {
     throw new \Exception("PG4WP: Not Yet Implemented");
     // mysqli_stat => No direct equivalent
@@ -373,7 +372,7 @@ function wpsqli_stat($connection)
  * @param mixed $value The value for the specified option.
  * @return bool Returns TRUE on success or FALSE on failure.
  */
-function wpsqli_options($connection, $option, $value)
+function wpsqli_options(&$connection, $option, $value)
 {
     throw new \Exception("PG4WP: Not Yet Implemented");
     // mysqli_options => No direct equivalent. Options are set in the connection string or via set_config in PostgreSQL.
@@ -434,7 +433,7 @@ function wpsqli_connect_error()
  *                   mode and FALSE to turn it off.
  * @return bool Returns TRUE on success or FALSE on failure.
  */
-function wpsqli_autocommit($connection, $mode)
+function wpsqli_autocommit(&$connection, $mode)
 {
     // mysqli_autocommit => pg_autocommit (resource $connection, bool $mode): bool
     // PostgreSQL autocommit behavior is typically managed at the transaction level.
@@ -456,7 +455,7 @@ function wpsqli_autocommit($connection, $mode)
  * @param string|null $name Optional name for the transaction, used for savepoint names.
  * @return bool Returns TRUE on success or FALSE on failure.
  */
-function wpsqli_begin_transaction($connection, $flags = 0, $name = null)
+function wpsqli_begin_transaction(&$connection, $flags = 0, $name = null)
 {
     // mysqli_begin_transaction => pg_query (resource $connection, string $query): resource
     // PostgreSQL uses standard BEGIN or START TRANSACTION queries.
@@ -476,7 +475,7 @@ function wpsqli_begin_transaction($connection, $flags = 0, $name = null)
  * @param string|null $name Optional name for the savepoint that should be committed.
  * @return bool Returns TRUE on success or FALSE on failure.
  */
-function wpsqli_commit($connection, $flags = 0, $name = null)
+function wpsqli_commit(&$connection, $flags = 0, $name = null)
 {
     // mysqli_commit => pg_query (resource $connection, string $query): resource
     // Commits are standard SQL in PostgreSQL.
@@ -498,7 +497,7 @@ function wpsqli_commit($connection, $flags = 0, $name = null)
  * @param string|null $name Optional name of the savepoint to which the rollback operation should be directed.
  * @return bool Returns TRUE on success or FALSE on failure.
  */
-function wpsqli_rollback($connection, $flags = 0, $name = null)
+function wpsqli_rollback(&$connection, $flags = 0, $name = null)
 {
     // mysqli_rollback => pg_query (resource $connection, string $query): resource
     // Rollbacks are standard SQL in PostgreSQL.
@@ -518,10 +517,10 @@ function wpsqli_rollback($connection, $flags = 0, $name = null)
  * @return mixed Returns a pg_result object for successful SELECT queries, TRUE for other
  *               successful queries, or FALSE on failure.
  */
-function wpsqli_query($connection, $query, $result_mode = 0)
+function wpsqli_query(&$connection, $query, $result_mode = 0)
 {
     // Check if a connection to Postgres database is established
-    if (!$GLOBALS['pg4wp_conn']) {
+    if (!$connection) {
         // Store SQL query for later execution when connection is available
         $GLOBALS['pg4wp_pre_sql'][] = $sql;
         return true;
@@ -534,13 +533,13 @@ function wpsqli_query($connection, $query, $result_mode = 0)
 
     // Execute the SQL query and store the result
     if (PG4WP_DEBUG) {
-        $GLOBALS['pg4wp_result'] = pg_query($GLOBALS['pg4wp_conn'], $sql);
+        $result = pg_query($connection, $sql);
     } else {
-        $GLOBALS['pg4wp_result'] = @pg_query($GLOBALS['pg4wp_conn'], $sql);
+        $result = @pg_query($connection, $sql);
     }
 
     // Handle errors and logging
-    if ((PG4WP_DEBUG || PG4WP_LOG_ERRORS) && $GLOBALS['pg4wp_result'] === false && $err = pg_last_error($GLOBALS['pg4wp_conn'])) {
+    if ((PG4WP_DEBUG || PG4WP_LOG_ERRORS) && $result === false && $err = pg_last_error($connection)) {
         $ignore = false;
         // Ignore errors if WordPress is in the installation process
         if (defined('WP_INSTALLING') && WP_INSTALLING) {
@@ -552,8 +551,10 @@ function wpsqli_query($connection, $query, $result_mode = 0)
         }
     }
 
-    // Return the query result
-    return $GLOBALS['pg4wp_result'];
+    $GLOBALS['pg4wp_conn'] = $connection;
+    $GLOBALS['pg4wp_result'] = $result;
+
+    return $result;
 }
 
 /**
@@ -572,7 +573,7 @@ function wpsqli_query($connection, $query, $result_mode = 0)
  *              If the first query succeeds, the function will return TRUE even if
  *              a subsequent query fails.
  */
-function wpsqli_multi_query($connection, $query)
+function wpsqli_multi_query(&$connection, $query)
 {
     // Store the initial SQL query
     $initial = $query;
@@ -593,9 +594,9 @@ function wpsqli_multi_query($connection, $query)
  *
  * @param PgSql\Connection $connection The pg connection resource.
  * @param string $query The SQL query to prepare.
- * @return pg_stmt|false Returns a statement object on success or FALSE on failure.
+ * @return class|false Returns a statement object on success or FALSE on failure.
  */
-function wpsqli_prepare($connection, $query)
+function wpsqli_prepare(&$connection, $query)
 {
     // Store the initial SQL query
     $initial = $query;
@@ -712,9 +713,9 @@ function wpsqli_stmt_fetch($stmt)
  * query performance and protection against SQL injection attacks.
  *
  * @param PgSql\Connection $connection The pg connection resource.
- * @return pg_stmt A new statement object or FALSE on failure.
+ * @return class A new statement object or FALSE on failure.
  */
-function wpsqli_stmt_init($connection)
+function wpsqli_stmt_init(&$connection)
 {
     throw new \Exception("PG4WP: Not Yet Implemented");
     // mysqli_stmt_init => No direct equivalent in PostgreSQL.
@@ -837,7 +838,7 @@ function wpsqli_fetch_array($result, $mode = PGSQL_BOTH)
  * to a stdClass object. If the class does not exist or the specified class's constructor requires more
  * arguments than are given, an exception is thrown.
  *
- * @param pg_result $result The result set returned by pg_query, pg_store_result
+ * @param \PgSql\Result $result The result set returned by pg_query, pg_store_result
  *                              or pg_use_result.
  * @param string $class The name of the class to instantiate, set the properties of which
  *                      correspond to the fetched row's column names.
@@ -861,12 +862,12 @@ function wpsqli_fetch_object($result, $class = "stdClass", $constructor_args = [
  * column names as keys, which can be marginally faster and less memory intensive than
  * associative arrays if the column names are not required.
  * 
- * @param pg_result $result The result set returned by a query against the database.
+ * @param \PgSql\Result $result The result set returned by a query against the database.
  * 
  * @return array|null Returns an enumerated array of strings representing the fetched row,
  * or NULL if there are no more rows in the result set.
  */
-function wpsqli_fetch_row(pg_result $result): ?array
+function wpsqli_fetch_row($result): ?array
 {
     return pg_fetch_row($result);
 }
@@ -881,13 +882,13 @@ function wpsqli_fetch_row(pg_result $result): ?array
  * directly without iterating over all preceding rows, which can be useful for pagination
  * or when looking up specific rows by row number.
  * 
- * @param pg_result $result The result set returned by a query against the database.
+ * @param \PgSql\Result $result The result set returned by a query against the database.
  * @param int $row_number The desired row number to seek to. Row numbers are zero-indexed.
  * 
  * @return bool Returns TRUE on success or FALSE on failure. If the row number is out of range,
  * it returns FALSE.
  */
-function wpsqli_data_seek(pg_result $result, int $row_number): bool
+function wpsqli_data_seek($result, int $row_number): bool
 {
     return pg_result_seek($result, $row_number);
 }
@@ -901,7 +902,7 @@ function wpsqli_data_seek(pg_result $result, int $row_number): bool
  * and type. This is useful for dynamically generating table structures or processing query results
  * when the structure of the result set is not known in advance or changes.
  *
- * @param pg_result $result The result set returned by pg_query, pg_store_result
+ * @param \PgSql\Result $result The result set returned by pg_query, pg_store_result
  *                              or pg_use_result.
  * @return object An object which contains field definition information or FALSE if no field information
  *                is available.
@@ -922,7 +923,7 @@ function wpsqli_fetch_field($result)
  * dynamically process a query result without knowing the schema of the returned data,
  * as it allows the script to iterate over all fields in each row of the result set.
  *
- * @param pg_result $result The result set returned by pg_query, pg_store_result
+ * @param \PgSql\Result $result The result set returned by pg_query, pg_store_result
  *                              or pg_use_result.
  * @return int The number of fields in the specified result set.
  */
@@ -944,7 +945,7 @@ function wpsqli_num_fields($result)
  * @param PgSql\Connection $connection The pg connection resource.
  * @return int An integer representing the number of fields in the result set.
  */
-function wpsqli_field_count($connection)
+function wpsqli_field_count(&$connection)
 {
     // mysqli_field_count => pg_num_fields (resource $result): int
     // Use pg_num_fields to get the number of fields (columns) in a result.
@@ -962,9 +963,9 @@ function wpsqli_field_count($connection)
  * multiple times.
  *
  * @param PgSql\Connection $connection The pg connection resource.
- * @return pg_result|false A buffered result object or FALSE if an error occurred.
+ * @return \PgSql\Result|false A buffered result object or FALSE if an error occurred.
  */
-function wpsqli_store_result($connection)
+function wpsqli_store_result(&$connection)
 {
     throw new \Exception("PG4WP: Not Yet Implemented");
     // mysqli_store_result => Not needed in PostgreSQL.
@@ -983,9 +984,9 @@ function wpsqli_store_result($connection)
  * connection until the result set is fully processed.
  *
  * @param PgSql\Connection $connection The pg connection resource.
- * @return pg_result|false An unbuffered result object or FALSE if an error occurred.
+ * @return \PgSql\Result|false An unbuffered result object or FALSE if an error occurred.
  */
-function wpsqli_use_result($connection)
+function wpsqli_use_result(&$connection)
 {
     throw new \Exception("PG4WP: Not Yet Implemented");
     // mysqli_use_result => Not needed in PostgreSQL.
@@ -1001,7 +1002,7 @@ function wpsqli_use_result($connection)
  * datasets that can consume significant amounts of memory. It is an important aspect of resource
  * management and helps to keep the application's memory footprint minimal.
  *
- * @param pg_result $result The result set returned by pg_query, pg_store_result
+ * @param \PgSql\Result $result The result set returned by pg_query, pg_store_result
  *                              or pg_use_result.
  * @return void This function doesn't return any value.
  */
@@ -1024,7 +1025,7 @@ function wpsqli_free_result($result)
  * @return bool Returns TRUE if there are more result sets from previous multi queries and
  *              FALSE otherwise.
  */
-function wpsqli_more_results($connection)
+function wpsqli_more_results(&$connection)
 {
     // mysqli_more_results => No direct equivalent in PostgreSQL.
     // PostgreSQL does not have a built-in function to check for more results from a batch of queries.
@@ -1041,7 +1042,7 @@ function wpsqli_more_results($connection)
  * @param PgSql\Connection $connection The pg connection resource.
  * @return bool Returns TRUE on success or FALSE on failure (no more results or an error occurred).
  */
-function wpsqli_next_result($connection)
+function wpsqli_next_result(&$connection)
 {
     // mysqli_next_result => No direct equivalent in PostgreSQL.
     // PostgreSQL does not support multiple results like MySQL's multi_query function.
@@ -1069,7 +1070,7 @@ function wpsqli_is_resource($object)
  * @param PgSql\Connection $connection The pg connection resource.
  * @return int The number of affected rows in the previous operation, or -1 if the last operation failed.
  */
-function wpsqli_affected_rows($connection)
+function wpsqli_affected_rows(&$connection)
 {
     $result = $GLOBALS['pg4wp_result'];
     // mysqli_affected_rows => pg_affected_rows (resource $result): int
@@ -1088,11 +1089,8 @@ function wpsqli_affected_rows($connection)
  * 1. In PostgreSQL, this function uses CURRVAL() on the appropriate sequence to get the last inserted ID.
  * 2. In MySQL, last inserted ID is generally fetched using mysql_insert_id() or mysqli_insert_id().
  */
-function wpsqli_insert_id($connection = null)
+function wpsqli_insert_id(&$connection = null)
 {
-    if (!$connection) {
-        $connection = $GLOBALS['pg4wp_conn'];
-    }
     global $wpdb;
     $data = null;
     $ins_field = $GLOBALS['pg4wp_ins_field'];
@@ -1127,7 +1125,7 @@ function wpsqli_insert_id($connection = null)
             $data = pg_fetch_result($res, 0, 0);
         } elseif (PG4WP_DEBUG || PG4WP_LOG) {
             $log = '[' . microtime(true) . "] wpsqli_insert_id() was called with '$table' and '$ins_field'" .
-                    " and returned the error:\n" . pg_last_error($GLOBALS['pg4wp_conn']) .
+                    " and returned the error:\n" . pg_last_error($connection) .
                     "\nFor the query:\n" . $sql .
                     "\nThe latest INSERT query was :\n'$lastq'\n";
             error_log($log, 3, PG4WP_LOG . 'pg4wp_errors.log');
@@ -1137,6 +1135,8 @@ function wpsqli_insert_id($connection = null)
     if (PG4WP_DEBUG && $sql) {
         error_log('[' . microtime(true) . "] Getting inserted ID for '$table' ('$ins_field') : $sql => $data\n", 3, PG4WP_LOG . 'pg4wp_insertid.log');
     }
+
+    $GLOBALS['pg4wp_conn'] = $connection;
 
     return $data;
 }
@@ -1155,7 +1155,7 @@ function wpsqli_insert_id($connection = null)
  * @param string $charset The desired character set.
  * @return bool Returns TRUE on success or FALSE on failure.
  */
-function wpsqli_set_charset($connection, $charset)
+function wpsqli_set_charset(&$connection, $charset)
 {
     // mysqli_set_charset => pg_set_client_encoding (resource $connection, string $encoding): int
     // Sets the client encoding.
@@ -1176,7 +1176,7 @@ function wpsqli_set_charset($connection, $charset)
  * @param string $string The string to be escaped.
  * @return string Returns the escaped string.
  */
-function wpsqli_real_escape_string($connection, $string)
+function wpsqli_real_escape_string(&$connection, $string)
 {
     // mysqli_real_escape_string => pg_escape_string (resource $connection, string $data): string
     // Escapes a string for safe use in database queries.
@@ -1197,7 +1197,7 @@ function wpsqli_real_escape_string($connection, $string)
  * @return string Returns a string with the error message for the most recent function call
  *                if it has failed, or an empty string if no error has occurred.
  */
-function wpsqli_error($connection)
+function wpsqli_error(&$connection)
 {
     return pg_last_error($connection);
 }
@@ -1215,7 +1215,7 @@ function wpsqli_error($connection)
  * 3. `pg_result_error_field` is used to get the SQLSTATE error code.
  * 4. In MySQL, you could use `mysqli_errno` to get the error code directly.
  */
-function wpsqli_errno($connection)
+function wpsqli_errno(&$connection)
 {
     $result = pg_get_result($connection);
     if ($result === false) {
@@ -1258,7 +1258,7 @@ function wpsqli_report($flags)
  * @return string|null A string representing information about the last query executed,
  *                     or NULL if no information is available.
  */
-function wpsqli_info($connection)
+function wpsqli_info(&$connection)
 {
     throw new \Exception("PG4WP: Not Yet Implemented");
     // mysqli_info => No direct equivalent in PostgreSQL.
@@ -1302,10 +1302,10 @@ function wpsqli_poll(&...$args)
  * other DML queries (INSERT, UPDATE, DELETE, etc.) if the operation was successful, or FALSE on failure.
  *
  * @param PgSql\Connection $connection The pg connection resource.
- * @return pg_result|bool A pg_result object for successful SELECT queries, TRUE for other
+ * @return \PgSql\Result|bool A pg_result object for successful SELECT queries, TRUE for other
  *                            successful DML queries, or FALSE on failure.
  */
-function wpsqli_reap_async_query($connection)
+function wpsqli_reap_async_query(&$connection)
 {
     throw new \Exception("PG4WP: Not Yet Implemented");
     // mysqli_reap_async_query => No direct equivalent in PostgreSQL.
