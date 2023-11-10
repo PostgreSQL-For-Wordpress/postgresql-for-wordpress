@@ -103,48 +103,9 @@ function wpsqli_real_connect(&$connection, $hostname = null, $username = null, $
     $dbname = defined('DB_NAME') && DB_NAME ? DB_NAME : $database;
     $pg_connstr = $GLOBALS['pg4wp_connstr'] . ' dbname=' . $database;
     $GLOBALS['pg4wp_conn'] = $connection = pg_connect($pg_connstr);
-    pg4wp_create_field_function($connection);
 
     return $connection;
 }
-
-/**
- * SQL query to create or replace a PostgreSQL function named "field"
- * which imitates MySQL's FIELD() function behavior.
- *
- * - ROW_NUMBER() is a window function in Postgres, used to assign a unique integer to rows.
- * - unnest() is a Postgres function that takes an array and returns a set of rows.
- *
- * The function takes anyelement as the first parameter and anyarray as the second.
- * It returns a BIGINT.
- *
- * SQL is used as the procedural language, and the function is marked as IMMUTABLE.
- */
-function pg4wp_create_field_function($connection) {
-    $sql = <<<'SQL'
-        CREATE OR REPLACE FUNCTION field(anyelement, VARIADIC anyarray)
-        RETURNS BIGINT AS $$
-            SELECT rownum
-            FROM (
-                SELECT ROW_NUMBER() OVER () AS rownum, elem
-                FROM unnest($2) elem
-            ) AS numbered
-            WHERE numbered.elem = $1
-            UNION ALL
-            SELECT 0
-        $$
-        LANGUAGE SQL IMMUTABLE;
-    SQL;
-
-    // Execute the SQL query
-    $result = pg_query($connection, $sql);
-
-    if ((PG4WP_DEBUG || PG4WP_LOG_ERRORS) && $result === false) {
-        $error = pg_last_error($connection);
-        error_log("[" . microtime(true) . "] Error creating MySQL-compatible field function: $error\n", 3, PG4WP_LOG . 'pg4wp_errors.log');
-    }
-} 
-
 
 /**
 * Database Operations
