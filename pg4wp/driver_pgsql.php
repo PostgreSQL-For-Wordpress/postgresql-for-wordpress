@@ -158,7 +158,7 @@ function pg4wp_create_field_function($connection) {
  * databases without having to establish a new connection for each one. If the function succeeds,
  * it will return TRUE, indicating the database was successfully selected, or FALSE if it fails.
  *
- * @param pg $connection The pg connection resource.
+ * @param PgSql\Connection $connection The pg connection resource.
  * @param string $database The name of the database to select.
  * @return bool Returns TRUE on success or FALSE on failure.
  */
@@ -202,7 +202,7 @@ function wpsqli_select_db($connection, $database)
  * It's important to close connections when they are no longer needed to free up resources on both the web
  * server and the PostgreSQL server. The function returns TRUE on success or FALSE on failure.
  *
- * @param pg $connection The pg connection resource to be closed.
+ * @param PgSql\Connection $connection The pg connection resource to be closed.
  * @return bool Returns TRUE on successful closure, FALSE on failure.
  */
 function wpsqli_close($connection)
@@ -217,7 +217,7 @@ function wpsqli_close($connection)
  * This function sets up variables on the fake pg connection class which are used when 
  * connecting to the postgres database with pg_connect
  *
- * @param pg $connection The pg connection resource.
+ * @param PgSql\Connection $connection The pg connection resource.
  * @param string $key The path to the key file.
  * @param string $cert The path to the certificate file.
  * @param string $ca The path to the certificate authority file.
@@ -261,7 +261,7 @@ function wpsqli_get_client_info()
  * PostgreSQL versions or simply for logging and monitoring. Understanding the server version is
  * essential for ensuring compatibility with specific PostgreSQL features and syntax.
  *
- * @param pg $connection The pg connection resource.
+ * @param PgSql\Connection $connection The pg connection resource.
  * @return string The version of the PostgreSQL server.
  */
 function wpsqli_get_server_info($connection)
@@ -280,7 +280,7 @@ function wpsqli_get_server_info($connection)
  * This includes the host name and the connection type, such as TCP/IP or a UNIX socket. It's useful
  * for debugging and for understanding how PHP is communicating with the PostgreSQL server.
  *
- * @param pg $connection The pg connection resource.
+ * @param PgSql\Connection $connection The pg connection resource.
  * @return string A string describing the connection type and server host information.
  */
 function wpsqli_host_info($connection)
@@ -300,13 +300,12 @@ function wpsqli_host_info($connection)
  * successfully re-established, and FALSE if the connection is not established and
  * cannot be re-established.
  *
- * @param pg $connection The pg connection resource.
+ * @param PgSql\Connection $connection The pg connection resource.
  * @return bool Returns TRUE on success or FALSE on failure.
  */
 function wpsqli_ping($connection)
 {
-    throw new \Exception("PG4WP: Not Yet Implemented");
-    // mysqli_ping => No direct equivalent. You would need to run a simple query to test connection.
+    return pg_ping($connection);
 }
 
 /**
@@ -317,7 +316,7 @@ function wpsqli_ping($connection)
  * statement to terminate a connection. It is useful for debugging and managing PostgreSQL connections
  * and can be used to uniquely identify the connection within the server's process.
  *
- * @param pg $connection The pg connection resource.
+ * @param PgSql\Connection $connection The pg connection resource.
  * @return int The thread ID for the current connection.
  */
 function wpsqli_thread_id($connection)
@@ -351,7 +350,7 @@ function wpsqli_thread_safe()
  * This can be useful for monitoring the health and performance of the PostgreSQL server, as well
  * as for debugging purposes.
  *
- * @param pg $connection The pg connection resource.
+ * @param PgSql\Connection $connection The pg connection resource.
  * @return string A string describing the server status or FALSE on failure.
  */
 function wpsqli_stat($connection)
@@ -369,7 +368,7 @@ function wpsqli_stat($connection)
  * be called after pg_init() and before pg_real_connect(). It returns TRUE on success or
  * FALSE on failure.
  *
- * @param pg $connection The pg connection resource.
+ * @param PgSql\Connection $connection The pg connection resource.
  * @param int $option The specific option that is to be set.
  * @param mixed $value The value for the specified option.
  * @return bool Returns TRUE on success or FALSE on failure.
@@ -431,7 +430,7 @@ function wpsqli_connect_error()
  * function is particularly useful for transactions that require multiple steps and you don't want
  * to commit until all steps are successful.
  *
- * @param pg $connection The pg connection resource.
+ * @param PgSql\Connection $connection The pg connection resource.
  * @param bool $mode Whether to turn on auto-commit mode or not. Pass TRUE to turn on auto-commit
  *                   mode and FALSE to turn it off.
  * @return bool Returns TRUE on success or FALSE on failure.
@@ -452,7 +451,7 @@ function wpsqli_autocommit($connection, $mode)
  * by committing or rolling back the transaction. This function can also set a name for the transaction,
  * which can be used for savepoints.
  *
- * @param pg $connection The pg connection resource.
+ * @param PgSql\Connection $connection The pg connection resource.
  * @param int $flags Optional flags for defining transaction characteristics. This should be a bitmask
  *                   of any of the pg_TRANS_START_* constants.
  * @param string|null $name Optional name for the transaction, used for savepoint names.
@@ -473,7 +472,7 @@ function wpsqli_begin_transaction($connection, $flags = 0, $name = null)
  * start of the transaction are permanently saved to the database. This function can also take optional flags
  * and a name, the latter being used if the commit should be associated with a named savepoint.
  *
- * @param pg $connection The pg connection resource.
+ * @param PgSql\Connection $connection The pg connection resource.
  * @param int $flags Optional flags for the commit operation. It should be a bitmask of the pg_TRANS_COR_* constants.
  * @param string|null $name Optional name for the savepoint that should be committed.
  * @return bool Returns TRUE on success or FALSE on failure.
@@ -494,7 +493,7 @@ function wpsqli_commit($connection, $flags = 0, $name = null)
  * to be treated as an atomic unit. The function can also accept optional flags and a name, which can be
  * used to rollback to a named savepoint within the transaction rather than rolling back the entire transaction.
  *
- * @param pg $connection The pg connection resource.
+ * @param PgSql\Connection $connection The pg connection resource.
  * @param int $flags Optional flags that define how the rollback operation should be handled. It should be
  *                   a bitmask of the pg_TRANS_COR_* constants.
  * @param string|null $name Optional name of the savepoint to which the rollback operation should be directed.
@@ -514,7 +513,7 @@ function wpsqli_rollback($connection, $flags = 0, $name = null)
  * a query against the database and returns a result set for successful SELECT queries, or TRUE
  * for other successful DML queries such as INSERT, UPDATE, DELETE, etc. 
  *
- * @param pg $connection The pg connection resource.
+ * @param PgSql\Connection $connection The pg connection resource.
  * @param string $query The SQL query to be executed.
  * @param int $result_mode The optional mode for storing result set.
  * @return mixed Returns a pg_result object for successful SELECT queries, TRUE for other
@@ -568,7 +567,7 @@ function wpsqli_query($connection, $query, $result_mode = 0)
  * processed using pg_store_result() and pg_next_result(). It is important to ensure
  * that any user input included in the queries is properly sanitized to avoid SQL injection.
  *
- * @param pg $connection The pg connection resource.
+ * @param PgSql\Connection $connection The pg connection resource.
  * @param string $query The queries to execute, concatenated by semicolons.
  * @return bool Returns TRUE on success or FALSE on the first error that occurred.
  *              If the first query succeeds, the function will return TRUE even if
@@ -593,7 +592,7 @@ function wpsqli_multi_query($connection, $query)
  * SQL injection vulnerabilities by separating the query structure from its data. It is especially
  * useful when the same statement is executed multiple times with different parameters.
  *
- * @param pg $connection The pg connection resource.
+ * @param PgSql\Connection $connection The pg connection resource.
  * @param string $query The SQL query to prepare.
  * @return pg_stmt|false Returns a statement object on success or FALSE on failure.
  */
@@ -713,7 +712,7 @@ function wpsqli_stmt_fetch($stmt)
  * prepared statement multiple times with different parameters, providing benefits such as improved
  * query performance and protection against SQL injection attacks.
  *
- * @param pg $connection The pg connection resource.
+ * @param PgSql\Connection $connection The pg connection resource.
  * @return pg_stmt A new statement object or FALSE on failure.
  */
 function wpsqli_stmt_init($connection)
@@ -943,7 +942,7 @@ function wpsqli_num_fields($result)
  * can be particularly useful when you need to know how many columns will be returned by a
  * SELECT statement before fetching data, which can help in dynamically processing result sets.
  *
- * @param pg $connection The pg connection resource.
+ * @param PgSql\Connection $connection The pg connection resource.
  * @return int An integer representing the number of fields in the result set.
  */
 function wpsqli_field_count($connection)
@@ -963,7 +962,7 @@ function wpsqli_field_count($connection)
  * pg_fetch_* functions. It's particularly useful when the result set is expected to be accessed
  * multiple times.
  *
- * @param pg $connection The pg connection resource.
+ * @param PgSql\Connection $connection The pg connection resource.
  * @return pg_result|false A buffered result object or FALSE if an error occurred.
  */
 function wpsqli_store_result($connection)
@@ -984,7 +983,7 @@ function wpsqli_store_result($connection)
  * However, it requires the connection to remain open, and no other operations can be performed on the
  * connection until the result set is fully processed.
  *
- * @param pg $connection The pg connection resource.
+ * @param PgSql\Connection $connection The pg connection resource.
  * @return pg_result|false An unbuffered result object or FALSE if an error occurred.
  */
 function wpsqli_use_result($connection)
@@ -1024,7 +1023,7 @@ function wpsqli_free_result($result)
  * It returns TRUE if one or more result sets are available from the previous calls to
  * pg_multi_query(), otherwise FALSE.
  *
- * @param pg $connection The pg connection resource.
+ * @param PgSql\Connection $connection The pg connection resource.
  * @return bool Returns TRUE if there are more result sets from previous multi queries and
  *              FALSE otherwise.
  */
@@ -1045,7 +1044,7 @@ function wpsqli_more_results($connection)
  * ensure that all result sets are processed sequentially. It returns TRUE if there is another result set,
  * FALSE if there are no more result sets, or FALSE with an error if there is a problem moving the result pointer.
  *
- * @param pg $connection The pg connection resource.
+ * @param PgSql\Connection $connection The pg connection resource.
  * @return bool Returns TRUE on success or FALSE on failure (no more results or an error occurred).
  */
 function wpsqli_next_result($connection)
@@ -1073,7 +1072,7 @@ function wpsqli_is_resource($object)
  * allowing the developer to verify that the expected number of rows were altered. It returns an
  * integer indicating the number of rows affected or -1 if the last query failed.
  *
- * @param pg $connection The pg connection resource.
+ * @param PgSql\Connection $connection The pg connection resource.
  * @return int The number of affected rows in the previous operation, or -1 if the last operation failed.
  */
 function wpsqli_affected_rows($connection)
@@ -1158,7 +1157,7 @@ function wpsqli_insert_id($connection = null)
  * This is particularly important to ensure that data is properly encoded and decoded when stored
  * and retrieved from the database, avoiding character encoding issues.
  *
- * @param pg $connection The pg connection resource.
+ * @param PgSql\Connection $connection The pg connection resource.
  * @param string $charset The desired character set.
  * @return bool Returns TRUE on success or FALSE on failure.
  */
@@ -1179,7 +1178,7 @@ function wpsqli_set_charset($connection, $charset)
  * the pg connection resource, and returns the escaped string which is safe to be included
  * in SQL statements.
  *
- * @param pg $connection The pg connection resource.
+ * @param PgSql\Connection $connection The pg connection resource.
  * @param string $string The string to be escaped.
  * @return string Returns the escaped string.
  */
@@ -1200,7 +1199,7 @@ function wpsqli_real_escape_string($connection, $string)
  * in PostgreSQL-related operations. When a pg function fails, wpsqli_error can be
  * used to fetch the corresponding error message to understand what went wrong.
  *
- * @param pg $connection The pg connection resource.
+ * @param PgSql\Connection $connection The pg connection resource.
  * @return string Returns a string with the error message for the most recent function call
  *                if it has failed, or an empty string if no error has occurred.
  */
@@ -1261,7 +1260,7 @@ function wpsqli_report($flags)
  * or DELETE query, as well as the number of rows matched and changed. It is valuable for
  * obtaining detailed insights into the execution of database operations.
  *
- * @param pg $connection The pg connection resource.
+ * @param PgSql\Connection $connection The pg connection resource.
  * @return string|null A string representing information about the last query executed,
  *                     or NULL if no information is available.
  */
@@ -1308,7 +1307,7 @@ function wpsqli_poll(&...$args)
  * asynchronous queries. It returns a pg_result object for successful SELECT queries, or TRUE for
  * other DML queries (INSERT, UPDATE, DELETE, etc.) if the operation was successful, or FALSE on failure.
  *
- * @param pg $connection The pg connection resource.
+ * @param PgSql\Connection $connection The pg connection resource.
  * @return pg_result|bool A pg_result object for successful SELECT queries, TRUE for other
  *                            successful DML queries, or FALSE on failure.
  */
