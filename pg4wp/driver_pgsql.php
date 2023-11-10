@@ -512,10 +512,7 @@ function wpsqli_rollback($connection, $flags = 0, $name = null)
  *
  * This function is a wrapper for the pg_query function. The pg_query function performs
  * a query against the database and returns a result set for successful SELECT queries, or TRUE
- * for other successful DML queries such as INSERT, UPDATE, DELETE, etc. It can also be used
- * to execute multiple queries if the database server supports it. The function can return FALSE
- * on failure. The optional third parameter defines the result mode - whether to use a resultset
- * buffering (pg_STORE_RESULT) or not (pg_USE_RESULT).
+ * for other successful DML queries such as INSERT, UPDATE, DELETE, etc. 
  *
  * @param pg $connection The pg connection resource.
  * @param string $query The SQL query to be executed.
@@ -523,7 +520,7 @@ function wpsqli_rollback($connection, $flags = 0, $name = null)
  * @return mixed Returns a pg_result object for successful SELECT queries, TRUE for other
  *               successful queries, or FALSE on failure.
  */
-function wpsqli_query($connection, $query, $result_mode = pg_STORE_RESULT)
+function wpsqli_query($connection, $query, $result_mode = 0)
 {
     // Check if a connection to Postgres database is established
     if (!$GLOBALS['pg4wp_conn']) {
