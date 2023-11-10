@@ -15,6 +15,13 @@ If you want to use this plugin, you should be aware of the following :
 - WordPress with PG4WP is expected to be slower than the original WordPress with MySQL because PG4WP does much SQL rewriting for any page view
 - Some WordPress plugins should work 'out of the box' but many plugins won't because they would need specific code in PG4WP
 
+### Design
+
+PostgreSQL for Wordpress works by intercepting calls to the mysqli_ driver in wordpress's wpdb class.
+it replaces calls to mysqli_ with wpsqli_ which then are implemented by the driver files found in this plugin. 
+
+![PG4WP Design](docs/images/pg4wp_design.png)
+
 ### Supported Wordpress Versions
 
 This plugin has been tested against Wordpress 6.3.2
