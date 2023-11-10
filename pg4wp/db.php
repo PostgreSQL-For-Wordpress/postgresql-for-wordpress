@@ -28,12 +28,6 @@ if(!defined('PG4WP_ROOT')) {
         define('PG4WP_LOG_ERRORS', true);
     }
 
-    if (!defined('PG4WP_INSECURE')) {
-        // If you want to allow insecure configuration (from the author point of view) to work with PG4WP,
-        // change this to true
-        define('PG4WP_INSECURE', false);
-    }
-
     // This defines the directory where PG4WP files are loaded from
     //   3 places checked : wp-content, wp-content/plugins and the base directory
     if(file_exists(ABSPATH . 'wp-content/pg4wp')) {

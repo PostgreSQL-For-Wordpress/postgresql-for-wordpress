@@ -14,13 +14,6 @@ require_once ABSPATH . '/wp-includes/version.php';
 require_once ABSPATH . '/wp-includes/cache.php';
 require_once ABSPATH . '/wp-includes/l10n.php';
 
-if (!function_exists('wpsql_is_resource')) {
-    function wpsql_is_resource($object)
-    {
-        return $object !== false && $object !== null;
-    }
-}
-
 // Load the driver defined in 'db.php'
 require_once(PG4WP_ROOT . '/driver_' . DB_DRIVER . '.php');
 
@@ -29,19 +22,14 @@ $replaces = array(
     'define( '	=> '// define( ',
     'class wpdb'	=> 'class wpdb2',
     'new wpdb'	=> 'new wpdb2',
-    'mysql_'	=> 'wpsql_',
-    'is_resource'	=> 'wpsql_is_resource',
+    'instanceof mysqli_result' => 'instanceof \PgSql\Result',
+    'instanceof mysqli' => 'instanceof \PgSql\Connection',
+    '$this->dbh->connect_errno' => 'wpsqli_connect_error()',
+    'mysqli_'	=> 'wpsqli_',
+    'is_resource'	=> 'wpsqli_is_resource',
     '<?php'		=> '',
     '?>'		=> '',
 );
-
-// Ensure class uses the replaced mysql_ functions rather than mysqli_
-if (!defined('WP_USE_EXT_MYSQL')) {
-    define('WP_USE_EXT_MYSQL', true);
-}
-if (WP_USE_EXT_MYSQL != true) {
-    throw new \Exception("PG4SQL CANNOT BE ENABLED WITH MYSQLI, REMOVE ANY WP_USE_EXT_MYSQL configuration");
-}
 
 eval(str_replace(array_keys($replaces), array_values($replaces), file_get_contents(ABSPATH . '/wp-includes/class-wpdb.php')));
 
