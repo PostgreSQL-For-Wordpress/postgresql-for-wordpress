@@ -18,7 +18,9 @@ it replaces calls to mysqli_ with wpsqli_ which then are implemented by the driv
 
 ### Supported Wordpress Versions
 
-This plugin has been tested against Wordpress 6.3.2
+This plugin has been tested against 
+- Wordpress 6.4.1 (v3 branch)
+- Wordpress 6.3.2 (v2 branch)
 
 ### Supported PHP versions
 
@@ -42,6 +44,7 @@ PG4WP 2.0 will have a mechanism to add plugin support.
 
 | Theme                 | Version     | Working   |
 | -----------           | ----------- | --------- |
+| Twenty Twenty-Four    | 1.0         | Confirmed |
 | Twenty Twenty-Three   | 1.2         | Confirmed |
 | Twenty Twenty-Two     | 1.5         | Confirmed |
 | Twenty Twenty-One     | 1.9         | Confirmed |
