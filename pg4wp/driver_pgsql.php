@@ -392,7 +392,6 @@ function wpsqli_options($connection, $option, $value)
  */
 function wpsqli_connect_errno()
 {
-    // mysqli_connect_errno => pg_last_error (resource $connection): string
     throw new \Exception("PG4WP: Not Yet Implemented");
 }
 
