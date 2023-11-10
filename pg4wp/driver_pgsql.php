@@ -1016,10 +1016,8 @@ function wpsqli_free_result($result)
 /**
  * Checks if there are any more result sets from a multi query.
  *
- * This function is a wrapper for the pg_more_results function. It is used after executing
- * a multi query with pg_multi_query() to check if there are more result sets available.
- * This is important when processing multiple SQL statements in one call, as it determines
- * whether the application should keep reading results before sending more statements to the server.
+ * mysqli_more_results => No direct equivalent in PostgreSQL.
+ * PostgreSQL does not support multiple results like MySQL's multi_query function.
  * It returns TRUE if one or more result sets are available from the previous calls to
  * pg_multi_query(), otherwise FALSE.
  *
@@ -1029,19 +1027,16 @@ function wpsqli_free_result($result)
  */
 function wpsqli_more_results($connection)
 {
-    throw new \Exception("PG4WP: Not Yet Implemented");
     // mysqli_more_results => No direct equivalent in PostgreSQL.
     // PostgreSQL does not have a built-in function to check for more results from a batch of queries.
+    return false;
 }
 
 /**
  * Moves the internal result pointer to the next result set returned from a multi query.
  *
- * This function is a wrapper for the pg_next_result function, which is used in a multi query
- * scenario. After executing pg_multi_query(), which can send multiple SQL statements to the
- * server at once, pg_next_result() checks for more result sets and prepares the next one for
- * reading. This is crucial for handling multiple operations executed with pg_multi_query() to
- * ensure that all result sets are processed sequentially. It returns TRUE if there is another result set,
+ * mysqli_next_result => No direct equivalent in PostgreSQL.
+ * PostgreSQL does not support multiple results like MySQL's multi_query function.
  * FALSE if there are no more result sets, or FALSE with an error if there is a problem moving the result pointer.
  *
  * @param PgSql\Connection $connection The pg connection resource.
@@ -1049,9 +1044,9 @@ function wpsqli_more_results($connection)
  */
 function wpsqli_next_result($connection)
 {
-    throw new \Exception("PG4WP: Not Yet Implemented");
     // mysqli_next_result => No direct equivalent in PostgreSQL.
     // PostgreSQL does not support multiple results like MySQL's multi_query function.
+    return false;
 }
 
 /**
