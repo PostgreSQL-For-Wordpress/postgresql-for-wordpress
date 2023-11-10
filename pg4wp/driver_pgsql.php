@@ -58,7 +58,7 @@ function wpsqli_init()
  * @param int $flags Client connection flags.
  * @return bool Returns TRUE on success or FALSE on failure.
  */
-function wpsqli_real_connect($connection, $hostname = null, $username = null, $password = null, $database = null, $port = null, $socket = null, $flags = 0)
+function wpsqli_real_connect(&$connection, $hostname = null, $username = null, $password = null, $database = null, $port = null, $socket = null, $flags = 0)
 {
     $GLOBALS['pg4wp_connstr'] = '';
 
@@ -1190,7 +1190,7 @@ function wpsqli_real_escape_string($connection, $string)
 {
     // mysqli_real_escape_string => pg_escape_string (resource $connection, string $data): string
     // Escapes a string for safe use in database queries.
-    return pg_escape_string($connection, $data);
+    return pg_escape_string($connection, $string);
 }
 
 /**
@@ -1250,9 +1250,9 @@ function wpsqli_errno($connection)
  */
 function wpsqli_report($flags)
 {
-    throw new \Exception("PG4WP: Not Yet Implemented");
     // mysqli_report => No direct equivalent in PostgreSQL.
     // MySQL's mysqli_report function is used to set what MySQLi should report, which doesn't have a direct equivalent in PostgreSQL's PHP functions.
+    return true;
 }
 
 /**
