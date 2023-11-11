@@ -32,9 +32,6 @@ This plugin has been tested on PostgreSQL 14.2
 
 ### Plugin Support
 
-You shouldn't expect any plugin specific code to be integrated into PG4WP except for plugins shipped with WordPress itself (such as Akismet).
-PG4WP 2.0 will have a mechanism to add plugin support.
-
 | Plugin                 | Version     | Working   |
 | -----------            | ----------- | --------- |
 | Debug Bar              | 1.1.4       | Confirmed |
