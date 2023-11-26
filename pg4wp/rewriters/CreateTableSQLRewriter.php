@@ -97,6 +97,11 @@ class CreateTableSQLRewriter extends AbstractSQLRewriter
         }
         // Now remove handled indexes
         $sql = preg_replace($pattern, '', $sql);
+
+
+        $pattern = "/(,\s*)?UNIQUE KEY\s+[a-zA-Z0-9_]+\s+(\([a-zA-Z0-9_,\s]+\))/";
+        $replacement = "$1UNIQUE $2";
+        $sql = preg_replace($pattern, $replacement, $sql);
     
         return $sql;
     }
