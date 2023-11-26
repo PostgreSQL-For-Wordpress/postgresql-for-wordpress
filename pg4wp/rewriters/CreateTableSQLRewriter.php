@@ -6,6 +6,7 @@ class CreateTableSQLRewriter extends AbstractSQLRewriter
         'bigint(20)'	=> 'bigint',
         'bigint(10)'	=> 'int',
         'int(11)'		=> 'int',
+        'int(1)'		=> 'smallint',
         'tinytext'		=> 'text',
         'mediumtext'	=> 'text',
         'longtext'		=> 'text',
@@ -45,22 +46,22 @@ class CreateTableSQLRewriter extends AbstractSQLRewriter
         $sql = trim($sql) . ';';
 
         // Translate types and some other replacements
-        $sql = str_replace(
+        $sql = str_ireplace(
             array_keys($this->stringReplacements),
             array_values($this->stringReplacements),
             $sql
         );
 
         // Fix auto_increment by adding a sequence
-        $pattern = '/int[ ]+NOT NULL auto_increment/';
+        $pattern = '/int[ ]+NOT NULL auto_increment/i';
         preg_match($pattern, $sql, $matches);
         if($matches) {
             $seq = $table . '_seq';
-            $sql = str_replace('NOT NULL auto_increment', "NOT NULL DEFAULT nextval('$seq'::text)", $sql);
+            $sql = str_ireplace('NOT NULL auto_increment', "NOT NULL DEFAULT nextval('$seq'::text)", $sql);
             $sql .= "\nCREATE SEQUENCE $seq;";
         }
 
-        // Support for INDEX creation
+        // Support for UNIQUE INDEX creation
         $pattern = '/,\s+(UNIQUE |)KEY\s+([^\s]+)\s+\(((?:[\w]+(?:\([\d]+\))?[,]?)*)\)/';
         if(preg_match_all($pattern, $sql, $matches, PREG_SET_ORDER)) {
             foreach($matches as $match) {
@@ -71,6 +72,22 @@ class CreateTableSQLRewriter extends AbstractSQLRewriter
                 // Workaround for index name duplicate
                 $index = $table . '_' . $index;
                 $sql .= "\nCREATE {$unique}INDEX $index ON $table ($columns);";
+            }
+        }
+        // Now remove handled indexes
+        $sql = preg_replace($pattern, '', $sql);
+    
+        // Support for PRIMARY INDEX creation
+        $pattern = '/,\s+(PRIMARY |)KEY\s+\(((?:[\w]+(?:\([\d]+\))?[,]?)*)\)/';
+        if(preg_match_all($pattern, $sql, $matches, PREG_SET_ORDER)) {
+            foreach($matches as $match) {
+                $primary = $match[1];
+                $columns = $match[2];
+                $columns = preg_replace('/\(\d+\)/', '', $columns);
+                $index = $columns;
+                // Workaround for index name duplicate
+                $index = $table . '_' . $index;
+                $sql .= "\nCREATE {$primary}INDEX $index ON $table ($columns);";
             }
         }
         // Now remove handled indexes

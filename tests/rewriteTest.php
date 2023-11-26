@@ -31,4 +31,45 @@ final class rewriteTest extends TestCase
         $postgresql = pg4wp_rewrite($sql);
         $this->assertSame($postgresql, $expected);
     }
+
+    public function test_it_handles_auto_increment() 
+    {
+        $sql = <<<SQL
+            CREATE TABLE wp_itsec_lockouts (
+                lockout_id bigint UNSIGNED NOT NULL AUTO_INCREMENT, 
+                lockout_type varchar(25) NOT NULL, 
+                lockout_start timestamp NOT NULL, 
+                lockout_start_gmt timestamp NOT NULL, 
+                lockout_expire timestamp NOT NULL, 
+                lockout_expire_gmt timestamp NOT NULL, 
+                lockout_host varchar(40), 
+                lockout_user bigint UNSIGNED, 
+                lockout_username varchar(60), 
+                lockout_active int(1) NOT NULL DEFAULT 1, 
+                lockout_context TEXT, 
+                PRIMARY KEY (lockout_id)
+            )
+        SQL;
+        
+        $expected = <<<SQL
+            CREATE TABLE wp_itsec_lockouts (
+                lockout_id bigint  NOT NULL DEFAULT nextval('wp_itsec_lockouts_seq'::text), 
+                lockout_type varchar(25) NOT NULL, 
+                lockout_start timestamp NOT NULL, 
+                lockout_start_gmt timestamp NOT NULL, 
+                lockout_expire timestamp NOT NULL, 
+                lockout_expire_gmt timestamp NOT NULL, 
+                lockout_host varchar(40), 
+                lockout_user bigint , 
+                lockout_username varchar(60), 
+                lockout_active smallint NOT NULL DEFAULT 1, 
+                lockout_context TEXT
+            );
+        CREATE SEQUENCE wp_itsec_lockouts_seq;
+        CREATE PRIMARY INDEX wp_itsec_lockouts_lockout_id ON wp_itsec_lockouts (lockout_id);
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($postgresql), trim($expected));
+    }
 }
