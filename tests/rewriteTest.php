@@ -63,10 +63,10 @@ final class rewriteTest extends TestCase
                 lockout_user bigint , 
                 lockout_username varchar(60), 
                 lockout_active smallint NOT NULL DEFAULT 1, 
-                lockout_context TEXT
+                lockout_context TEXT, 
+                PRIMARY KEY (lockout_id)
             );
         CREATE SEQUENCE wp_itsec_lockouts_seq;
-        CREATE PRIMARY INDEX wp_itsec_lockouts_lockout_id ON wp_itsec_lockouts (lockout_id);
         SQL;
 
         $postgresql = pg4wp_rewrite($sql);

@@ -77,22 +77,6 @@ class CreateTableSQLRewriter extends AbstractSQLRewriter
         // Now remove handled indexes
         $sql = preg_replace($pattern, '', $sql);
     
-        // Support for PRIMARY INDEX creation
-        $pattern = '/,\s+(PRIMARY |)KEY\s+\(((?:[\w]+(?:\([\d]+\))?[,]?)*)\)/';
-        if(preg_match_all($pattern, $sql, $matches, PREG_SET_ORDER)) {
-            foreach($matches as $match) {
-                $primary = $match[1];
-                $columns = $match[2];
-                $columns = preg_replace('/\(\d+\)/', '', $columns);
-                $index = $columns;
-                // Workaround for index name duplicate
-                $index = $table . '_' . $index;
-                $sql .= "\nCREATE {$primary}INDEX $index ON $table ($columns);";
-            }
-        }
-        // Now remove handled indexes
-        $sql = preg_replace($pattern, '', $sql);
-
         return $sql;
     }
 }
