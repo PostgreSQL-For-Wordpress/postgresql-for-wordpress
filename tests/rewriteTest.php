@@ -53,7 +53,7 @@ final class rewriteTest extends TestCase
         
         $expected = <<<SQL
             CREATE TABLE wp_itsec_lockouts (
-                lockout_id bigint  NOT NULL DEFAULT nextval('wp_itsec_lockouts_seq'::text), 
+                lockout_id bigserial, 
                 lockout_type varchar(25) NOT NULL, 
                 lockout_start timestamp NOT NULL, 
                 lockout_start_gmt timestamp NOT NULL, 
@@ -66,7 +66,28 @@ final class rewriteTest extends TestCase
                 lockout_context TEXT, 
                 PRIMARY KEY (lockout_id)
             );
-        CREATE SEQUENCE wp_itsec_lockouts_seq;
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($postgresql), trim($expected));
+    }
+
+    public function test_it_handles_auto_increment_without_null() 
+    {
+        $sql = <<<SQL
+            CREATE TABLE wp_e_events (
+                    id bigint auto_increment primary key,
+                    event_data text null,
+                    created_at timestamp not null
+            )
+        SQL;
+        
+        $expected = <<<SQL
+            CREATE TABLE wp_e_events (
+                    id bigserial primary key,
+                    event_data text null,
+                    created_at timestamp not null
+            );
         SQL;
 
         $postgresql = pg4wp_rewrite($sql);

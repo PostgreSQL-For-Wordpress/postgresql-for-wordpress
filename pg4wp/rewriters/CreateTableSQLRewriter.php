@@ -52,13 +52,34 @@ class CreateTableSQLRewriter extends AbstractSQLRewriter
             $sql
         );
 
-        // Fix auto_increment by adding a sequence
-        $pattern = '/int[ ]+NOT NULL auto_increment/i';
+        // bigint
+        $pattern = '/bigint(\(\d+\))?([ ]*NOT NULL)?[ ]*auto_increment/i';
         preg_match($pattern, $sql, $matches);
         if($matches) {
-            $seq = $table . '_seq';
-            $sql = str_ireplace('NOT NULL auto_increment', "NOT NULL DEFAULT nextval('$seq'::text)", $sql);
-            $sql .= "\nCREATE SEQUENCE $seq;";
+            $sql = preg_replace($pattern, 'bigserial', $sql);
+        }
+
+        // int
+        $pattern = '/int(\(\d+\))?([ ]*NOT NULL)?[ ]*auto_increment/i';
+        preg_match($pattern, $sql, $matches);
+        if($matches) {
+            $sql = preg_replace($pattern, 'serial', $sql);
+        }
+
+        // smallint
+        $pattern = '/smallint(\(\d+\))?([ ]*NOT NULL)?[ ]*auto_increment/i';
+        preg_match($pattern, $sql, $matches);
+        if($matches) {
+            $sql = preg_replace($pattern, 'smallserial', $sql);
+        }
+
+        // Handle for numeric and decimal -- being replaced with serial
+        $numeric_patterns = ['/numeric(\(\d+\))?([ ]*NOT NULL)?[ ]*auto_increment/i', '/decimal(\(\d+\))?([ ]*NOT NULL)?[ ]*auto_increment/i'];
+        foreach($numeric_patterns as $pattern) {
+            preg_match($pattern, $sql, $matches);
+            if($matches) {
+                $sql = preg_replace($pattern, 'serial', $sql);
+            }
         }
 
         // Support for UNIQUE INDEX creation
