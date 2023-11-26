@@ -123,5 +123,47 @@ final class rewriteTest extends TestCase
         $this->assertSame(trim($postgresql), trim($expected));
     }
 
+    public function test_it_handles_keys_without_unique() 
+    {
+        $sql = <<<SQL
+            CREATE TABLE wp_itsec_vulnerabilities (
+                id varchar(128) NOT NULL,
+                software_type varchar(20) NOT NULL,
+                software_slug varchar(255) NOT NULL,
+                first_seen timestamp NOT NULL,
+                last_seen timestamp NOT NULL,
+                resolved_at timestamp default NULL,
+                resolved_by bigint NOT NULL default 0,
+                resolution varchar(20) NOT NULL default '',
+                details text NOT NULL,
+                PRIMARY KEY (id),
+                KEY resolution (resolution),
+                KEY software_type (software_type),
+                KEY last_seen (last_seen)
+            )
+        SQL;
+        
+        $expected = <<<SQL
+            CREATE TABLE wp_itsec_vulnerabilities (
+                id varchar(128) NOT NULL,
+                software_type varchar(20) NOT NULL,
+                software_slug varchar(255) NOT NULL,
+                first_seen timestamp NOT NULL,
+                last_seen timestamp NOT NULL,
+                resolved_at timestamp default NULL,
+                resolved_by bigint NOT NULL default 0,
+                resolution varchar(20) NOT NULL default '',
+                details text NOT NULL,
+                PRIMARY KEY (id)
+            );
+        CREATE INDEX wp_itsec_vulnerabilities_resolution ON wp_itsec_vulnerabilities (resolution);
+        CREATE INDEX wp_itsec_vulnerabilities_software_type ON wp_itsec_vulnerabilities (software_type);
+        CREATE INDEX wp_itsec_vulnerabilities_last_seen ON wp_itsec_vulnerabilities (last_seen);
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($postgresql), trim($expected));
+    }
+
   
 }
