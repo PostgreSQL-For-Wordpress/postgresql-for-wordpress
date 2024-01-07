@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 use PHPUnit\Framework\TestCase;
 
 if (!defined('ABSPATH')) {
@@ -30,5 +32,16 @@ final class rewriteTest extends TestCase
         $expected = 'SELECT COUNT(id) AS count0, username FROM users GROUP BY username';
         $postgresql = pg4wp_rewrite($sql);
         $this->assertSame($postgresql, $expected);
+    }
+
+    protected function setUp(): void
+    {
+        global $wpdb;
+        $wpdb = new class () {
+            public $categories = "wp_categories";
+            public $comments = "wp_comments";
+            public $prefix = "wp_";
+            public $options = "wp_options";
+        };
     }
 }

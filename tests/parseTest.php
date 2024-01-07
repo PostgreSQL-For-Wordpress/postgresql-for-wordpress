@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 use PHPUnit\Framework\TestCase;
 
 if (!defined('ABSPATH')) {
@@ -35,7 +37,7 @@ final class parseTest extends TestCase
     protected function setUp(): void
     {
         global $wpdb;
-        $wpdb = new class() {
+        $wpdb = new class () {
             public $options = "wp_options";
             public $categories = "wp_categories";
         };

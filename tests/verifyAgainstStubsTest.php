@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 use PHPUnit\Framework\TestCase;
 
 if (!defined('ABSPATH')) {
@@ -13,7 +15,7 @@ require_once __DIR__ . "/../pg4wp/db.php";
 
 final class verifyAgainstStubsTest extends TestCase
 {
-    const STUBS_DIRECTORY = __DIR__ . '/stubs';
+    public const STUBS_DIRECTORY = __DIR__ . '/stubs';
 
     public function test_verify_against_stubs()
     {
@@ -27,7 +29,7 @@ final class verifyAgainstStubsTest extends TestCase
     protected function setUp(): void
     {
         global $wpdb;
-        $wpdb = new class() {
+        $wpdb = new class () {
             public $categories = "wp_categories";
             public $comments = "wp_comments";
             public $prefix = "wp_";

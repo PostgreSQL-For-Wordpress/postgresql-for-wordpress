@@ -58,7 +58,7 @@ class AlterTableSQLRewriter extends AbstractSQLRewriter
     private function rewriteChangeColumn(string $sql): string
     {
         $pattern = '/ALTER TABLE\s+(\w+)\s+CHANGE COLUMN\s+([^\s]+)\s+([^\s]+)\s+([^ ]+)( unsigned|)\s*(NOT NULL|)\s*(default (.+)|)/';
-        
+
         if(1 === preg_match($pattern, $sql, $matches)) {
             $table = $matches[1];
             $col = $matches[2];

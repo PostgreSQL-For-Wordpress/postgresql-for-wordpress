@@ -30,7 +30,7 @@ class CreateTableSQLRewriter extends AbstractSQLRewriter
         // For flash-album-gallery plugin
         'tinyint'		=> 'smallint'
     ];
-    
+
     public function rewrite(): string
     {
         $sql = $this->original();

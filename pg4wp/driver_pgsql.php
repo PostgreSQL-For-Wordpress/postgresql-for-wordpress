@@ -31,7 +31,7 @@ $GLOBALS['pg4wp_conn'] = false;
  */
 function wpsqli_init()
 {
-    return new class {
+    return new class () {
         public $sslkey;
         public $sslcert;
         public $sslca;
@@ -48,7 +48,7 @@ function wpsqli_init()
  * password, database name, port number, socket, and flags, The flags parameter can be used to set different
  * connection options that can affect the behavior of the connection.
  *
- * @param $connection dummy parameter just for compatibility with mysqli 
+ * @param $connection dummy parameter just for compatibility with mysqli
  * @param string|null $hostname The host name or an IP address.
  * @param string|null $username The PostgreSQL user name.
  * @param string|null $password The password associated with the username.
@@ -76,7 +76,7 @@ function wpsqli_real_connect(&$connection, $hostname = null, $username = null, $
 
     if (!empty($password)) {
         $GLOBALS['pg4wp_connstr'] .= ' password=' . $password;
-    } 
+    }
 
     // SSL parameters
     if (!empty($connection->sslkey)) {
@@ -88,7 +88,7 @@ function wpsqli_real_connect(&$connection, $hostname = null, $username = null, $
     }
 
     if (!empty($connection->sslca)) {
-        $GLOBALS['pg4wp_connstr'] .= ' sslrootcert=' . $connection->sslca; 
+        $GLOBALS['pg4wp_connstr'] .= ' sslrootcert=' . $connection->sslca;
     }
 
     if (!empty($connection->sslcapath)) {
@@ -157,7 +157,7 @@ function wpsqli_select_db(&$connection, $database)
 /**
  * Closes a previously opened database connection.
  *
- * This function is a wrapper for the pg_close function. 
+ * This function is a wrapper for the pg_close function.
  * // mysqli_close => pg_close (resource $connection): bool
  * It's important to close connections when they are no longer needed to free up resources on both the web
  * server and the PostgreSQL server. The function returns TRUE on success or FALSE on failure.
@@ -174,7 +174,7 @@ function wpsqli_close(&$connection)
 /**
  * Used to establish secure connections using SSL.
  *
- * This function sets up variables on the fake pg connection class which are used when 
+ * This function sets up variables on the fake pg connection class which are used when
  * connecting to the postgres database with pg_connect
  *
  * @param PgSql\Connection $connection The pg connection resource.
@@ -208,7 +208,7 @@ function wpsqli_ssl_set(&$connection, $key, $cert, $ca, $capath, $cipher)
  */
 function wpsqli_get_client_info()
 {
-    // mysqli_get_client_info => No direct equivalent. 
+    // mysqli_get_client_info => No direct equivalent.
     // Information can be derived from phpinfo() or phpversion().
     return '8.0.35'; // Just want to fool wordpress ...
 }
@@ -288,8 +288,8 @@ function wpsqli_thread_id(&$connection)
 /**
  * Returns whether the client library is thread-safe.
  *
- * This function is a wrapper for the pg_thread_safe function. It indicates whether the 
- * pg client library that PHP is using is thread-safe. This is important information when 
+ * This function is a wrapper for the pg_thread_safe function. It indicates whether the
+ * pg client library that PHP is using is thread-safe. This is important information when
  * running PHP in a multi-threaded environment such as with the worker MPM in Apache or when
  * using multi-threading extensions in PHP.
  *
@@ -359,9 +359,9 @@ function wpsqli_connect_errno()
  * Returns a string description of the last connect error.
  *
  * This function is a wrapper for the pg_connect_error function. It provides a textual description
- * of the error from the last connection attempt made by pg_connect() or pg_real_connect(). 
+ * of the error from the last connection attempt made by pg_connect() or pg_real_connect().
  * Unlike pg_connect_errno(), which returns an error code, pg_connect_error() returns a string
- * describing the error. This is useful for error handling, providing more detailed context about 
+ * describing the error. This is useful for error handling, providing more detailed context about
  * connection problems.
  *
  * @return string|null A string that describes the error from the last connection attempt, or NULL
@@ -470,7 +470,7 @@ function wpsqli_rollback(&$connection, $flags = 0, $name = null)
  *
  * This function is a wrapper for the pg_query function. The pg_query function performs
  * a query against the database and returns a result set for successful SELECT queries, or TRUE
- * for other successful DML queries such as INSERT, UPDATE, DELETE, etc. 
+ * for other successful DML queries such as INSERT, UPDATE, DELETE, etc.
  *
  * @param PgSql\Connection $connection The pg connection resource.
  * @param string $query The SQL query to be executed.
@@ -817,14 +817,14 @@ function wpsqli_fetch_object($result, $class = "stdClass", $constructor_args = [
  * Fetches one row of data from the result set and returns it as an enumerated array.
  * Each call to this function will retrieve the next row in the result set, so it's typically
  * used in a loop to process multiple rows.
- * 
+ *
  * This function is particularly useful when you need to retrieve a row as a simple array
  * where each column is accessed by an integer index starting at 0. It does not include
  * column names as keys, which can be marginally faster and less memory intensive than
  * associative arrays if the column names are not required.
- * 
+ *
  * @param \PgSql\Result $result The result set returned by a query against the database.
- * 
+ *
  * @return array|null Returns an enumerated array of strings representing the fetched row,
  * or NULL if there are no more rows in the result set.
  */
@@ -838,14 +838,14 @@ function wpsqli_fetch_row($result): ?array
  * $result object. This function can be used in conjunction with pg_fetch_row(),
  * pg_fetch_assoc(), pg_fetch_array(), or pg_fetch_object() to navigate between
  * rows in result sets, especially when using buffered result sets.
- * 
+ *
  * This is an important function for situations where you need to access a specific row
  * directly without iterating over all preceding rows, which can be useful for pagination
  * or when looking up specific rows by row number.
- * 
+ *
  * @param \PgSql\Result $result The result set returned by a query against the database.
  * @param int $row_number The desired row number to seek to. Row numbers are zero-indexed.
- * 
+ *
  * @return bool Returns TRUE on success or FALSE on failure. If the row number is out of range,
  * it returns FALSE.
  */
