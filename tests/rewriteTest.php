@@ -167,9 +167,6 @@ final class rewriteTest extends TestCase
         $this->assertSame(trim($postgresql), trim($expected));
     }
 
-  
-}
-
     protected function setUp(): void
     {
         global $wpdb;
