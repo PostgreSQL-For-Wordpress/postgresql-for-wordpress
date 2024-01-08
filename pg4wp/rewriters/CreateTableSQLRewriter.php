@@ -86,16 +86,24 @@ class CreateTableSQLRewriter extends AbstractSQLRewriter
         }
 
         // Support for UNIQUE INDEX creation
-        $pattern = '/,\s+(UNIQUE |)KEY\s+([^\s]+)\s+\(((?:[\w]+(?:\([\d]+\))?[,]?)*)\)/';
+        $pattern = '/,\s*(UNIQUE |)KEY\s+(`[^`]+`|\w+)\s+\(([^)]+)\)/';
         if(preg_match_all($pattern, $sql, $matches, PREG_SET_ORDER)) {
             foreach($matches as $match) {
                 $unique = $match[1];
                 $index = $match[2];
                 $columns = $match[3];
-                $columns = preg_replace('/\(\d+\)/', '', $columns);
-                // Workaround for index name duplicate
-                $index = $table . '_' . $index;
-                $sql .= "\nCREATE {$unique}INDEX $index ON $table ($columns);";
+
+               // Removing backticks from the index names
+                $index = str_replace('`', '', $index);
+
+                // Removing backticks from the columns
+                $columns = str_replace('`', '', $columns);
+
+                // Creating a unique index name
+                $indexName = $table . '_' . $index;
+
+                // Appending the CREATE INDEX statement to SQL
+                $sql .= "\nCREATE {$unique}INDEX $indexName ON $table ($columns);";
             }
         }
         // Now remove handled indexes
@@ -105,7 +113,7 @@ class CreateTableSQLRewriter extends AbstractSQLRewriter
         $pattern = "/(,\s*)?UNIQUE KEY\s+[a-zA-Z0-9_]+\s+(\([a-zA-Z0-9_,\s]+\))/";
         $replacement = "$1UNIQUE $2";
         $sql = preg_replace($pattern, $replacement, $sql);
-    
+
         return $sql;
     }
 }

@@ -21,7 +21,7 @@ final class rewriteTest extends TestCase
         $sql = 'SELECT COUNT(NULLIF(`meta_value` LIKE \'%"administrator"%\', false)), COUNT(NULLIF(`meta_value` = \'a:0:{}\', false)), COUNT(*) FROM wp_usermeta INNER JOIN wp_users ON user_id = ID WHERE meta_key = \'wp_capabilities\'';
         $expected = 'SELECT COUNT(NULLIF(meta_value ILIKE \'%"administrator"%\', false)) AS count0, COUNT(NULLIF(meta_value = \'a:0:{}\', false)) AS count1, COUNT(*) FROM wp_usermeta INNER JOIN wp_users ON user_id = "ID" WHERE meta_key = \'wp_capabilities\'';
         $postgresql = pg4wp_rewrite($sql);
-        $this->assertSame($postgresql, $expected);
+        $this->assertSame(trim($expected), trim($postgresql));
     }
 
 
@@ -31,10 +31,10 @@ final class rewriteTest extends TestCase
         $sql = 'SELECT COUNT(id), username FROM users';
         $expected = 'SELECT COUNT(id) AS count0, username FROM users GROUP BY username';
         $postgresql = pg4wp_rewrite($sql);
-        $this->assertSame($postgresql, $expected);
+        $this->assertSame(trim($expected), trim($postgresql));
     }
 
-    public function test_it_handles_auto_increment() 
+    public function test_it_handles_auto_increment()
     {
         $sql = <<<SQL
             CREATE TABLE wp_itsec_lockouts (
@@ -52,7 +52,7 @@ final class rewriteTest extends TestCase
                 PRIMARY KEY (lockout_id)
             )
         SQL;
-        
+
         $expected = <<<SQL
             CREATE TABLE wp_itsec_lockouts (
                 lockout_id bigserial, 
@@ -71,10 +71,10 @@ final class rewriteTest extends TestCase
         SQL;
 
         $postgresql = pg4wp_rewrite($sql);
-        $this->assertSame(trim($postgresql), trim($expected));
+        $this->assertSame(trim($expected), trim($postgresql));
     }
 
-    public function test_it_handles_auto_increment_without_null() 
+    public function test_it_handles_auto_increment_without_null()
     {
         $sql = <<<SQL
             CREATE TABLE wp_e_events (
@@ -83,7 +83,7 @@ final class rewriteTest extends TestCase
                     created_at timestamp not null
             )
         SQL;
-        
+
         $expected = <<<SQL
             CREATE TABLE wp_e_events (
                     id bigserial primary key,
@@ -93,11 +93,11 @@ final class rewriteTest extends TestCase
         SQL;
 
         $postgresql = pg4wp_rewrite($sql);
-        $this->assertSame(trim($postgresql), trim($expected));
+        $this->assertSame(trim($expected), trim($postgresql));
     }
 
 
-    public function test_it_handles_keys() 
+    public function test_it_handles_keys()
     {
         $sql = <<<SQL
             CREATE TABLE wp_itsec_dashboard_lockouts (
@@ -109,23 +109,23 @@ final class rewriteTest extends TestCase
                 UNIQUE KEY ip__time (ip, time)
             )
         SQL;
-        
+
         $expected = <<<SQL
             CREATE TABLE wp_itsec_dashboard_lockouts (
                 id serial,
                 ip varchar(40),
                 time timestamp NOT NULL,
                 count int NOT NULL,
-                PRIMARY KEY (id),
-                UNIQUE (ip, time)
+                PRIMARY KEY (id)
             );
+        CREATE UNIQUE INDEX wp_itsec_dashboard_lockouts_ip__time ON wp_itsec_dashboard_lockouts (ip, time);
         SQL;
 
         $postgresql = pg4wp_rewrite($sql);
-        $this->assertSame(trim($postgresql), trim($expected));
+        $this->assertSame(trim($expected), trim($postgresql));
     }
 
-    public function test_it_handles_keys_without_unique() 
+    public function test_it_handles_keys_without_unique()
     {
         $sql = <<<SQL
             CREATE TABLE wp_itsec_vulnerabilities (
@@ -144,7 +144,7 @@ final class rewriteTest extends TestCase
                 KEY last_seen (last_seen)
             )
         SQL;
-        
+
         $expected = <<<SQL
             CREATE TABLE wp_itsec_vulnerabilities (
                 id varchar(128) NOT NULL,
@@ -164,10 +164,10 @@ final class rewriteTest extends TestCase
         SQL;
 
         $postgresql = pg4wp_rewrite($sql);
-        $this->assertSame(trim($postgresql), trim($expected));
+        $this->assertSame(trim($expected), trim($postgresql));
     }
 
-    public function test_it_does_not_remove_if_not_exists() 
+    public function test_it_does_not_remove_if_not_exists()
     {
         $sql = <<<SQL
             CREATE TABLE IF NOT EXISTS wp_itsec_dashboard_lockouts (
@@ -179,24 +179,24 @@ final class rewriteTest extends TestCase
                 UNIQUE KEY ip__time (ip, time)
             )
         SQL;
-        
+
         $expected = <<<SQL
             CREATE TABLE IF NOT EXISTS wp_itsec_dashboard_lockouts (
                 id serial,
                 ip varchar(40),
                 time timestamp NOT NULL,
                 count int NOT NULL,
-                PRIMARY KEY (id),
-                UNIQUE (ip, time)
+                PRIMARY KEY (id)
             );
+        CREATE UNIQUE INDEX wp_itsec_dashboard_lockouts_ip__time ON wp_itsec_dashboard_lockouts (ip, time);
         SQL;
 
         $postgresql = pg4wp_rewrite($sql);
-        $this->assertSame(trim($postgresql), trim($expected));
+        $this->assertSame(trim($expected), trim($postgresql));
     }
 
 
-    public function test_it_removes_character_sets() 
+    public function test_it_removes_character_sets()
     {
         $sql = <<<SQL
             CREATE TABLE wp_statistics_useronline (
@@ -216,7 +216,7 @@ final class rewriteTest extends TestCase
                 PRIMARY KEY  (ID)
             ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci
         SQL;
-        
+
         $expected = <<<SQL
             CREATE TABLE wp_statistics_useronline (
                 "ID" bigserial,
@@ -237,9 +237,48 @@ final class rewriteTest extends TestCase
         SQL;
 
         $postgresql = pg4wp_rewrite($sql);
-        $this->assertSame(trim($postgresql), trim($expected));
+        $this->assertSame(trim($expected), trim($postgresql));
     }
 
+    public function test_it_handles_multiple_keys()
+    {
+        $sql = <<<SQL
+            CREATE TABLE wp_statistics_pages (
+                page_id BIGINT(20) NOT NULL AUTO_INCREMENT,
+                uri varchar(190) NOT NULL,
+                type varchar(180) NOT NULL,
+                date date NOT NULL,
+                count int(11) NOT NULL,
+                id int(11) NOT NULL,
+                UNIQUE KEY date_2 (date,uri),
+                KEY url (uri),
+                KEY date (date),
+                KEY id (id),
+                KEY `uri` (`uri`,`count`,`id`),
+                PRIMARY KEY (`page_id`)
+            ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci
+        SQL;
+
+        $expected = <<<SQL
+            CREATE TABLE wp_statistics_pages (
+                page_id bigserial,
+                uri varchar(190) NOT NULL,
+                type varchar(180) NOT NULL,
+                date date NOT NULL,
+                count int NOT NULL,
+                id int NOT NULL,
+                PRIMARY KEY (page_id)
+            );
+        CREATE UNIQUE INDEX wp_statistics_pages_date_2 ON wp_statistics_pages (date,uri);
+        CREATE INDEX wp_statistics_pages_url ON wp_statistics_pages (uri);
+        CREATE INDEX wp_statistics_pages_date ON wp_statistics_pages (date);
+        CREATE INDEX wp_statistics_pages_id ON wp_statistics_pages (id);
+        CREATE INDEX wp_statistics_pages_uri ON wp_statistics_pages (uri,count,id);
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql));
+    }
 
     protected function setUp(): void
     {
