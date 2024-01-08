@@ -17,8 +17,8 @@ class CreateTableSQLRewriter extends AbstractSQLRewriter
         'default \'0000-00-00 00:00:00\''	=> 'DEFAULT now()',
         '\'0000-00-00 00:00:00\''	=> 'now()',
         'datetime'		=> 'timestamp',
-        'DEFAULT CHARACTER SET utf8mb4' => '',
-        'DEFAULT CHARACTER SET utf8'	=> '',
+        ' DEFAULT CHARACTER SET utf8mb4' => '',
+        ' DEFAULT CHARACTER SET utf8'	=> '',
 
         // WP 2.7.1 compatibility
         ' int(4)'		=> ' smallint',
@@ -27,8 +27,9 @@ class CreateTableSQLRewriter extends AbstractSQLRewriter
         ' tinyint(2)'	=> ' smallint',
         ' tinyint(1)'	=> ' smallint',
         " enum('0','1')"	=> ' smallint',
-        'COLLATE utf8mb4_unicode_520_ci'	=> '',
-        'COLLATE utf8_general_ci'	=> '',
+        ' COLLATE utf8mb4_unicode_520_ci'	=> '',
+        ' COLLATE utf8_general_ci'	=> '',
+        ' CHARACTER SET utf8' => '',
 
         // For flash-album-gallery plugin
         ' tinyint'		=> ' smallint'

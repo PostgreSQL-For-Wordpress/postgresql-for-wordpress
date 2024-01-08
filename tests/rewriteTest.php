@@ -195,6 +195,52 @@ final class rewriteTest extends TestCase
         $this->assertSame(trim($postgresql), trim($expected));
     }
 
+
+    public function test_it_removes_character_sets() 
+    {
+        $sql = <<<SQL
+            CREATE TABLE wp_statistics_useronline (
+                ID bigint(20) NOT NULL AUTO_INCREMENT,
+                ip varchar(60) NOT NULL,
+                created int(11),
+                timestamp int(10) NOT NULL,
+                date datetime NOT NULL,
+                referred text CHARACTER SET utf8 NOT NULL,
+                agent varchar(255) NOT NULL,
+                platform varchar(255),
+                version varchar(255),
+                location varchar(10),
+                `user_id` BIGINT(48) NOT NULL,
+                `page_id` BIGINT(48) NOT NULL,
+                `type` VARCHAR(100) NOT NULL,
+                PRIMARY KEY  (ID)
+            ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci
+        SQL;
+        
+        $expected = <<<SQL
+            CREATE TABLE wp_statistics_useronline (
+                "ID" bigserial,
+                ip varchar(60) NOT NULL,
+                created int,
+                timestamp int NOT NULL,
+                date timestamp NOT NULL,
+                referred text NOT NULL,
+                agent varchar(255) NOT NULL,
+                platform varchar(255),
+                version varchar(255),
+                location varchar(10),
+                user_id BIGINT(48) NOT NULL,
+                page_id BIGINT(48) NOT NULL,
+                type VARCHAR(100) NOT NULL,
+                PRIMARY KEY  ( "ID" )
+            );
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($postgresql), trim($expected));
+    }
+
+
     protected function setUp(): void
     {
         global $wpdb;
