@@ -30,6 +30,7 @@ class CreateTableSQLRewriter extends AbstractSQLRewriter
         ' COLLATE utf8mb4_unicode_520_ci'	=> '',
         ' COLLATE utf8_general_ci'	=> '',
         ' CHARACTER SET utf8' => '',
+        ' DEFAULT CHARSET=utf8' => '',
 
         // For flash-album-gallery plugin
         ' tinyint'		=> ' smallint'
@@ -46,7 +47,12 @@ class CreateTableSQLRewriter extends AbstractSQLRewriter
         $table = $matches[1];
 
         // Remove trailing spaces
-        $sql = trim($sql) . ';';
+        $sql = trim($sql);
+
+        // Add a slash if needed
+        if (substr($sql,strlen($sql)-1, 1) != ";") {
+            $sql = $sql . ";";
+        }
 
         // Translate types and some other replacements
         $sql = str_ireplace(

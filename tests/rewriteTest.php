@@ -280,6 +280,32 @@ final class rewriteTest extends TestCase
         $this->assertSame(trim($expected), trim($postgresql));
     }
 
+    
+    public function test_it_removes_table_charsets()
+    {
+        $sql = <<<SQL
+            CREATE TABLE `wp_yoast_migrations` (
+                `id` int(11) UNSIGNED auto_increment NOT NULL,
+                `version` varchar(191),
+                PRIMARY KEY (`id`)
+            ) DEFAULT CHARSET=utf8;
+        SQL;
+
+        $expected = <<<SQL
+            CREATE TABLE wp_yoast_migrations (
+                id serial NOT NULL,
+                version varchar(191),
+                PRIMARY KEY (id)
+            );
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql));
+    }
+
+
+    
+
     protected function setUp(): void
     {
         global $wpdb;
