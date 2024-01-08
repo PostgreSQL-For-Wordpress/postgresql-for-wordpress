@@ -167,6 +167,34 @@ final class rewriteTest extends TestCase
         $this->assertSame(trim($postgresql), trim($expected));
     }
 
+    public function test_it_does_not_remove_if_not_exists() 
+    {
+        $sql = <<<SQL
+            CREATE TABLE IF NOT EXISTS wp_itsec_dashboard_lockouts (
+                id int NOT NULL AUTO_INCREMENT,
+                ip varchar(40),
+                time timestamp NOT NULL,
+                count int NOT NULL,
+                PRIMARY KEY (id),
+                UNIQUE KEY ip__time (ip, time)
+            )
+        SQL;
+        
+        $expected = <<<SQL
+            CREATE TABLE IF NOT EXISTS wp_itsec_dashboard_lockouts (
+                id serial,
+                ip varchar(40),
+                time timestamp NOT NULL,
+                count int NOT NULL,
+                PRIMARY KEY (id),
+                UNIQUE (ip, time)
+            );
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($postgresql), trim($expected));
+    }
+
     protected function setUp(): void
     {
         global $wpdb;
