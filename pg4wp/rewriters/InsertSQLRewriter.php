@@ -99,7 +99,7 @@ class InsertSQLRewriter extends AbstractSQLRewriter
                 }
 
                 // Construct the PostgreSQL ON CONFLICT DO UPDATE section
-                $updateSection = implode(', ', array_map(fn($col) => "$col = EXCLUDED.$col", $updateCols));
+                $updateSection = implode(', ', array_map(fn ($col) => "$col = EXCLUDED.$col", $updateCols));
 
                 // Construct the PostgreSQL query
                 $postgresSQL = sprintf('%s %s ON CONFLICT (%s) DO UPDATE SET %s', $tableSection, $valuesSection, $primaryKey, $updateSection);
