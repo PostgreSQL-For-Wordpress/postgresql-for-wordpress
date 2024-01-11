@@ -92,7 +92,7 @@ class CreateTableSQLRewriter extends AbstractSQLRewriter
         }
 
         // Support for UNIQUE INDEX creation
-        $pattern = '/,\s*(UNIQUE |)KEY\s+(`[^`]+`|\w+)\s+\((.*?)\)(?!\))/';
+        $pattern = '/,\s*(UNIQUE |)KEY\s+(`[^`]+`|\w+)\s+\(((?:[^()]|\([^)]*\))*)\)/';
         if(preg_match_all($pattern, $sql, $matches, PREG_SET_ORDER)) {
             foreach($matches as $match) {
                 $unique = $match[1];

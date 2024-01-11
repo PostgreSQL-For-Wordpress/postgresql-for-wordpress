@@ -333,6 +333,54 @@ final class rewriteTest extends TestCase
         $postgresql = pg4wp_rewrite($sql);
         $this->assertSame(trim($expected), trim($postgresql));
     }
+    
+
+
+    public function test_it_can_create_double_keys_with_length()
+    {
+        $sql = <<<SQL
+            CREATE TABLE wp_blogs (
+                blog_id bigint(20) NOT NULL auto_increment,
+                site_id bigint(20) NOT NULL default '0',
+                domain varchar(200) NOT NULL default '',
+                path varchar(100) NOT NULL default '',
+                registered datetime NOT NULL default '0000-00-00 00:00:00',
+                last_updated datetime NOT NULL default '0000-00-00 00:00:00',
+                public tinyint(2) NOT NULL default '1',
+                archived tinyint(2) NOT NULL default '0',
+                mature tinyint(2) NOT NULL default '0',
+                spam tinyint(2) NOT NULL default '0',
+                deleted tinyint(2) NOT NULL default '0',
+                lang_id int(11) NOT NULL default '0',
+                PRIMARY KEY  (blog_id),
+                KEY domain (domain(50),path(5)),
+                KEY lang_id (lang_id)
+            ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci
+        SQL;
+
+        $expected = <<<SQL
+            CREATE TABLE wp_blogs (
+                blog_id bigserial,
+                site_id bigint NOT NULL default '0',
+                domain varchar(200) NOT NULL default '',
+                path varchar(100) NOT NULL default '',
+                registered timestamp NOT NULL DEFAULT now(),
+                last_updated timestamp NOT NULL DEFAULT now(),
+                public smallint NOT NULL default '1',
+                archived smallint NOT NULL default '0',
+                mature smallint NOT NULL default '0',
+                spam smallint NOT NULL default '0',
+                deleted smallint NOT NULL default '0',
+                lang_id int NOT NULL default '0',
+                PRIMARY KEY  (blog_id)
+            );
+        CREATE INDEX wp_blogs_domain ON wp_blogs (domain,path);
+        CREATE INDEX wp_blogs_lang_id ON wp_blogs (lang_id);
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql));
+    }
 
     
 
