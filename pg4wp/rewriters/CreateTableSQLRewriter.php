@@ -50,7 +50,7 @@ class CreateTableSQLRewriter extends AbstractSQLRewriter
         $sql = trim($sql);
 
         // Add a slash if needed
-        if (substr($sql,strlen($sql)-1, 1) != ";") {
+        if (substr($sql, strlen($sql) - 1, 1) != ";") {
             $sql = $sql . ";";
         }
 
@@ -92,18 +92,18 @@ class CreateTableSQLRewriter extends AbstractSQLRewriter
         }
 
         // Support for UNIQUE INDEX creation
-        $pattern = '/,\s*(UNIQUE |)KEY\s+(`[^`]+`|\w+)\s+\(([^)]+)\)/';
+        $pattern = '/,\s*(UNIQUE |)KEY\s+(`[^`]+`|\w+)\s+\((.*?)\)(?!\))/';
         if(preg_match_all($pattern, $sql, $matches, PREG_SET_ORDER)) {
             foreach($matches as $match) {
                 $unique = $match[1];
                 $index = $match[2];
                 $columns = $match[3];
 
-               // Removing backticks from the index names
+                // Removing backticks from the index names
                 $index = str_replace('`', '', $index);
 
-                // Removing backticks from the columns
-                $columns = str_replace('`', '', $columns);
+                // Removing backticks and key length constraints from the columns
+                $columns = preg_replace(["/`/", "/\(\d+\)/"], '', $columns);
 
                 // Creating a unique index name
                 $indexName = $table . '_' . $index;

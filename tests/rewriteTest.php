@@ -304,6 +304,36 @@ final class rewriteTest extends TestCase
     }
 
 
+    public function test_it_can_create_keys_with_length()
+    {
+        $sql = <<<SQL
+            CREATE TABLE wp_usermeta (
+                umeta_id bigint(20) unsigned NOT NULL auto_increment,
+                user_id bigint(20) unsigned NOT NULL default '0',
+                meta_key varchar(255) default NULL,
+                meta_value longtext,
+                PRIMARY KEY (umeta_id),
+                KEY user_id (user_id),
+                KEY meta_key (meta_key(191))
+            ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci
+        SQL;
+
+        $expected = <<<SQL
+            CREATE TABLE wp_usermeta (
+                umeta_id bigserial,
+                user_id bigint  NOT NULL default '0',
+                meta_key varchar(255) default NULL,
+                meta_value text,
+                PRIMARY KEY (umeta_id)
+            );
+        CREATE INDEX wp_usermeta_user_id ON wp_usermeta (user_id);
+        CREATE INDEX wp_usermeta_meta_key ON wp_usermeta (meta_key);
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql));
+    }
+
     
 
     protected function setUp(): void
