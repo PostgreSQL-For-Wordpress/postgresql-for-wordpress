@@ -382,6 +382,27 @@ final class rewriteTest extends TestCase
         $this->assertSame(trim($expected), trim($postgresql));
     }
 
+    public function test_it_doesnt_rewrite_when_it_doesnt_need_to()
+    {
+        $sql = <<<SQL
+            SELECT p.ID FROM wp_posts p 
+            WHERE post_type='scheduled-action' 
+            AND p.post_status IN ('pending') 
+            AND p.post_modified_gmt <= '2023-11-27 14:23:34' 
+            AND p.post_password != '' ORDER BY p.post_date_gmt ASC LIMIT 0, 20
+        SQL;
+
+        $expected = <<<SQL
+            SELECT p."ID" , p.post_date_gmt FROM wp_posts p 
+            WHERE post_type='scheduled-action' 
+            AND p.post_status IN ('pending') 
+            AND p.post_modified_gmt <= '2023-11-27 14:23:34' 
+            AND p.post_password != '' ORDER BY p.post_date_gmt ASC LIMIT 20 OFFSET 0
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql));
+    }
 
 
     protected function setUp(): void
