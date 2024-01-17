@@ -1039,6 +1039,49 @@ function wpsqli_affected_rows(&$connection)
     return pg_affected_rows($result);
 }
 
+// Gets the list of sequences from postgres
+function wpsqli_get_list_of_sequences(&$connection)
+{
+    $sql = "SELECT sequencename FROM pg_sequences";
+    $result = pg_query($connection, $sql);
+    if(!$result) {
+        if (PG4WP_DEBUG || PG4WP_LOG) {
+            $log = "Unable to get list of sequences\n";
+            error_log($log, 3, PG4WP_LOG . 'pg4wp_errors.log');
+        }
+        return [];
+    }
+
+    $data = pg_fetch_all($result);
+    return array_column($data, 'sequencename');
+}
+
+// Get the primary sequence for a table
+function wpsqli_get_primary_sequence_for_table(&$connection, $table)
+{
+    // TODO: it should be possible to use a WP transient here for object caching
+    global $sequence_lookup;
+    if (empty($sequence_lookup)) {
+        $sequence_lookup = [];
+    }
+
+    if (isset($sequence_lookup[$table])) {
+        return $sequence_lookup[$table];
+    }
+
+    $sequences = wpsqli_get_list_of_sequences($connection);
+    foreach($sequences as $sequence) {
+        if (strncmp($sequence, $table, strlen($table)) === 0) {
+            $sequence_lookup[$table] = $sequence;
+            return $sequence;
+        }
+    }
+
+    // Fallback to default if we don't find a sequence
+    // Note: this will probably fail
+    return $table . '_seq';
+}
+
 /**
  * Fetches the ID generated for an AUTO_INCREMENT column by the previous INSERT query.
  *
@@ -1057,19 +1100,13 @@ function wpsqli_insert_id(&$connection = null)
     $ins_field = $GLOBALS['pg4wp_ins_field'];
     $table = $GLOBALS['pg4wp_ins_table'];
     $lastq = $GLOBALS['pg4wp_last_insert'];
-    $seq = $table . '_seq';
+    $seq = wpsqli_get_primary_sequence_for_table($connection, $table);
 
-    // Special case for 'term_relationships' table, which does not have a sequence in PostgreSQL.
-    if ($table == $wpdb->term_relationships) {
-        // PostgreSQL: Using CURRVAL() to get the current value of the sequence.
-        $sql = "SELECT CURRVAL('$seq')";
-        $res = pg_query($connection, $sql);
-        if (false !== $res) {
-            $data = pg_fetch_result($res, 0, 0);
-        }
-    }
     // Special case when using WP_Import plugin where ID is defined in the query itself.
-    elseif ('post_author' == $ins_field && false !== strpos($lastq, 'ID')) {
+    if($table == $wpdb->term_relationships) {
+        $sql = 'NO QUERY';
+        $data = 0;
+    } elseif ('post_author' == $ins_field && false !== strpos($lastq, 'ID')) {
         // No PostgreSQL specific operation here.
         $sql = 'ID was in query ';
         $pattern = '/.+\'(\d+).+$/';
@@ -1080,7 +1117,8 @@ function wpsqli_insert_id(&$connection = null)
         $GLOBALS['pg4wp_queued_query'] = "SELECT SETVAL('$seq',(SELECT MAX(\"ID\") FROM $table)+1);";
     } else {
         // PostgreSQL: Using CURRVAL() to get the current value of the sequence.
-        $sql = "SELECT CURRVAL('$seq')";
+        // Double quoting is needed to prevent seq from being lowercased automatically
+        $sql = "SELECT CURRVAL('\"$seq\"')";
         $res = pg_query($connection, $sql);
         if (false !== $res) {
             $data = pg_fetch_result($res, 0, 0);
