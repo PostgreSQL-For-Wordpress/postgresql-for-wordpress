@@ -53,7 +53,7 @@ function pg4wp_rewrite($sql)
 
             // When installing, the sequence for table terms has to be updated
             if(defined('WP_INSTALLING') && WP_INSTALLING && false !== strpos($sql, 'INSERT INTO `' . $wpdb->terms . '`')) {
-                $end .= ';SELECT setval(\'' . $wpdb->terms . '_seq\', (SELECT MAX(term_id) FROM ' . $wpdb->terms . ')+1);';
+                $end .= ';SELECT setval(\'' . $wpdb->terms . '_term_id_seq\', (SELECT MAX(term_id) FROM ' . $wpdb->terms . ')+1);';
             }
             break;
         case 'Insert':

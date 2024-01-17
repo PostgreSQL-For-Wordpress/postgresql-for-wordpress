@@ -54,7 +54,7 @@ final class rewriteTest extends TestCase
         SQL;
 
         $expected = <<<SQL
-            CREATE TABLE wp_itsec_lockouts (
+            CREATE TABLE IF NOT EXISTS wp_itsec_lockouts (
                 lockout_id bigserial, 
                 lockout_type varchar(25) NOT NULL, 
                 lockout_start timestamp NOT NULL, 
@@ -85,7 +85,7 @@ final class rewriteTest extends TestCase
         SQL;
 
         $expected = <<<SQL
-            CREATE TABLE wp_e_events (
+            CREATE TABLE IF NOT EXISTS wp_e_events (
                     id bigserial primary key,
                     event_data text null,
                     created_at timestamp not null
@@ -111,14 +111,14 @@ final class rewriteTest extends TestCase
         SQL;
 
         $expected = <<<SQL
-            CREATE TABLE wp_itsec_dashboard_lockouts (
+            CREATE TABLE IF NOT EXISTS wp_itsec_dashboard_lockouts (
                 id serial,
                 ip varchar(40),
                 time timestamp NOT NULL,
                 count int NOT NULL,
                 PRIMARY KEY (id)
             );
-        CREATE UNIQUE INDEX wp_itsec_dashboard_lockouts_ip__time ON wp_itsec_dashboard_lockouts (ip, time);
+        CREATE UNIQUE INDEX IF NOT EXISTS wp_itsec_dashboard_lockouts_ip__time ON wp_itsec_dashboard_lockouts (ip, time);
         SQL;
 
         $postgresql = pg4wp_rewrite($sql);
@@ -146,7 +146,7 @@ final class rewriteTest extends TestCase
         SQL;
 
         $expected = <<<SQL
-            CREATE TABLE wp_itsec_vulnerabilities (
+            CREATE TABLE IF NOT EXISTS wp_itsec_vulnerabilities (
                 id varchar(128) NOT NULL,
                 software_type varchar(20) NOT NULL,
                 software_slug varchar(255) NOT NULL,
@@ -158,9 +158,9 @@ final class rewriteTest extends TestCase
                 details text NOT NULL,
                 PRIMARY KEY (id)
             );
-        CREATE INDEX wp_itsec_vulnerabilities_resolution ON wp_itsec_vulnerabilities (resolution);
-        CREATE INDEX wp_itsec_vulnerabilities_software_type ON wp_itsec_vulnerabilities (software_type);
-        CREATE INDEX wp_itsec_vulnerabilities_last_seen ON wp_itsec_vulnerabilities (last_seen);
+        CREATE INDEX IF NOT EXISTS wp_itsec_vulnerabilities_resolution ON wp_itsec_vulnerabilities (resolution);
+        CREATE INDEX IF NOT EXISTS wp_itsec_vulnerabilities_software_type ON wp_itsec_vulnerabilities (software_type);
+        CREATE INDEX IF NOT EXISTS wp_itsec_vulnerabilities_last_seen ON wp_itsec_vulnerabilities (last_seen);
         SQL;
 
         $postgresql = pg4wp_rewrite($sql);
@@ -188,7 +188,7 @@ final class rewriteTest extends TestCase
                 count int NOT NULL,
                 PRIMARY KEY (id)
             );
-        CREATE UNIQUE INDEX wp_itsec_dashboard_lockouts_ip__time ON wp_itsec_dashboard_lockouts (ip, time);
+        CREATE UNIQUE INDEX IF NOT EXISTS wp_itsec_dashboard_lockouts_ip__time ON wp_itsec_dashboard_lockouts (ip, time);
         SQL;
 
         $postgresql = pg4wp_rewrite($sql);
@@ -218,7 +218,7 @@ final class rewriteTest extends TestCase
         SQL;
 
         $expected = <<<SQL
-            CREATE TABLE wp_statistics_useronline (
+            CREATE TABLE IF NOT EXISTS wp_statistics_useronline (
                 "ID" bigserial,
                 ip varchar(60) NOT NULL,
                 created int,
@@ -260,7 +260,7 @@ final class rewriteTest extends TestCase
         SQL;
 
         $expected = <<<SQL
-            CREATE TABLE wp_statistics_pages (
+            CREATE TABLE IF NOT EXISTS wp_statistics_pages (
                 page_id bigserial,
                 uri varchar(190) NOT NULL,
                 type varchar(180) NOT NULL,
@@ -269,18 +269,18 @@ final class rewriteTest extends TestCase
                 id int NOT NULL,
                 PRIMARY KEY (page_id)
             );
-        CREATE UNIQUE INDEX wp_statistics_pages_date_2 ON wp_statistics_pages (date,uri);
-        CREATE INDEX wp_statistics_pages_url ON wp_statistics_pages (uri);
-        CREATE INDEX wp_statistics_pages_date ON wp_statistics_pages (date);
-        CREATE INDEX wp_statistics_pages_id ON wp_statistics_pages (id);
-        CREATE INDEX wp_statistics_pages_uri ON wp_statistics_pages (uri,count,id);
+        CREATE UNIQUE INDEX IF NOT EXISTS wp_statistics_pages_date_2 ON wp_statistics_pages (date,uri);
+        CREATE INDEX IF NOT EXISTS wp_statistics_pages_url ON wp_statistics_pages (uri);
+        CREATE INDEX IF NOT EXISTS wp_statistics_pages_date ON wp_statistics_pages (date);
+        CREATE INDEX IF NOT EXISTS wp_statistics_pages_id ON wp_statistics_pages (id);
+        CREATE INDEX IF NOT EXISTS wp_statistics_pages_uri ON wp_statistics_pages (uri,count,id);
         SQL;
 
         $postgresql = pg4wp_rewrite($sql);
         $this->assertSame(trim($expected), trim($postgresql));
     }
 
-    
+
     public function test_it_removes_table_charsets()
     {
         $sql = <<<SQL
@@ -319,21 +319,21 @@ final class rewriteTest extends TestCase
         SQL;
 
         $expected = <<<SQL
-            CREATE TABLE wp_usermeta (
+            CREATE TABLE IF NOT EXISTS wp_usermeta (
                 umeta_id bigserial,
                 user_id bigint  NOT NULL default '0',
                 meta_key varchar(255) default NULL,
                 meta_value text,
                 PRIMARY KEY (umeta_id)
             );
-        CREATE INDEX wp_usermeta_user_id ON wp_usermeta (user_id);
-        CREATE INDEX wp_usermeta_meta_key ON wp_usermeta (meta_key);
+        CREATE INDEX IF NOT EXISTS wp_usermeta_user_id ON wp_usermeta (user_id);
+        CREATE INDEX IF NOT EXISTS wp_usermeta_meta_key ON wp_usermeta (meta_key);
         SQL;
 
         $postgresql = pg4wp_rewrite($sql);
         $this->assertSame(trim($expected), trim($postgresql));
     }
-    
+
 
 
     public function test_it_can_create_double_keys_with_length()
@@ -359,7 +359,7 @@ final class rewriteTest extends TestCase
         SQL;
 
         $expected = <<<SQL
-            CREATE TABLE wp_blogs (
+            CREATE TABLE IF NOT EXISTS wp_blogs (
                 blog_id bigserial,
                 site_id bigint NOT NULL default '0',
                 domain varchar(200) NOT NULL default '',
@@ -374,15 +374,15 @@ final class rewriteTest extends TestCase
                 lang_id int NOT NULL default '0',
                 PRIMARY KEY  (blog_id)
             );
-        CREATE INDEX wp_blogs_domain ON wp_blogs (domain,path);
-        CREATE INDEX wp_blogs_lang_id ON wp_blogs (lang_id);
+        CREATE INDEX IF NOT EXISTS wp_blogs_domain ON wp_blogs (domain,path);
+        CREATE INDEX IF NOT EXISTS wp_blogs_lang_id ON wp_blogs (lang_id);
         SQL;
 
         $postgresql = pg4wp_rewrite($sql);
         $this->assertSame(trim($expected), trim($postgresql));
     }
 
-    
+
 
     protected function setUp(): void
     {

@@ -46,6 +46,11 @@ class CreateTableSQLRewriter extends AbstractSQLRewriter
         preg_match($pattern, $tableSQL, $matches);
         $table = $matches[1];
 
+        // change all creates into create if not exists
+        $pattern = "/CREATE TABLE (IF NOT EXISTS )?(\w+)\s*\(/i";
+        $replacement = 'CREATE TABLE IF NOT EXISTS $2 (';
+        $sql = preg_replace($pattern, $replacement, $sql);
+
         // Remove trailing spaces
         $sql = trim($sql);
 
@@ -109,7 +114,7 @@ class CreateTableSQLRewriter extends AbstractSQLRewriter
                 $indexName = $table . '_' . $index;
 
                 // Appending the CREATE INDEX statement to SQL
-                $sql .= "\nCREATE {$unique}INDEX $indexName ON $table ($columns);";
+                $sql .= "\nCREATE {$unique}INDEX IF NOT EXISTS $indexName ON $table ($columns);";
             }
         }
         // Now remove handled indexes
