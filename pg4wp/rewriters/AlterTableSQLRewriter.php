@@ -35,25 +35,59 @@ class AlterTableSQLRewriter extends AbstractSQLRewriter
     {
         $sql = $this->original();
 
+        if (str_contains($sql, 'ADD INDEX') || str_contains($sql, 'ADD UNIQUE INDEX')) {
+            $sql = $this->rewriteAddIndex($sql);
+            return $sql;
+        }
         if (str_contains($sql, 'CHANGE COLUMN')) {
             $sql = $this->rewriteChangeColumn($sql);
+            return $sql;
         }
         if (str_contains($sql, 'ALTER COLUMN')) {
             $sql = $this->rewriteAlterColumn($sql);
+            return $sql;
         }
         if (str_contains($sql, 'ADD COLUMN')) {
             $sql = $this->rewriteAddColumn($sql);
+            return $sql;
         }
         if (str_contains($sql, 'ADD KEY') || str_contains($sql, 'ADD UNIQUE KEY')) {
             $sql = $this->rewriteAddKey($sql);
+            return $sql;
         }
         if (str_contains($sql, 'DROP INDEX')) {
             $sql = $this->rewriteDropIndex($sql);
+            return $sql;
         }
         if (str_contains($sql, 'DROP PRIMARY KEY')) {
             $sql = $this->rewriteDropPrimaryKey($sql);
+            return $sql;
         }
 
+        return $sql;
+    }
+
+    private function rewriteAddIndex(string $sql): string 
+    {
+        $pattern = '/ALTER TABLE\s+(\w+)\s+ADD (UNIQUE |)INDEX\s+([^\s]+)\s+\(((?:[^\(\)]+|\([^\(\)]+\))+)\)/';
+
+        if(1 === preg_match($pattern, $sql, $matches)) {
+            $table = $matches[1];
+            $unique = $matches[2];
+            $index = $matches[3];
+            $columns = $matches[4];
+    
+            // Remove prefix indexing
+            // Rarely used and apparently unnecessary for current uses
+            $columns = preg_replace('/\([^\)]*\)/', '', $columns);
+    
+            // Workaround for index name duplicate
+            $index = $table . '_' . $index;
+            
+            // Add backticks around index name and column name, and include IF NOT EXISTS clause
+            $sql = "CREATE {$unique}INDEX IF NOT EXISTS `{$index}` ON `{$table}` (`{$columns}`)";
+        }
+    
         return $sql;
     }
 
@@ -168,7 +202,7 @@ class AlterTableSQLRewriter extends AbstractSQLRewriter
         if(1 === preg_match($pattern, $sql, $matches)) {
             $table = $matches[1];
             $index = $matches[2];
-            $sql = "DROP INDEX ${table}_${index}";
+            $sql = "DROP INDEX {$table}_{$index}";
         }
 
         return $sql;
@@ -180,7 +214,7 @@ class AlterTableSQLRewriter extends AbstractSQLRewriter
 
         if(1 === preg_match($pattern, $sql, $matches)) {
             $table = $matches[1];
-            $sql = "ALTER TABLE ${table} DROP CONSTRAINT ${table}_pkey";
+            $sql = "ALTER TABLE {$table} DROP CONSTRAINT {$table}_pkey";
         }
 
         return $sql;

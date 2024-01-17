@@ -404,6 +404,35 @@ final class rewriteTest extends TestCase
         $this->assertSame(trim($expected), trim($postgresql));
     }
 
+    public function test_it_handles_alter_tables_with_indexes() 
+    {
+        $sql = <<<SQL
+            ALTER TABLE wp_e_events ADD INDEX `created_at_index` (`created_at`)
+        SQL;
+
+        $expected = <<<SQL
+            CREATE INDEX IF NOT EXISTS wp_e_events_created_at_index ON wp_e_events (created_at)
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql));
+
+    }
+
+    public function test_it_handles_alter_tables_with_unique_indexes() 
+    {
+        $sql = <<<SQL
+            ALTER TABLE wp_e_events ADD UNIQUE INDEX `created_at_index` (`created_at`)
+        SQL;
+
+        $expected = <<<SQL
+            CREATE UNIQUE INDEX IF NOT EXISTS wp_e_events_created_at_index ON wp_e_events (created_at)
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql));
+    }
+
 
     protected function setUp(): void
     {
