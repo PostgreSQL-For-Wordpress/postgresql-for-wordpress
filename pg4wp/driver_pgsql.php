@@ -1059,9 +1059,20 @@ function wpsqli_get_list_of_sequences(&$connection)
 // Get the primary sequence for a table
 function wpsqli_get_primary_sequence_for_table(&$connection, $table)
 {
+    // TODO: it should be possible to use a WP transient here for object caching
+    global $sequence_lookup;
+    if (empty($sequence_lookup)) {
+        $sequence_lookup = [];
+    }
+
+    if (isset($sequence_lookup[$table])) {
+        return $sequence_lookup[$table];
+    }
+
     $sequences = wpsqli_get_list_of_sequences($connection);
     foreach($sequences as $sequence) {
         if (strncmp($sequence, $table, strlen($table)) === 0) {
+            $sequence_lookup[$table] = $sequence;
             return $sequence;
         }
     }
