@@ -433,6 +433,22 @@ final class rewriteTest extends TestCase
         $this->assertSame(trim($expected), trim($postgresql));
     }
 
+    public function test_it_doesnt_remove_single_quotes() 
+    {
+        $sql = <<<SQL
+            SELECT COUNT(*) FROM wp_comments WHERE user_id = 5 AND comment_approved = '1'
+        SQL;
+
+        $expected = <<<SQL
+            SELECT COUNT(*) FROM wp_comments WHERE user_id = 5 AND comment_approved = '1'
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql));
+    }
+
+
+    
 
     protected function setUp(): void
     {
