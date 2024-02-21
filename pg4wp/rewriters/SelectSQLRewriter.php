@@ -31,6 +31,16 @@ class SelectSQLRewriter extends AbstractSQLRewriter
             $sql = preg_replace('/SELECT\s+.*?\s+FROM\s+/is', 'SELECT COUNT(*) FROM ', $sql, 1);
         }
 
+        if(false !== strpos($sql, 'information_schema')) {
+            // WP Site Health rewrites
+            if (false !== strpos($sql, "SELECT TABLE_NAME AS 'table', TABLE_ROWS AS 'rows', SUM(data_length + index_length)")) {
+                $sql = $this->postgresTableSizeRewrite(); 
+                return $sql;
+            }
+
+            throw new Exception("Unsupported call to information_schema, this probably won't work correctly and needs to be specifically handled, open a github issue with the SQL");
+        }
+
         $sql = $this->ensureOrderByInSelect($sql);
 
         // Convert CONVERT to CAST
@@ -344,6 +354,31 @@ class SelectSQLRewriter extends AbstractSQLRewriter
         }
 
         // Return original query if no MySQL LIMIT syntax is found
+        return $sql;
+    }
+
+    // This method is specifically to handle should_suggest_persistent_object_cache in wp site health
+    protected function postgresTableSizeRewrite() 
+    {
+
+        $sql = <<<SQL
+        SELECT 
+            C.relname AS "table", 
+            S.n_live_tup AS "rows", 
+            pg_total_relation_size(C.oid) AS "bytes"
+        FROM 
+            pg_class C 
+        LEFT JOIN 
+            pg_namespace N ON (N.oid = C.relnamespace) 
+        INNER JOIN 
+            pg_stat_user_tables S ON (S.relid = C.oid) 
+        WHERE 
+            N.nspname = 'public' AND 
+            C.relname IN ('wp_comments','wp_options','wp_posts','wp_terms','wp_users')
+        GROUP BY 
+            C.relname, pg_total_relation_size(C.oid), S.n_live_tup;
+        SQL;
+
         return $sql;
     }
 
