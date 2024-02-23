@@ -64,7 +64,7 @@ final class rewriteTest extends TestCase
                 lockout_host varchar(40), 
                 lockout_user bigint , 
                 lockout_username varchar(60), 
-                lockout_active smallint NOT NULL DEFAULT 1, 
+                lockout_active int NOT NULL DEFAULT 1, 
                 lockout_context TEXT, 
                 PRIMARY KEY (lockout_id)
             );
