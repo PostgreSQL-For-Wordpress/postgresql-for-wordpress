@@ -42,9 +42,9 @@ class ShowTableStatusSQLRewriter extends AbstractSQLRewriter
             pg_namespace nsp ON cls.relnamespace = nsp.oid
         WHERE 
             cls.relkind = 'r' 
-            AND nsp.nspname NOT LIKE 'pg_%' -- Ignore schemas with names starting with pg_
-            AND nsp.nspname != 'information_schema' -- Ignore the information_schema
-            AND nsp.nspname = $schema -- Select only tables in the 'myschema' schema
+            AND nsp.nspname NOT LIKE 'pg_%' 
+            AND nsp.nspname != 'information_schema' 
+            AND nsp.nspname = '$schema' 
         ORDER BY 
             cls.relname ASC;
         SQL;

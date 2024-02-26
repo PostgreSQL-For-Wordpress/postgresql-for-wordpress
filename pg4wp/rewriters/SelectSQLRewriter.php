@@ -373,7 +373,7 @@ class SelectSQLRewriter extends AbstractSQLRewriter
         INNER JOIN 
             pg_stat_user_tables S ON (S.relid = C.oid) 
         WHERE 
-            N.nspname = $schema AND 
+            N.nspname = '$schema' AND 
             C.relname IN ('wp_comments','wp_options','wp_posts','wp_terms','wp_users')
         GROUP BY 
             C.relname, pg_total_relation_size(C.oid), S.n_live_tup;
