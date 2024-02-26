@@ -3,11 +3,6 @@
 class AlterTableSQLRewriter extends AbstractSQLRewriter
 {
     private $stringReplacements = [
-        ' bigint(40)'   => ' bigint',
-        ' bigint(20)'	=> ' bigint',
-        ' bigint(10)'	=> ' int',
-        ' int(11)'		=> ' int',
-        ' int(10)'      => ' int',
         ' tinytext'		=> ' text',
         ' mediumtext'	=> ' text',
         ' longtext'		=> ' text',
@@ -16,16 +11,15 @@ class AlterTableSQLRewriter extends AbstractSQLRewriter
         'default \'0000-00-00 00:00:00\''	=> 'DEFAULT now()',
         '\'0000-00-00 00:00:00\''	=> 'now()',
         ' datetime'		=> ' timestamp',
+        ' DEFAULT CHARACTER SET utf8mb4' => '',
         ' DEFAULT CHARACTER SET utf8'	=> '',
 
-        // WP 2.7.1 compatibility
-        ' int(4)'		=> ' smallint',
-
         // For WPMU (starting with WP 3.2)
-        ' tinyint(2)'	=> ' smallint',
-        ' tinyint(1)'	=> ' smallint',
         " enum('0','1')"	=> ' smallint',
+        ' COLLATE utf8mb4_unicode_520_ci'	=> '',
         ' COLLATE utf8_general_ci'	=> '',
+        ' CHARACTER SET utf8' => '',
+        ' DEFAULT CHARSET=utf8' => '',
 
         // For flash-album-gallery plugin
         ' tinyint'		=> ' smallint'
@@ -34,6 +28,8 @@ class AlterTableSQLRewriter extends AbstractSQLRewriter
     public function rewrite(): string
     {
         $sql = $this->original();
+
+        $sql = $this->rewrite_numeric_type($sql);
 
         if (str_contains($sql, 'CHANGE COLUMN')) {
             $sql = $this->rewriteChangeColumn($sql);
@@ -183,6 +179,52 @@ class AlterTableSQLRewriter extends AbstractSQLRewriter
             $sql = "ALTER TABLE ${table} DROP CONSTRAINT ${table}_pkey";
         }
 
+        return $sql;
+    }
+
+    private function rewrite_numeric_type($sql){
+        // Numeric types in MySQL which need to be rewritten
+        $numeric_types = ["bigint", "int", "integer", "smallint", "mediumint", "tinyint", "double", "decimal"];
+        $numeric_types_imploded = implode('|', $numeric_types);
+    
+        // Prepare regex pattern to match 'type(x)'
+        $pattern = "/(" . $numeric_types_imploded . ")\(\d+\)/";
+    
+        // Execute type find & replace 
+        $sql = preg_replace_callback($pattern, function ($matches) {
+            return $matches[1];
+        }, $sql);
+
+        // bigint
+        $pattern = '/bigint(\(\d+\))?([ ]*NOT NULL)?[ ]*auto_increment/i';
+        preg_match($pattern, $sql, $matches);
+        if($matches) {
+            $sql = preg_replace($pattern, 'bigserial', $sql);
+        }
+
+        // int
+        $pattern = '/int(\(\d+\))?([ ]*NOT NULL)?[ ]*auto_increment/i';
+        preg_match($pattern, $sql, $matches);
+        if($matches) {
+            $sql = preg_replace($pattern, 'serial', $sql);
+        }
+
+        // smallint
+        $pattern = '/smallint(\(\d+\))?([ ]*NOT NULL)?[ ]*auto_increment/i';
+        preg_match($pattern, $sql, $matches);
+        if($matches) {
+            $sql = preg_replace($pattern, 'smallserial', $sql);
+        }
+
+        // Handle for numeric and decimal -- being replaced with serial
+        $numeric_patterns = ['/numeric(\(\d+\))?([ ]*NOT NULL)?[ ]*auto_increment/i', '/decimal(\(\d+\))?([ ]*NOT NULL)?[ ]*auto_increment/i'];
+        foreach($numeric_patterns as $pattern) {
+            preg_match($pattern, $sql, $matches);
+            if($matches) {
+                $sql = preg_replace($pattern, 'serial', $sql);
+            }
+        }
+    
         return $sql;
     }
 }
