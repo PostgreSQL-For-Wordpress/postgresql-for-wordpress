@@ -1,5 +1,5 @@
 ---
-name: Issue
+name: SQL Rewriting Issue
 about: This is used for filing bugs or problems with PG4WP
 title: ''
 labels: ''
