@@ -383,6 +383,18 @@ final class rewriteTest extends TestCase
     }
 
 
+    public function test_it_can_handle_replacement_sql()
+    {
+        $sql = "REPLACE INTO test2 (column1, column2, column3) VALUES (1, 'Old', '2014-08-20 18:47:00')";
+        $expected = "INSERT INTO test2 (column1, column2, column3) VALUES (1, 'Old', '2014-08-20 18:47:00') ON CONFLICT (column1) DO UPDATE SET column2 = EXCLUDED.column2, column3 = EXCLUDED.column3";
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql));
+    }
+
+
+
+
 
     protected function setUp(): void
     {
