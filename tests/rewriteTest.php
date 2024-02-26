@@ -382,6 +382,39 @@ final class rewriteTest extends TestCase
         $this->assertSame(trim($expected), trim($postgresql));
     }
 
+    public function test_it_will_handle_found_rows_on_queries_with_order_by_case()
+    {
+        $GLOBALS['pg4wp_numrows_query'] = <<<SQL
+            SELECT wp_posts.ID
+            FROM wp_posts 
+            WHERE 1=1 AND 
+            (((wp_posts.post_title LIKE '%Hello%') OR (wp_posts.post_excerpt LIKE '%Hello%') OR (wp_posts.post_content LIKE '%Hello%')) AND 
+            ((wp_posts.post_title LIKE '%world%') OR (wp_posts.post_excerpt LIKE '%world%') OR (wp_posts.post_content LIKE '%world%'))) AND 
+            ((wp_posts.post_type = 'post' AND (wp_posts.post_status = 'publish' OR wp_posts.post_status = 'future' OR wp_posts.post_status = 'draft' OR wp_posts.post_status = 'pending' OR wp_posts.post_status = 'private'))) 
+            ORDER BY (CASE
+                WHEN wp_posts.post_title LIKE '%Hello world%' THEN 1 
+                WHEN wp_posts.post_title LIKE '%Hello%' AND wp_posts.post_title LIKE '%world%' THEN 2 
+                WHEN wp_posts.post_title LIKE '%Hello%' OR wp_posts.post_title LIKE '%world%' THEN 3 
+                WHEN wp_posts.post_excerpt LIKE '%Hello world%' THEN 4 
+                WHEN wp_posts.post_content LIKE '%Hello world%' THEN 5 ELSE 6 END), wp_posts.post_date 
+                DESC 
+            LIMIT 0, 20
+        SQL;
+
+        $sql = "SELECT FOUND_ROWS()";
+
+        $expected = <<<SQL
+            SELECT COUNT(*) FROM wp_posts 
+            WHERE 1=1 AND 
+            (((wp_posts.post_title ILIKE '%Hello%') OR (wp_posts.post_excerpt ILIKE '%Hello%') OR (wp_posts.post_content ILIKE '%Hello%')) AND 
+            ((wp_posts.post_title ILIKE '%world%') OR (wp_posts.post_excerpt ILIKE '%world%') OR (wp_posts.post_content ILIKE '%world%'))) AND 
+            ((wp_posts.post_type = 'post' AND (wp_posts.post_status = 'publish' OR wp_posts.post_status = 'future' OR wp_posts.post_status = 'draft' OR wp_posts.post_status = 'pending' OR wp_posts.post_status = 'private')))
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql));
+    }
+
 
     public function test_it_can_handle_replacement_sql()
     {

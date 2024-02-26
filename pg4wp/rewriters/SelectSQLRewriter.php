@@ -24,6 +24,9 @@ class SelectSQLRewriter extends AbstractSQLRewriter
             // Remove the LIMIT clause if it exists
             $sql = preg_replace('/\s+LIMIT\s+\d+(\s*,\s*\d+)?/i', '', $sql);
 
+            // Remove the ORDER BY containing case / end clause if it exists
+            $sql = preg_replace('/\s+ORDER\s+BY\s+.+END\),[^)]+/is', '', $sql);
+
             // Remove the ORDER BY clause if it exists
             $sql = preg_replace('/\s+ORDER\s+BY\s+[^)]+/i', '', $sql);
 
