@@ -19,7 +19,7 @@ it replaces calls to mysqli_ with wpsqli_ which then are implemented by the driv
 ### Supported Wordpress Versions
 
 This plugin has been tested against 
-- Wordpress 6.4.1 (v3 branch)
+- Wordpress 6.4.3 (v3 branch)
 - Wordpress 6.3.2 (v2 branch)
 
 ### Supported PHP versions
