@@ -533,16 +533,16 @@ function wpsqli_query(&$connection, $query, $result_mode = 0)
     $GLOBALS['pg4wp_conn'] = $connection;
     $GLOBALS['pg4wp_result'] = $result;
 
-    if (false !== str_post("INSERT INTO")) {
+    if (false !== strpos($sql, "INSERT INTO")) {
         $matches = array();
-        preg_match("/^INSERT INTO ([a-z0-9_]+)/i", $query, $matches);
+        preg_match("/^INSERT INTO\s+`?([a-z0-9_]+)`?/i", $query, $matches);
         $tableName = $matches[1];
 
-        if (false !== str_pos($sql, "RETURNING")) {
-            $primaryKey = $this->get_primary_key_for_table($connection, $tableName);
+        if (false !== strpos($sql, "RETURNING")) {
+            $primaryKey = get_primary_key_for_table($connection, $tableName);
             $row = pg_fetch_assoc($result);
 
-            $GLOBALS['pg4wp_ins_id'] = $row[$primaryKey]; 
+            $GLOBALS['pg4wp_ins_id'] = $row[$primaryKey];
         }
     }
 
