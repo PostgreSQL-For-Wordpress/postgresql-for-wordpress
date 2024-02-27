@@ -119,6 +119,43 @@ class InsertSQLRewriter extends AbstractSQLRewriter
             $sql = utf8_encode($sql);
         }
 
+        if(false === strpos($sql, 'RETURNING')) {
+            $end_of_statement = $this->findSemicolon($sql);
+            if ($end_of_statement !== false) {
+                // Create the substrings up to and after the semicolon
+                $sql_before_semicolon = substr($sql, 0, $end_of_statement);
+                $sql_after_semicolon = substr($sql, $end_of_statement, strlen($sql));
+
+                // Splice the SQL string together with 'RETURNING *'
+                $sql = $sql_before_semicolon . ' RETURNING *' . $sql_after_semicolon;
+
+            } else {
+                $sql = $sql .=" RETURNING *";
+            }
+        }
+
         return $sql;
+    }
+
+    // finds semicolons that aren't in variables
+    private function findSemicolon($sql) {
+        $quoteOpened = false;
+        $parenthesisDepth = 0;
+    
+        $sqlAsArray = str_split($sql);
+        for($i=0; $i<count($sqlAsArray); $i++) {
+            if(($sqlAsArray[$i] == '"' || $sqlAsArray[$i]=="'") && ($i == 0 || $sqlAsArray[$i-1]!='\\'))
+                $quoteOpened = !$quoteOpened; 
+    
+            else if($sqlAsArray[$i] == '(' && !$quoteOpened)
+                $parenthesisDepth++;
+    
+            else if($sqlAsArray[$i] == ')' && !$quoteOpened)
+                $parenthesisDepth--;
+    
+            else if($sqlAsArray[$i] == ';' && !$quoteOpened && $parenthesisDepth == 0) 
+                return $i;
+        }
+        return false;
     }
 }

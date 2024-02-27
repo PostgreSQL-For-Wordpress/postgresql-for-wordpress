@@ -16,6 +16,7 @@ $GLOBALS['pg4wp_result'] = 0;
 $GLOBALS['pg4wp_numrows_query'] = '';
 $GLOBALS['pg4wp_ins_table'] = '';
 $GLOBALS['pg4wp_ins_field'] = '';
+$GLOBALS['pg4wp_ins_id'] = '';
 $GLOBALS['pg4wp_last_insert'] = '';
 $GLOBALS['pg4wp_connstr'] = '';
 $GLOBALS['pg4wp_conn'] = false;
@@ -465,6 +466,23 @@ function wpsqli_rollback(&$connection, $flags = 0, $name = null)
     pg_query($connection, "ROLLBACK");
 }
 
+function get_primary_key_for_table(&$connection, $table) 
+{
+    $query = <<<SQL
+    SELECT a.attname
+        FROM   pg_index i
+        JOIN   pg_attribute a ON a.attrelid = i.indrelid
+                            AND a.attnum = ANY(i.indkey)
+        WHERE  i.indrelid = '$table'::regclass
+        AND    i.indisprimary
+    SQL;
+
+    $result = pg_query($connection, $query);
+
+    $row = pg_fetch_row($result);
+    return $row[0];
+}
+
 /**
  * Performs a query against the database.
  *
@@ -514,6 +532,19 @@ function wpsqli_query(&$connection, $query, $result_mode = 0)
 
     $GLOBALS['pg4wp_conn'] = $connection;
     $GLOBALS['pg4wp_result'] = $result;
+
+    if (false !== str_post("INSERT INTO")) {
+        $matches = array();
+        preg_match("/^INSERT INTO ([a-z0-9_]+)/i", $query, $matches);
+        $tableName = $matches[1];
+
+        if (false !== str_pos($sql, "RETURNING")) {
+            $primaryKey = $this->get_primary_key_for_table($connection, $tableName);
+            $row = pg_fetch_assoc($result);
+
+            $GLOBALS['pg4wp_ins_id'] = $row[$primaryKey]; 
+        }
+    }
 
     return $result;
 }
@@ -1077,9 +1108,8 @@ function wpsqli_get_primary_sequence_for_table(&$connection, $table)
         }
     }
 
-    // Fallback to default if we don't find a sequence
-    // Note: this will probably fail
-    return $table . '_seq';
+    // we didn't find a sequence for this table. 
+    return null;
 }
 
 /**
@@ -1115,8 +1145,12 @@ function wpsqli_insert_id(&$connection = null)
 
         // PostgreSQL: Setting the value of the sequence based on the latest inserted ID.
         $GLOBALS['pg4wp_queued_query'] = "SELECT SETVAL('$seq',(SELECT MAX(\"ID\") FROM $table)+1);";
+    } elseif($GLOBALS['pg4wp_ins_id']) {
+        return $GLOBALS['pg4wp_ins_id']; 
+    } elseif(empty($sql)) {
+        $sql = 'NO QUERY';
+        $data = 0; 
     } else {
-        // PostgreSQL: Using CURRVAL() to get the current value of the sequence.
         // Double quoting is needed to prevent seq from being lowercased automatically
         $sql = "SELECT CURRVAL('\"$seq\"')";
         $res = pg_query($connection, $sql);

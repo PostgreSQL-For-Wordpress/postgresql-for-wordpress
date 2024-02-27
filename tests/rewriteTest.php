@@ -415,6 +415,31 @@ final class rewriteTest extends TestCase
         $this->assertSame(trim($expected), trim($postgresql));
     }
 
+    public function test_it_will_append_returning_id_to_insert_statements()
+    {
+        $sql = <<<SQL
+            INSERT INTO wp_translations_term_relations (
+                object_id, 
+                object_lang, 
+                source_id) 
+            VALUES (%d, %s, %d) 
+            ON DUPLICATE KEY 
+            UPDATE object_id=VALUES(object_id), object_lang=VALUES(object_lang), source_id=VALUES(source_id);
+        SQL;
+
+        $expected = <<<SQL
+            INSERT INTO wp_translations_term_relations (
+                object_id, 
+                object_lang, 
+                source_id) 
+            VALUES (%d, %s, %d) 
+            ON DUPLICATE KEY 
+            UPDATE object_id=VALUES(object_id), object_lang=VALUES(object_lang), source_id=VALUES(source_id) RETURNING *;
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql));
+    }
 
     public function test_it_can_handle_replacement_sql()
     {
