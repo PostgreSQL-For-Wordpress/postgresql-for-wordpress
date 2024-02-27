@@ -281,7 +281,7 @@ class AlterTableSQLRewriter extends AbstractSQLRewriter
             };
 
             // Replace protected column names with quoted versions within columns and keys part
-            $columnsAndKeys = preg_replace_callback($regex, $callback, $columnsAndKeys, 1);
+            $columnsAndKeys = preg_replace_callback($regex, $callback, $columnsAndKeys);
             return $prefix . $columnsAndKeys . $suffix;
         }
 

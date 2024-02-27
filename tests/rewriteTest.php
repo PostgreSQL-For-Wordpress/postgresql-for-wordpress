@@ -114,7 +114,7 @@ final class rewriteTest extends TestCase
             CREATE TABLE IF NOT EXISTS wp_itsec_dashboard_lockouts (
                 id serial,
                 ip varchar(40),
-                time timestamp NOT NULL,
+                "time" timestamp NOT NULL,
                 count int NOT NULL,
                 PRIMARY KEY (id)
             );
@@ -184,7 +184,7 @@ final class rewriteTest extends TestCase
             CREATE TABLE IF NOT EXISTS wp_itsec_dashboard_lockouts (
                 id serial,
                 ip varchar(40),
-                time timestamp NOT NULL,
+                "time" timestamp NOT NULL,
                 count int NOT NULL,
                 PRIMARY KEY (id)
             );
@@ -222,8 +222,8 @@ final class rewriteTest extends TestCase
                 "ID" bigserial,
                 ip varchar(60) NOT NULL,
                 created int,
-                timestamp int NOT NULL,
-                date timestamp NOT NULL,
+                "timestamp" int NOT NULL,
+                "date" timestamp NOT NULL,
                 referred text NOT NULL,
                 agent varchar(255) NOT NULL,
                 platform varchar(255),
@@ -264,7 +264,7 @@ final class rewriteTest extends TestCase
                 page_id bigserial,
                 uri varchar(190) NOT NULL,
                 type varchar(180) NOT NULL,
-                date date NOT NULL,
+                "date" date NOT NULL,
                 count int NOT NULL,
                 id int NOT NULL,
                 PRIMARY KEY (page_id)
