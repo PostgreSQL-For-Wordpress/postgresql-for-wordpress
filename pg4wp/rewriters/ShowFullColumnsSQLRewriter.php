@@ -28,9 +28,10 @@ class ShowFullColumnsSQLRewriter extends AbstractSQLRewriter
      * Generates a PostgreSQL-compatible SQL query to mimic MySQL's "SHOW FULL COLUMNS".
      *
      * @param string $tableName The table name
+     * @param string $schema The schema name
      * @return string The generated SQL query
      */
-    public function generatePostgresShowColumns($tableName)
+    public function generatePostgresShowColumns($tableName, $schema = "public")
     {
         $sql = <<<SQL
             SELECT 
@@ -62,7 +63,7 @@ class ShowFullColumnsSQLRewriter extends AbstractSQLRewriter
                     FROM pg_catalog.pg_class c
                     LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
                     WHERE c.relname = '$tableName'
-                    AND n.nspname = 'public'
+                    AND n.nspname = '$schema'
                 )
             ORDER BY 
                 a.attnum;

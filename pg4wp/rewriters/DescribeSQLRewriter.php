@@ -28,9 +28,10 @@ class DescribeSQLRewriter extends AbstractSQLRewriter
      * Generates a PostgreSQL-compatible SQL query to mimic MySQL's "DESCRIBE".
      *
      * @param string $tableName The table name
+     * @param string $schema The schema name
      * @return string The generated SQL query
      */
-    public function generatePostgresDescribeTable($tableName)
+    public function generatePostgresDescribeTable($tableName, $schema = "public")
     {
         $sql = <<<SQL
             SELECT  
@@ -70,7 +71,7 @@ class DescribeSQLRewriter extends AbstractSQLRewriter
                 LEFT JOIN pg_constraint p ON p.conrelid = c.oid AND f.attnum = ANY (p.conkey)  
                 LEFT JOIN pg_class AS g ON p.confrelid = g.oid  
             WHERE c.relkind = 'r'::char  
-                AND n.nspname = 'public' 
+                AND n.nspname = '$schema' 
                 AND c.relname = '$tableName'
                 AND f.attnum > 0 ORDER BY number
         SQL;
