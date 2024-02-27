@@ -61,12 +61,12 @@ class ReplaceIntoSQLRewriter extends AbstractSQLRewriter
             // Extract SQL components
             $tableSection = trim(substr($statement, $insertIndex, $columnsStartIndex - $insertIndex));
             $valuesSection = trim(substr($statement, $valuesIndex, strlen($statement) - $valuesIndex));
-            $columnsSection = trim(substr($statement, $columnsStartIndex, $columnsEndIndex - $columnsStartIndex + 1)); 
+            $columnsSection = trim(substr($statement, $columnsStartIndex, $columnsEndIndex - $columnsStartIndex + 1));
 
             // Extract and clean up column names from the update section
             $updateCols = explode(',', substr($columnsSection, 1, strlen($columnsSection) - 2));
             $updateCols = array_map(function ($col) {
-                return  trim($col); 
+                return  trim($col);
             }, $updateCols);
 
             // Choose a primary key for ON CONFLICT
@@ -91,7 +91,7 @@ class ReplaceIntoSQLRewriter extends AbstractSQLRewriter
             }
 
             // trim any preceding commas
-            $updateSection = ltrim($updateSection,", ");
+            $updateSection = ltrim($updateSection, ", ");
 
             // Construct the PostgreSQL query
             $postgresSQL = sprintf('%s %s %s ON CONFLICT (%s) DO UPDATE SET %s', $tableSection, $columnsSection, $valuesSection, $primaryKey, $updateSection);

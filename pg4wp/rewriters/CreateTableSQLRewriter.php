@@ -88,15 +88,16 @@ class CreateTableSQLRewriter extends AbstractSQLRewriter
         return $sql;
     }
 
-    private function rewrite_numeric_type($sql){
+    private function rewrite_numeric_type($sql)
+    {
         // Numeric types in MySQL which need to be rewritten
         $numeric_types = ["bigint", "int", "integer", "smallint", "mediumint", "tinyint", "double", "decimal"];
         $numeric_types_imploded = implode('|', $numeric_types);
-    
+
         // Prepare regex pattern to match 'type(x)'
         $pattern = "/(" . $numeric_types_imploded . ")\(\d+\)/";
-    
-        // Execute type find & replace 
+
+        // Execute type find & replace
         $sql = preg_replace_callback($pattern, function ($matches) {
             return $matches[1];
         }, $sql);
@@ -130,7 +131,7 @@ class CreateTableSQLRewriter extends AbstractSQLRewriter
                 $sql = preg_replace($pattern, 'serial', $sql);
             }
         }
-    
+
         return $sql;
     }
 }

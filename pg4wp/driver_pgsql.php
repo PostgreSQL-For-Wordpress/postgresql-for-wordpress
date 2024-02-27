@@ -466,7 +466,7 @@ function wpsqli_rollback(&$connection, $flags = 0, $name = null)
     pg_query($connection, "ROLLBACK");
 }
 
-function get_primary_key_for_table(&$connection, $table) 
+function get_primary_key_for_table(&$connection, $table)
 {
     $query = <<<SQL
     SELECT a.attname
@@ -542,7 +542,7 @@ function wpsqli_query(&$connection, $query, $result_mode = 0)
             $primaryKey = $this->get_primary_key_for_table($connection, $tableName);
             $row = pg_fetch_assoc($result);
 
-            $GLOBALS['pg4wp_ins_id'] = $row[$primaryKey]; 
+            $GLOBALS['pg4wp_ins_id'] = $row[$primaryKey];
         }
     }
 
@@ -1108,7 +1108,7 @@ function wpsqli_get_primary_sequence_for_table(&$connection, $table)
         }
     }
 
-    // we didn't find a sequence for this table. 
+    // we didn't find a sequence for this table.
     return null;
 }
 
@@ -1146,10 +1146,10 @@ function wpsqli_insert_id(&$connection = null)
         // PostgreSQL: Setting the value of the sequence based on the latest inserted ID.
         $GLOBALS['pg4wp_queued_query'] = "SELECT SETVAL('$seq',(SELECT MAX(\"ID\") FROM $table)+1);";
     } elseif($GLOBALS['pg4wp_ins_id']) {
-        return $GLOBALS['pg4wp_ins_id']; 
+        return $GLOBALS['pg4wp_ins_id'];
     } elseif(empty($sql)) {
         $sql = 'NO QUERY';
-        $data = 0; 
+        $data = 0;
     } else {
         // Double quoting is needed to prevent seq from being lowercased automatically
         $sql = "SELECT CURRVAL('\"$seq\"')";

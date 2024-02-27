@@ -130,7 +130,7 @@ class InsertSQLRewriter extends AbstractSQLRewriter
                 $sql = $sql_before_semicolon . ' RETURNING *' . $sql_after_semicolon;
 
             } else {
-                $sql = $sql .=" RETURNING *";
+                $sql = $sql .= " RETURNING *";
             }
         }
 
@@ -138,23 +138,22 @@ class InsertSQLRewriter extends AbstractSQLRewriter
     }
 
     // finds semicolons that aren't in variables
-    private function findSemicolon($sql) {
+    private function findSemicolon($sql)
+    {
         $quoteOpened = false;
         $parenthesisDepth = 0;
-    
+
         $sqlAsArray = str_split($sql);
-        for($i=0; $i<count($sqlAsArray); $i++) {
-            if(($sqlAsArray[$i] == '"' || $sqlAsArray[$i]=="'") && ($i == 0 || $sqlAsArray[$i-1]!='\\'))
-                $quoteOpened = !$quoteOpened; 
-    
-            else if($sqlAsArray[$i] == '(' && !$quoteOpened)
+        for($i = 0; $i < count($sqlAsArray); $i++) {
+            if(($sqlAsArray[$i] == '"' || $sqlAsArray[$i] == "'") && ($i == 0 || $sqlAsArray[$i - 1] != '\\')) {
+                $quoteOpened = !$quoteOpened;
+            } elseif($sqlAsArray[$i] == '(' && !$quoteOpened) {
                 $parenthesisDepth++;
-    
-            else if($sqlAsArray[$i] == ')' && !$quoteOpened)
+            } elseif($sqlAsArray[$i] == ')' && !$quoteOpened) {
                 $parenthesisDepth--;
-    
-            else if($sqlAsArray[$i] == ';' && !$quoteOpened && $parenthesisDepth == 0) 
+            } elseif($sqlAsArray[$i] == ';' && !$quoteOpened && $parenthesisDepth == 0) {
                 return $i;
+            }
         }
         return false;
     }
