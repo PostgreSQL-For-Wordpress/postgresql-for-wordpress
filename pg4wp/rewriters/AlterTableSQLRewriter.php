@@ -30,6 +30,7 @@ class AlterTableSQLRewriter extends AbstractSQLRewriter
         $sql = $this->original();
         
         $sql = $this->rewrite_numeric_type($sql);
+        $sql = $this->rewrite_columns_with_protected_names($sql);
 
         if (str_contains($sql, 'ADD INDEX') || str_contains($sql, 'ADD UNIQUE INDEX')) {
             $sql = $this->rewriteAddIndex($sql);
@@ -260,6 +261,30 @@ class AlterTableSQLRewriter extends AbstractSQLRewriter
             }
         }
     
+        return $sql;
+    }
+
+    private function rewrite_columns_with_protected_names($sql) 
+    {
+        // Splitting the SQL statement into parts before "(", inside "(", and after ")"
+        if (preg_match('/^(CREATE TABLE IF NOT EXISTS|CREATE TABLE|ALTER TABLE)\s+([^\s]+)\s*\((.*)\)(.*)$/is', $sql, $matches)) {
+            $prefix = $matches[1] . ' ' . $matches[2] . ' (';
+            $columnsAndKeys = $matches[3];
+            $suffix = ')' . $matches[4];
+    
+            $regex = '/(?:^|\s*,\s*)(\b(?:timestamp|date|time|default)\b)\s*(?=\s+\w+)/i'; 
+
+            // Callback function to add quotes around protected column names
+            $callback = function($matches) {
+                $whitespace = str_replace($matches[1], "", $matches[0]);
+                return $whitespace . '"' . $matches[1] . '"';
+            };
+
+            // Replace protected column names with quoted versions within columns and keys part
+            $columnsAndKeys = preg_replace_callback($regex, $callback, $columnsAndKeys, 1);
+            return $prefix . $columnsAndKeys . $suffix;
+        }
+
         return $sql;
     }
 }

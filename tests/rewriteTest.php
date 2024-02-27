@@ -530,6 +530,69 @@ final class rewriteTest extends TestCase
         $this->assertSame(trim($expected), trim($postgresql));
     }
 
+    public function test_it_rewrites_protected_column_names()
+    {
+        $sql = <<<SQL
+            CREATE TABLE wp_cmplz_cookiebanners (
+                "ID" int NOT NULL DEFAULT nextval('wp_cmplz_cookiebanners_seq'::text),
+                banner_version int NOT NULL,
+                default int NOT NULL
+            );
+        SQL;
+
+        $expected = <<<SQL
+            CREATE TABLE IF NOT EXISTS wp_cmplz_cookiebanners (
+                 "ID"  int NOT NULL DEFAULT nextval('wp_cmplz_cookiebanners_seq'::text),
+                banner_version int NOT NULL,
+                "default" int NOT NULL
+            );
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql));
+    }
+
+    public function test_it_rewrites_advanced_protected_column_names()
+    {
+        $sql = <<<SQL
+            CREATE TABLE wp_statistics_pages (
+                page_id BIGINT(20) NOT NULL AUTO_INCREMENT,
+                uri varchar(190) NOT NULL,
+                type varchar(180) NOT NULL,
+                date date NOT NULL,
+                count int(11) NOT NULL,
+                id int(11) NOT NULL,
+                UNIQUE KEY date_2 (date,uri),
+                KEY url (uri),
+                KEY date (date),
+                KEY id (id),
+                KEY `uri` (`uri`,`count`,`id`),
+                PRIMARY KEY (`page_id`)
+            ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci
+        SQL;
+
+        $expected = <<<SQL
+           CREATE TABLE IF NOT EXISTS wp_statistics_pages (
+                page_id bigserial,
+                uri varchar(190) NOT NULL,
+                type varchar(180) NOT NULL,
+                "date" date NOT NULL,
+                count int NOT NULL,
+                id int NOT NULL,
+                PRIMARY KEY (page_id)
+            );
+        CREATE UNIQUE INDEX IF NOT EXISTS wp_statistics_pages_date_2 ON wp_statistics_pages (date,uri);
+        CREATE INDEX IF NOT EXISTS wp_statistics_pages_url ON wp_statistics_pages (uri);
+        CREATE INDEX IF NOT EXISTS wp_statistics_pages_date ON wp_statistics_pages (date);
+        CREATE INDEX IF NOT EXISTS wp_statistics_pages_id ON wp_statistics_pages (id);
+        CREATE INDEX IF NOT EXISTS wp_statistics_pages_uri ON wp_statistics_pages (uri,count,id);
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql));
+    }
+    
+
     public function test_it_doesnt_remove_single_quotes() 
     {
         $sql = <<<SQL
