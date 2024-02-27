@@ -1141,28 +1141,15 @@ function wpsqli_insert_id(&$connection = null)
     $data = null;
     $ins_field = $GLOBALS['pg4wp_ins_field'];
     $table = $GLOBALS['pg4wp_ins_table'];
-    $lastq = $GLOBALS['pg4wp_last_insert'];
-    $seq = wpsqli_get_primary_sequence_for_table($connection, $table);
 
-    // Special case when using WP_Import plugin where ID is defined in the query itself.
-    if($table == $wpdb->term_relationships) {
-        $sql = 'NO QUERY';
-        $data = 0;
-    } elseif ('post_author' == $ins_field && false !== strpos($lastq, 'ID')) {
-        // No PostgreSQL specific operation here.
-        $sql = 'ID was in query ';
-        $pattern = '/.+\'(\d+).+$/';
-        preg_match($pattern, $lastq, $matches);
-        $data = $matches[1];
-
-        // PostgreSQL: Setting the value of the sequence based on the latest inserted ID.
-        $GLOBALS['pg4wp_queued_query'] = "SELECT SETVAL('$seq',(SELECT MAX(\"ID\") FROM $table)+1);";
-    } elseif($GLOBALS['pg4wp_ins_id']) {
+    if($GLOBALS['pg4wp_ins_id']) {
         return $GLOBALS['pg4wp_ins_id'];
     } elseif(empty($sql)) {
         $sql = 'NO QUERY';
         $data = 0;
     } else {
+        $seq = wpsqli_get_primary_sequence_for_table($connection, $table);
+        $lastq = $GLOBALS['pg4wp_last_insert'];
         // Double quoting is needed to prevent seq from being lowercased automatically
         $sql = "SELECT CURRVAL('\"$seq\"')";
         $res = pg_query($connection, $sql);
