@@ -425,9 +425,73 @@ final class rewriteTest extends TestCase
         $this->assertSame(trim($expected), trim($postgresql));
     }
 
+    public function test_it_doesnt_rewrite_when_it_doesnt_need_to()
+    {
+        $sql = <<<SQL
+            SELECT p.ID FROM wp_posts p 
+            WHERE post_type='scheduled-action' 
+            AND p.post_status IN ('pending') 
+            AND p.post_modified_gmt <= '2023-11-27 14:23:34' 
+            AND p.post_password != '' ORDER BY p.post_date_gmt ASC LIMIT 0, 20
+        SQL;
+
+        $expected = <<<SQL
+            SELECT p."ID" , p.post_date_gmt FROM wp_posts p 
+            WHERE post_type='scheduled-action' 
+            AND p.post_status IN ('pending') 
+            AND p.post_modified_gmt <= '2023-11-27 14:23:34' 
+            AND p.post_password != '' ORDER BY p.post_date_gmt ASC LIMIT 20 OFFSET 0
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql));
+    }
+
+    public function test_it_handles_alter_tables_with_indexes() 
+    {
+        $sql = <<<SQL
+            ALTER TABLE wp_e_events ADD INDEX `created_at_index` (`created_at`)
+        SQL;
+
+        $expected = <<<SQL
+            CREATE INDEX IF NOT EXISTS wp_e_events_created_at_index ON wp_e_events (created_at)
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql));
+
+    }
+
+    public function test_it_handles_alter_tables_with_unique_indexes() 
+    {
+        $sql = <<<SQL
+            ALTER TABLE wp_e_events ADD UNIQUE INDEX `created_at_index` (`created_at`)
+        SQL;
+
+        $expected = <<<SQL
+            CREATE UNIQUE INDEX IF NOT EXISTS wp_e_events_created_at_index ON wp_e_events (created_at)
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql));
+    }
+
+    public function test_it_doesnt_remove_single_quotes() 
+    {
+        $sql = <<<SQL
+            SELECT COUNT(*) FROM wp_comments WHERE user_id = 5 AND comment_approved = '1'
+        SQL;
+
+        $expected = <<<SQL
+            SELECT COUNT(*) FROM wp_comments WHERE user_id = 5 AND comment_approved = '1'
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql));
+    }
 
 
-
+    
 
     protected function setUp(): void
     {
