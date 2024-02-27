@@ -8,15 +8,6 @@ class InsertSQLRewriter extends AbstractSQLRewriter
 
         $sql = $this->original();
 
-        $sql = str_replace('(0,', "('0',", $sql);
-        $sql = str_replace('(1,', "('1',", $sql);
-
-        // Fix inserts into wp_categories
-        if(false !== strpos($sql, 'INSERT INTO ' . $wpdb->categories)) {
-            $sql = str_replace('"cat_ID",', '', $sql);
-            $sql = str_replace("VALUES ('0',", "VALUES(", $sql);
-        }
-
         // Those are used when we need to set the date to now() in gmt time
         $sql = str_replace("'0000-00-00 00:00:00'", 'now() AT TIME ZONE \'gmt\'', $sql);
 
