@@ -469,18 +469,30 @@ function wpsqli_rollback(&$connection, $flags = 0, $name = null)
 function get_primary_key_for_table(&$connection, $table)
 {
     $query = <<<SQL
-    SELECT a.attname
-        FROM   pg_index i
-        JOIN   pg_attribute a ON a.attrelid = i.indrelid
-                            AND a.attnum = ANY(i.indkey)
+    SELECT a.attname, i.indisprimary 
+        FROM   pg_index i 
+        JOIN   pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey)
         WHERE  i.indrelid = '$table'::regclass
-        AND    i.indisprimary
     SQL;
 
     $result = pg_query($connection, $query);
+    if (!$result) {
+        return null;
+    }
 
-    $row = pg_fetch_row($result);
-    return $row[0];
+    $firstRow = null;
+    while ($row = pg_fetch_row($result)) {
+        if ($firstRow === null) {
+            $firstRow = $row; // Save the first row in case no match is found
+        }
+        
+        if ($row[1] == true) {
+            return $row[0]; // Return the first row where $row[1] == true
+        }
+    }
+
+    // If no row where $row[1] == true was found, return the first row encountered
+    return $firstRow ? $firstRow[0] : null;
 }
 
 /**
