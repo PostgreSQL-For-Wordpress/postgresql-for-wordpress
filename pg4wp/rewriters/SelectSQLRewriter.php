@@ -123,7 +123,6 @@ class SelectSQLRewriter extends AbstractSQLRewriter
         if(isset($wpdb)) {
             $sql = str_replace('GROUP BY ' . $wpdb->prefix . 'posts.ID', '', $sql);
         }
-        $sql = str_replace("!= ''", '<> 0', $sql);
 
         // MySQL 'LIKE' is case insensitive by default, whereas PostgreSQL 'LIKE' is
         $sql = str_replace(' LIKE ', ' ILIKE ', $sql);

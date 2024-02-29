@@ -114,7 +114,7 @@ final class rewriteTest extends TestCase
             CREATE TABLE IF NOT EXISTS wp_itsec_dashboard_lockouts (
                 id serial,
                 ip varchar(40),
-                time timestamp NOT NULL,
+                "time" timestamp NOT NULL,
                 count int NOT NULL,
                 PRIMARY KEY (id)
             );
@@ -184,7 +184,7 @@ final class rewriteTest extends TestCase
             CREATE TABLE IF NOT EXISTS wp_itsec_dashboard_lockouts (
                 id serial,
                 ip varchar(40),
-                time timestamp NOT NULL,
+                "time" timestamp NOT NULL,
                 count int NOT NULL,
                 PRIMARY KEY (id)
             );
@@ -222,8 +222,8 @@ final class rewriteTest extends TestCase
                 "ID" bigserial,
                 ip varchar(60) NOT NULL,
                 created int,
-                timestamp int NOT NULL,
-                date timestamp NOT NULL,
+                "timestamp" int NOT NULL,
+                "date" timestamp NOT NULL,
                 referred text NOT NULL,
                 agent varchar(255) NOT NULL,
                 platform varchar(255),
@@ -264,7 +264,7 @@ final class rewriteTest extends TestCase
                 page_id bigserial,
                 uri varchar(190) NOT NULL,
                 type varchar(180) NOT NULL,
-                date date NOT NULL,
+                "date" date NOT NULL,
                 count int NOT NULL,
                 id int NOT NULL,
                 PRIMARY KEY (page_id)
@@ -479,8 +479,136 @@ final class rewriteTest extends TestCase
         $this->assertSame(trim($expected), trim($postgresql));
     }
 
+    public function test_it_doesnt_rewrite_when_it_doesnt_need_to()
+    {
+        $sql = <<<SQL
+            SELECT p.ID FROM wp_posts p 
+            WHERE post_type='scheduled-action' 
+            AND p.post_status IN ('pending') 
+            AND p.post_modified_gmt <= '2023-11-27 14:23:34' 
+            AND p.post_password != '' ORDER BY p.post_date_gmt ASC LIMIT 0, 20
+        SQL;
+
+        $expected = <<<SQL
+            SELECT p."ID" , p.post_date_gmt FROM wp_posts p 
+            WHERE post_type='scheduled-action' 
+            AND p.post_status IN ('pending') 
+            AND p.post_modified_gmt <= '2023-11-27 14:23:34' 
+            AND p.post_password != '' ORDER BY p.post_date_gmt ASC LIMIT 20 OFFSET 0
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql));
+    }
+
+    public function test_it_handles_alter_tables_with_indexes() 
+    {
+        $sql = <<<SQL
+            ALTER TABLE wp_e_events ADD INDEX `created_at_index` (`created_at`)
+        SQL;
+
+        $expected = <<<SQL
+            CREATE INDEX IF NOT EXISTS wp_e_events_created_at_index ON wp_e_events (created_at)
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql));
+
+    }
+
+    public function test_it_handles_alter_tables_with_unique_indexes() 
+    {
+        $sql = <<<SQL
+            ALTER TABLE wp_e_events ADD UNIQUE INDEX `created_at_index` (`created_at`)
+        SQL;
+
+        $expected = <<<SQL
+            CREATE UNIQUE INDEX IF NOT EXISTS wp_e_events_created_at_index ON wp_e_events (created_at)
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql));
+    }
+
+    public function test_it_rewrites_protected_column_names()
+    {
+        $sql = <<<SQL
+            CREATE TABLE wp_cmplz_cookiebanners (
+                "ID" int NOT NULL DEFAULT nextval('wp_cmplz_cookiebanners_seq'::text),
+                banner_version int NOT NULL,
+                default int NOT NULL
+            );
+        SQL;
+
+        $expected = <<<SQL
+            CREATE TABLE IF NOT EXISTS wp_cmplz_cookiebanners (
+                 "ID"  int NOT NULL DEFAULT nextval('wp_cmplz_cookiebanners_seq'::text),
+                banner_version int NOT NULL,
+                "default" int NOT NULL
+            );
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql));
+    }
+
+    public function test_it_rewrites_advanced_protected_column_names()
+    {
+        $sql = <<<SQL
+            CREATE TABLE wp_statistics_pages (
+                page_id BIGINT(20) NOT NULL AUTO_INCREMENT,
+                uri varchar(190) NOT NULL,
+                type varchar(180) NOT NULL,
+                date date NOT NULL,
+                count int(11) NOT NULL,
+                id int(11) NOT NULL,
+                UNIQUE KEY date_2 (date,uri),
+                KEY url (uri),
+                KEY date (date),
+                KEY id (id),
+                KEY `uri` (`uri`,`count`,`id`),
+                PRIMARY KEY (`page_id`)
+            ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci
+        SQL;
+
+        $expected = <<<SQL
+           CREATE TABLE IF NOT EXISTS wp_statistics_pages (
+                page_id bigserial,
+                uri varchar(190) NOT NULL,
+                type varchar(180) NOT NULL,
+                "date" date NOT NULL,
+                count int NOT NULL,
+                id int NOT NULL,
+                PRIMARY KEY (page_id)
+            );
+        CREATE UNIQUE INDEX IF NOT EXISTS wp_statistics_pages_date_2 ON wp_statistics_pages (date,uri);
+        CREATE INDEX IF NOT EXISTS wp_statistics_pages_url ON wp_statistics_pages (uri);
+        CREATE INDEX IF NOT EXISTS wp_statistics_pages_date ON wp_statistics_pages (date);
+        CREATE INDEX IF NOT EXISTS wp_statistics_pages_id ON wp_statistics_pages (id);
+        CREATE INDEX IF NOT EXISTS wp_statistics_pages_uri ON wp_statistics_pages (uri,count,id);
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql));
+    }
+    
+
+    public function test_it_doesnt_remove_single_quotes() 
+    {
+        $sql = <<<SQL
+            SELECT COUNT(*) FROM wp_comments WHERE user_id = 5 AND comment_approved = '1'
+        SQL;
+
+        $expected = <<<SQL
+            SELECT COUNT(*) FROM wp_comments WHERE user_id = 5 AND comment_approved = '1'
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql));
+    }
 
 
+    
 
     protected function setUp(): void
     {
