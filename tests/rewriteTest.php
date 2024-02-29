@@ -415,65 +415,36 @@ final class rewriteTest extends TestCase
         $this->assertSame(trim($expected), trim($postgresql));
     }
 
-
-    public function test_it_can_handle_replacement_sql()
+    public function test_it_will_append_returning_id_to_insert_statements()
     {
-        $sql = "REPLACE INTO test2 (column1, column2, column3) VALUES (1, 'Old', '2014-08-20 18:47:00')";
-        $expected = "INSERT INTO test2 (column1, column2, column3) VALUES (1, 'Old', '2014-08-20 18:47:00') ON CONFLICT (column1) DO UPDATE SET column2 = EXCLUDED.column2, column3 = EXCLUDED.column3";
+        $sql = <<<SQL
+            INSERT INTO wp_translations_term_relations (
+                object_id, 
+                object_lang, 
+                source_id) 
+            VALUES (%d, %s, %d) 
+            ON DUPLICATE KEY 
+            UPDATE object_id=VALUES(object_id), object_lang=VALUES(object_lang), source_id=VALUES(source_id);
+        SQL;
+
+        $expected = <<<SQL
+            INSERT INTO wp_translations_term_relations (
+                object_id, 
+                object_lang, 
+                source_id) 
+            VALUES (%d, %s, %d) 
+            ON DUPLICATE KEY 
+            UPDATE object_id=VALUES(object_id), object_lang=VALUES(object_lang), source_id=VALUES(source_id) RETURNING *;
+        SQL;
 
         $postgresql = pg4wp_rewrite($sql);
         $this->assertSame(trim($expected), trim($postgresql));
     }
 
-
-    public function test_it_can_handle_insert_sql_containing_nested_parathesis_with_numbers()
+    public function test_it_can_handle_replacement_sql()
     {
-        $sql = <<<SQL
-            REPLACE INTO `wp_options` (`option_name`, `option_value`, `autoload`) VALUES ('_site_transient_wp_remote_block_patterns_b815a6cec4e03bb064328ac11645ce66', 'a:43:{i:0;O:8:"stdClass":7:{s:2:"id";i:309935;s:5:"title";O:8:"stdClass":1:{s:8:"rendered";s:45:"Centered image with two-tone background color";}s:7:"content";O:8:"stdClass":2:{s:8:"rendered";s
-
-            <div class="wp-block-cover alignfull is-light" style="margin-top:0;padding-top:5vw;padding-right:5vw;padding-bottom:5vw;padding-left:5vw;min-height:66vh;aspect-ratio:unset;aspect-ratio:unset;"><span aria-hidden="true" class="wp-block-cover__background has-background-dim-100 has-background-dim has-background-gradient" style="background:linear-grad
-            <div class="wp-block-group wp-container-content-2 is-layout-constrained wp-container-core-group-is-layout-1 wp-block-group-is-layout-constrained">
-            !-- /wp:image -->
-
-            <!-- wp:paragraph {"align":"right","style":{"typography":{"fontSize":"148px","textTransform":"uppercase","fontStyle":"normal","fontWeight":"700","lineHeight":"0.8","letterSpacing":"-4px"}},"textColor":"white"} -->
-            <p class="has-text-align-right has-white-color has-text-color" style="font-size:148px;font-style:normal;font-weight:700;letter-spacing:-4px;line-height:0.8;text-transform:uppercase">Big<br>John<br>Patton</p>
-            <!-- /wp:paragraph --></div>
-            <!-- /wp:group --></div>
-            <!-- /wp:group --></div></div>
-            <!-- /wp:cover -->";}i:4;O:8:"stdClass":7:{s:2:"id";i:309236;s:5:"title";O:8:"stdClass":1:{s:8:"rendered";s:60:"Fullwidth headline with links and gradient offset background";}s:7:"content";O:8:"stdClass":2:{s:8:"rendered";s:1972:"
-            <div class="wp-block-cover alignfull is-light" style="margin-top:0;padding-top:48px;padding-right:5vw;padding-bottom:48px;padding-left:5vw"><span aria-hidden="true" class="wp-block-cover__background has-background-dim-100 has-background-dim has-background-gradient" style="background:linear-gradient(180deg,rgb(0,0,0) 39%,rgb(83,80,123) 39%)"></spa
-            <div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
-
-
-
-            <!-- wp:image {"sizeSlug":"large","linkDestination":"none"} -->
-            <figure class="wp-block-image size-large"><img src="https://s.w.org/images/core/5.8/nature-above-02.jpg" alt="An aerial view of a field. A road runs through the upper right corner." /></figure>
-            <!-- /wp:image --></figure>
-            <!-- /wp:gallery -->";}}', 'no')
-        SQL;
-        $expected = <<<SQL
-            INSERT INTO "wp_options" ("option_name", "option_value", "autoload") VALUES ('_site_transient_wp_remote_block_patterns_b815a6cec4e03bb064328ac11645ce66', 'a:43:{i:0;O:8:"stdClass":7:{s:2:"id";i:309935;s:5:"title";O:8:"stdClass":1:{s:8:"rendered";s:45:"Centered image with two-tone background color";}s:7:"content";O:8:"stdClass":2:{s:8:"rendered";s
-
-            <div class="wp-block-cover alignfull is-light" style="margin-top:0;padding-top:5vw;padding-right:5vw;padding-bottom:5vw;padding-left:5vw;min-height:66vh;aspect-ratio:unset;aspect-ratio:unset;"><span aria-hidden="true" class="wp-block-cover__background has-background-dim-100 has-background-dim has-background-gradient" style="background:linear-grad
-            <div class="wp-block-group wp-container-content-2 is-layout-constrained wp-container-core-group-is-layout-1 wp-block-group-is-layout-constrained">
-            !-- /wp:image -->
-
-            <!-- wp:paragraph {"align":"right","style":{"typography":{"fontSize":"148px","textTransform":"uppercase","fontStyle":"normal","fontWeight":"700","lineHeight":"0.8","letterSpacing":"-4px"}},"textColor":"white"} -->
-            <p class="has-text-align-right has-white-color has-text-color" style="font-size:148px;font-style:normal;font-weight:700;letter-spacing:-4px;line-height:0.8;text-transform:uppercase">Big<br>John<br>Patton</p>
-            <!-- /wp:paragraph --></div>
-            <!-- /wp:group --></div>
-            <!-- /wp:group --></div></div>
-            <!-- /wp:cover -->";}i:4;O:8:"stdClass":7:{s:2:"id";i:309236;s:5:"title";O:8:"stdClass":1:{s:8:"rendered";s:60:"Fullwidth headline with links and gradient offset background";}s:7:"content";O:8:"stdClass":2:{s:8:"rendered";s:1972:"
-            <div class="wp-block-cover alignfull is-light" style="margin-top:0;padding-top:48px;padding-right:5vw;padding-bottom:48px;padding-left:5vw"><span aria-hidden="true" class="wp-block-cover__background has-background-dim-100 has-background-dim has-background-gradient" style="background:linear-gradient(180deg,rgb(0,0,0) 39%,rgb(83,80,123) 39%)"></spa
-            <div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
-
-
-
-            <!-- wp:image {"sizeSlug":"large","linkDestination":"none"} -->
-            <figure class="wp-block-image size-large"><img src="https://s.w.org/images/core/5.8/nature-above-02.jpg" alt="An aerial view of a field. A road runs through the upper right corner." /></figure>
-            <!-- /wp:image --></figure>
-            <!-- /wp:gallery -->";}}', 'no') ON CONFLICT ("option_name") DO UPDATE SET "option_value" = EXCLUDED."option_value", "autoload" = EXCLUDED."autoload" 
-        SQL;
+        $sql = "REPLACE INTO test2 (column1, column2, column3) VALUES (1, 'Old', '2014-08-20 18:47:00')";
+        $expected = "INSERT INTO test2 (column1, column2, column3) VALUES (1, 'Old', '2014-08-20 18:47:00') ON CONFLICT (column1) DO UPDATE SET column2 = EXCLUDED.column2, column3 = EXCLUDED.column3 RETURNING *";
 
         $postgresql = pg4wp_rewrite($sql);
         $this->assertSame(trim($expected), trim($postgresql));
@@ -601,6 +572,59 @@ final class rewriteTest extends TestCase
 
         $expected = <<<SQL
             SELECT COUNT(*) FROM wp_comments WHERE user_id = 5 AND comment_approved = '1'
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql));
+    }
+
+    public function test_it_can_handle_insert_sql_containing_nested_parathesis_with_numbers()
+    {
+        $sql = <<<SQL
+            REPLACE INTO `wp_options` (`option_name`, `option_value`, `autoload`) VALUES ('_site_transient_wp_remote_block_patterns_b815a6cec4e03bb064328ac11645ce66', 'a:43:{i:0;O:8:"stdClass":7:{s:2:"id";i:309935;s:5:"title";O:8:"stdClass":1:{s:8:"rendered";s:45:"Centered image with two-tone background color";}s:7:"content";O:8:"stdClass":2:{s:8:"rendered";s
+
+            <div class="wp-block-cover alignfull is-light" style="margin-top:0;padding-top:5vw;padding-right:5vw;padding-bottom:5vw;padding-left:5vw;min-height:66vh;aspect-ratio:unset;aspect-ratio:unset;"><span aria-hidden="true" class="wp-block-cover__background has-background-dim-100 has-background-dim has-background-gradient" style="background:linear-grad
+            <div class="wp-block-group wp-container-content-2 is-layout-constrained wp-container-core-group-is-layout-1 wp-block-group-is-layout-constrained">
+            !-- /wp:image -->
+
+            <!-- wp:paragraph {"align":"right","style":{"typography":{"fontSize":"148px","textTransform":"uppercase","fontStyle":"normal","fontWeight":"700","lineHeight":"0.8","letterSpacing":"-4px"}},"textColor":"white"} -->
+            <p class="has-text-align-right has-white-color has-text-color" style="font-size:148px;font-style:normal;font-weight:700;letter-spacing:-4px;line-height:0.8;text-transform:uppercase">Big<br>John<br>Patton</p>
+            <!-- /wp:paragraph --></div>
+            <!-- /wp:group --></div>
+            <!-- /wp:group --></div></div>
+            <!-- /wp:cover -->";}i:4;O:8:"stdClass":7:{s:2:"id";i:309236;s:5:"title";O:8:"stdClass":1:{s:8:"rendered";s:60:"Fullwidth headline with links and gradient offset background";}s:7:"content";O:8:"stdClass":2:{s:8:"rendered";s:1972:"
+            <div class="wp-block-cover alignfull is-light" style="margin-top:0;padding-top:48px;padding-right:5vw;padding-bottom:48px;padding-left:5vw"><span aria-hidden="true" class="wp-block-cover__background has-background-dim-100 has-background-dim has-background-gradient" style="background:linear-gradient(180deg,rgb(0,0,0) 39%,rgb(83,80,123) 39%)"></spa
+            <div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
+
+
+
+            <!-- wp:image {"sizeSlug":"large","linkDestination":"none"} -->
+            <figure class="wp-block-image size-large"><img src="https://s.w.org/images/core/5.8/nature-above-02.jpg" alt="An aerial view of a field. A road runs through the upper right corner." /></figure>
+            <!-- /wp:image --></figure>
+            <!-- /wp:gallery -->";}}', 'no')
+        SQL;
+        $expected = <<<SQL
+            INSERT INTO "wp_options" ("option_name", "option_value", "autoload") VALUES ('_site_transient_wp_remote_block_patterns_b815a6cec4e03bb064328ac11645ce66', 'a:43:{i:0;O:8:"stdClass":7:{s:2:"id";i:309935;s:5:"title";O:8:"stdClass":1:{s:8:"rendered";s:45:"Centered image with two-tone background color";}s:7:"content";O:8:"stdClass":2:{s:8:"rendered";s
+
+            <div class="wp-block-cover alignfull is-light" style="margin-top:0;padding-top:5vw;padding-right:5vw;padding-bottom:5vw;padding-left:5vw;min-height:66vh;aspect-ratio:unset;aspect-ratio:unset;"><span aria-hidden="true" class="wp-block-cover__background has-background-dim-100 has-background-dim has-background-gradient" style="background:linear-grad
+            <div class="wp-block-group wp-container-content-2 is-layout-constrained wp-container-core-group-is-layout-1 wp-block-group-is-layout-constrained">
+            !-- /wp:image -->
+
+            <!-- wp:paragraph {"align":"right","style":{"typography":{"fontSize":"148px","textTransform":"uppercase","fontStyle":"normal","fontWeight":"700","lineHeight":"0.8","letterSpacing":"-4px"}},"textColor":"white"} -->
+            <p class="has-text-align-right has-white-color has-text-color" style="font-size:148px;font-style:normal;font-weight:700;letter-spacing:-4px;line-height:0.8;text-transform:uppercase">Big<br>John<br>Patton</p>
+            <!-- /wp:paragraph --></div>
+            <!-- /wp:group --></div>
+            <!-- /wp:group --></div></div>
+            <!-- /wp:cover -->";}i:4;O:8:"stdClass":7:{s:2:"id";i:309236;s:5:"title";O:8:"stdClass":1:{s:8:"rendered";s:60:"Fullwidth headline with links and gradient offset background";}s:7:"content";O:8:"stdClass":2:{s:8:"rendered";s:1972:"
+            <div class="wp-block-cover alignfull is-light" style="margin-top:0;padding-top:48px;padding-right:5vw;padding-bottom:48px;padding-left:5vw"><span aria-hidden="true" class="wp-block-cover__background has-background-dim-100 has-background-dim has-background-gradient" style="background:linear-gradient(180deg,rgb(0,0,0) 39%,rgb(83,80,123) 39%)"></spa
+            <div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
+
+
+
+            <!-- wp:image {"sizeSlug":"large","linkDestination":"none"} -->
+            <figure class="wp-block-image size-large"><img src="https://s.w.org/images/core/5.8/nature-above-02.jpg" alt="An aerial view of a field. A road runs through the upper right corner." /></figure>
+            <!-- /wp:image --></figure>
+            <!-- /wp:gallery -->";}}', 'no') ON CONFLICT ("option_name") DO UPDATE SET "option_value" = EXCLUDED."option_value", "autoload" = EXCLUDED."autoload" RETURNING * 
         SQL;
 
         $postgresql = pg4wp_rewrite($sql);

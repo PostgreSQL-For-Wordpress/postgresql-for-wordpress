@@ -36,7 +36,6 @@ class AlterTableSQLRewriter extends AbstractSQLRewriter
             $sql = $this->rewriteAddIndex($sql);
             return $sql;
         }
-
         if (str_contains($sql, 'CHANGE COLUMN')) {
             $sql = $this->rewriteChangeColumn($sql);
             return $sql;
@@ -65,7 +64,7 @@ class AlterTableSQLRewriter extends AbstractSQLRewriter
         return $sql;
     }
 
-    private function rewriteAddIndex(string $sql): string 
+    private function rewriteAddIndex(string $sql): string
     {
         $pattern = '/ALTER TABLE\s+(\w+)\s+ADD (UNIQUE |)INDEX\s+([^\s]+)\s+\(((?:[^\(\)]+|\([^\(\)]+\))+)\)/';
 
@@ -74,18 +73,18 @@ class AlterTableSQLRewriter extends AbstractSQLRewriter
             $unique = $matches[2];
             $index = $matches[3];
             $columns = $matches[4];
-    
+
             // Remove prefix indexing
             // Rarely used and apparently unnecessary for current uses
             $columns = preg_replace('/\([^\)]*\)/', '', $columns);
-    
+
             // Workaround for index name duplicate
             $index = $table . '_' . $index;
-            
+
             // Add backticks around index name and column name, and include IF NOT EXISTS clause
             $sql = "CREATE {$unique}INDEX IF NOT EXISTS `{$index}` ON `{$table}` (`{$columns}`)";
         }
-    
+
         return $sql;
     }
 
@@ -218,15 +217,16 @@ class AlterTableSQLRewriter extends AbstractSQLRewriter
         return $sql;
     }
 
-    private function rewrite_numeric_type($sql){
+    private function rewrite_numeric_type($sql)
+    {
         // Numeric types in MySQL which need to be rewritten
         $numeric_types = ["bigint", "int", "integer", "smallint", "mediumint", "tinyint", "double", "decimal"];
         $numeric_types_imploded = implode('|', $numeric_types);
-    
+
         // Prepare regex pattern to match 'type(x)'
         $pattern = "/(" . $numeric_types_imploded . ")\(\d+\)/";
-    
-        // Execute type find & replace 
+
+        // Execute type find & replace
         $sql = preg_replace_callback($pattern, function ($matches) {
             return $matches[1];
         }, $sql);
@@ -260,7 +260,7 @@ class AlterTableSQLRewriter extends AbstractSQLRewriter
                 $sql = preg_replace($pattern, 'serial', $sql);
             }
         }
-    
+
         return $sql;
     }
 

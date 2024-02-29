@@ -61,12 +61,12 @@ class ReplaceIntoSQLRewriter extends AbstractSQLRewriter
             // Extract SQL components
             $tableSection = trim(substr($statement, $insertIndex, $columnsStartIndex - $insertIndex));
             $valuesSection = trim(substr($statement, $valuesIndex, strlen($statement) - $valuesIndex));
-            $columnsSection = trim(substr($statement, $columnsStartIndex, $columnsEndIndex - $columnsStartIndex + 1)); 
+            $columnsSection = trim(substr($statement, $columnsStartIndex, $columnsEndIndex - $columnsStartIndex + 1));
 
             // Extract and clean up column names from the update section
             $updateCols = explode(',', substr($columnsSection, 1, strlen($columnsSection) - 2));
             $updateCols = array_map(function ($col) {
-                return  trim($col); 
+                return  trim($col);
             }, $updateCols);
 
             // Choose a primary key for ON CONFLICT
@@ -91,10 +91,25 @@ class ReplaceIntoSQLRewriter extends AbstractSQLRewriter
             }
 
             // trim any preceding commas
-            $updateSection = ltrim($updateSection,", ");
+            $updateSection = ltrim($updateSection, ", ");
 
             // Construct the PostgreSQL query
             $postgresSQL = sprintf('%s %s %s ON CONFLICT (%s) DO UPDATE SET %s', $tableSection, $columnsSection, $valuesSection, $primaryKey, $updateSection);
+
+            if(false === strpos($postgresSQL, 'RETURNING')) {
+                $end_of_statement = $this->findSemicolon($postgresSQL);
+                if ($end_of_statement !== false) {
+                    // Create the substrings up to and after the semicolon
+                    $sql_before_semicolon = substr($postgresSQL, 0, $end_of_statement);
+                    $sql_after_semicolon = substr($postgresSQL, $end_of_statement, strlen($postgresSQL));
+    
+                    // Splice the SQL string together with 'RETURNING *'
+                    $postgresSQL = $sql_before_semicolon . ' RETURNING *' . $sql_after_semicolon;
+    
+                } else {
+                    $postgresSQL = $postgresSQL .= " RETURNING *";
+                }
+            }
 
             // Append to the converted statements list
             $convertedStatements[] = $postgresSQL;
@@ -104,4 +119,25 @@ class ReplaceIntoSQLRewriter extends AbstractSQLRewriter
 
         return $sql;
     }
+
+      // finds semicolons that aren't in variables
+      private function findSemicolon($sql)
+      {
+          $quoteOpened = false;
+          $parenthesisDepth = 0;
+  
+          $sqlAsArray = str_split($sql);
+          for($i = 0; $i < count($sqlAsArray); $i++) {
+              if(($sqlAsArray[$i] == '"' || $sqlAsArray[$i] == "'") && ($i == 0 || $sqlAsArray[$i - 1] != '\\')) {
+                  $quoteOpened = !$quoteOpened;
+              } elseif($sqlAsArray[$i] == '(' && !$quoteOpened) {
+                  $parenthesisDepth++;
+              } elseif($sqlAsArray[$i] == ')' && !$quoteOpened) {
+                  $parenthesisDepth--;
+              } elseif($sqlAsArray[$i] == ';' && !$quoteOpened && $parenthesisDepth == 0) {
+                  return $i;
+              }
+          }
+          return false;
+      }
 }

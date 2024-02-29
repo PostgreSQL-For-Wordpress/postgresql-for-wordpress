@@ -16,6 +16,7 @@ $GLOBALS['pg4wp_result'] = 0;
 $GLOBALS['pg4wp_numrows_query'] = '';
 $GLOBALS['pg4wp_ins_table'] = '';
 $GLOBALS['pg4wp_ins_field'] = '';
+$GLOBALS['pg4wp_ins_id'] = '';
 $GLOBALS['pg4wp_last_insert'] = '';
 $GLOBALS['pg4wp_connstr'] = '';
 $GLOBALS['pg4wp_conn'] = false;
@@ -465,6 +466,35 @@ function wpsqli_rollback(&$connection, $flags = 0, $name = null)
     pg_query($connection, "ROLLBACK");
 }
 
+function get_primary_key_for_table(&$connection, $table)
+{
+    $query = <<<SQL
+    SELECT a.attname, i.indisprimary 
+        FROM   pg_index i 
+        JOIN   pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey)
+        WHERE  i.indrelid = '$table'::regclass
+    SQL;
+
+    $result = pg_query($connection, $query);
+    if (!$result) {
+        return null;
+    }
+
+    $firstRow = null;
+    while ($row = pg_fetch_row($result)) {
+        if ($firstRow === null) {
+            $firstRow = $row; // Save the first row in case no match is found
+        }
+        
+        if ($row[1] == true) {
+            return $row[0]; // Return the first row where $row[1] == true
+        }
+    }
+
+    // If no row where $row[1] == true was found, return the first row encountered
+    return $firstRow ? $firstRow[0] : null;
+}
+
 /**
  * Performs a query against the database.
  *
@@ -514,6 +544,19 @@ function wpsqli_query(&$connection, $query, $result_mode = 0)
 
     $GLOBALS['pg4wp_conn'] = $connection;
     $GLOBALS['pg4wp_result'] = $result;
+
+    if (false !== strpos($sql, "INSERT INTO")) {
+        $matches = array();
+        preg_match("/^INSERT INTO\s+`?([a-z0-9_]+)`?/i", $query, $matches);
+        $tableName = $matches[1];
+
+        if (false !== strpos($sql, "RETURNING")) {
+            $primaryKey = get_primary_key_for_table($connection, $tableName);
+            $row = pg_fetch_assoc($result);
+
+            $GLOBALS['pg4wp_ins_id'] = $row[$primaryKey];
+        }
+    }
 
     return $result;
 }
@@ -1077,9 +1120,8 @@ function wpsqli_get_primary_sequence_for_table(&$connection, $table)
         }
     }
 
-    // Fallback to default if we don't find a sequence
-    // Note: this will probably fail
-    return $table . '_seq';
+    // we didn't find a sequence for this table.
+    return null;
 }
 
 /**
@@ -1099,24 +1141,15 @@ function wpsqli_insert_id(&$connection = null)
     $data = null;
     $ins_field = $GLOBALS['pg4wp_ins_field'];
     $table = $GLOBALS['pg4wp_ins_table'];
-    $lastq = $GLOBALS['pg4wp_last_insert'];
-    $seq = wpsqli_get_primary_sequence_for_table($connection, $table);
 
-    // Special case when using WP_Import plugin where ID is defined in the query itself.
-    if($table == $wpdb->term_relationships) {
+    if($GLOBALS['pg4wp_ins_id']) {
+        return $GLOBALS['pg4wp_ins_id'];
+    } elseif(empty($sql)) {
         $sql = 'NO QUERY';
         $data = 0;
-    } elseif ('post_author' == $ins_field && false !== strpos($lastq, 'ID')) {
-        // No PostgreSQL specific operation here.
-        $sql = 'ID was in query ';
-        $pattern = '/.+\'(\d+).+$/';
-        preg_match($pattern, $lastq, $matches);
-        $data = $matches[1];
-
-        // PostgreSQL: Setting the value of the sequence based on the latest inserted ID.
-        $GLOBALS['pg4wp_queued_query'] = "SELECT SETVAL('$seq',(SELECT MAX(\"ID\") FROM $table)+1);";
     } else {
-        // PostgreSQL: Using CURRVAL() to get the current value of the sequence.
+        $seq = wpsqli_get_primary_sequence_for_table($connection, $table);
+        $lastq = $GLOBALS['pg4wp_last_insert'];
         // Double quoting is needed to prevent seq from being lowercased automatically
         $sql = "SELECT CURRVAL('\"$seq\"')";
         $res = pg_query($connection, $sql);

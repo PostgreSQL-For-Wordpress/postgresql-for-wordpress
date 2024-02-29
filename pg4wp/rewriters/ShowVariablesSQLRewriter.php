@@ -38,7 +38,7 @@ class ShowVariablesSQLRewriter extends AbstractSQLRewriter
         }
 
         if ($variableName == "max_allowed_packet") {
-            // Act like 1GB packet size, in practice this limit doesn't actually exist for postgres, we just want to fool WP 
+            // Act like 1GB packet size, in practice this limit doesn't actually exist for postgres, we just want to fool WP
             return "SELECT '$variableName' AS \"Variable_name\", '1073741824' AS \"Value\";";
         }
 
