@@ -785,6 +785,132 @@ final class rewriteTest extends TestCase
         $this->assertSame(trim($expected), trim($postgresql));
     }
 
+    public function test_it_handles_order_by_on_non_integer() 
+    {
+        $sql = <<<SQL
+            SELECT 'date' FROM `wp_statistics_pages` ORDER BY 'page_id' ASC LIMIT 1
+        SQL;
+
+        $expected = <<<SQL
+            SELECT 'date', 'page_id' FROM wp_statistics_pages ORDER BY page_id ASC LIMIT 1
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql));
+    }
+
+    public function test_it_replaces_backticks_with_quotes() 
+    {
+        $sql = <<<SQL
+            SELECT `location`, COUNT(`location`) AS `count` FROM `wp_statistics_visitor` WHERE `last_counter` BETWEEN '2024-09-20' AND '2024-10-19' GROUP BY `location` ORDER BY `count` DESC LIMIT 10
+        SQL;
+
+        $expected = <<<SQL
+            SELECT location, COUNT(location) AS count, location ORDER BY count FROM wp_statistics_visitor WHERE last_counter BETWEEN '2024-09-20' AND '2024-10-19' GROUP BY location, location ORDER BY count
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql));
+    }
+
+
+    public function test_it_replaces_backticks_substring_index_with_split_part() 
+    {
+        $sql = <<<SQL
+            SELECT SUBSTRING_INDEX(REPLACE( REPLACE( referred, 'http://', '') , 'https://' , '') , '/', 1 ) as `domain`, count(referred) as `number` 
+            FROM wp_statistics_visitor WHERE `referred` REGEXP "^(https?://|www\.)[\.A-Za-z0-9\-]+\.[a-zA-Z]{2,4}" 
+            AND referred <> '' 
+            AND LENGTH(referred) >=12 
+            AND `last_counter` BETWEEN '2024-09-20' AND '2024-10-19'  
+            AND `referred` NOT LIKE 'http://wordpress.localhost%'  
+            AND `referred` NOT LIKE 'http://www.wordpress.localhost%'  
+            AND `referred` NOT LIKE 'https://wordpress.localhost%'  
+            AND `referred` NOT LIKE 'https://www.wordpress.localhost%'  
+            AND `referred` NOT LIKE 'ftp://wordpress.localhost%'  
+            AND `referred` NOT LIKE 'ftp://www.wordpress.localhost%'  
+            GROUP BY domain  
+            ORDER BY `number` DESC LIMIT 10
+        SQL;
+
+        $expected = <<<SQL
+            SELECT split_part(replace(replace(referred, 'http://', ''), 'https://', ''), '/', 1) as domain, count(referred) as number
+            FROM wp_statistics_visitor WHERE referred ~ '^(https?://|www\.)[\.A-Za-z0-9\-]+\.[a-zA-Z]{2,4}'
+            AND referred <> '' 
+            AND LENGTH(referred) >= 12
+            AND last_counter BETWEEN '2024-09-20' AND '2024-10-19'
+            AND referred NOT LIKE 'http://wordpress.localhost%'  
+            AND referred NOT LIKE 'http://www.wordpress.localhost%'  
+            AND referred NOT LIKE 'https://wordpress.localhost%'  
+            AND referred NOT LIKE 'https://www.wordpress.localhost%'  
+            AND referred NOT LIKE 'ftp://wordpress.localhost%'  
+            AND referred NOT LIKE 'ftp://www.wordpress.localhost%'  
+            GROUP BY domain  
+            ORDER BY number DESC 
+            LIMIT 10;
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql));
+    }
+
+    public function test_it_converts_to_date_casting()
+    {
+        $sql = <<<SQL
+            SELECT search.last_counter AS date, COUNT(DISTINCT search.visitor) AS visitors, search.engine FROM  wp_statistics_search AS search WHERE DATE(search.last_counter) BETWEEN '2024-10-13' AND '2024-10-19' GROUP BY search.last_counter, search.engine ORDER BY date DESC
+        SQL;
+
+        $expected = <<<SQL
+            SELECT search.last_counter AS date, COUNT(DISTINCT search.visitor) AS visitors, search.engine FROM wp_statistics_search AS search WHERE search.last_counter::date BETWEEN '2024-10-13' AND '2024-10-19' GROUP BY search.last_counter, search.engine ORDER BY date DESC;
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql)); 
+    }
+
+    public function test_it_converts_to_date_casting_another_example()
+    {
+        $sql = <<<SQL
+            SELECT SUM(pages.count) as views, pages.date as date FROM  wp_statistics_pages AS pages WHERE DATE(pages.date) BETWEEN '2024-10-13' AND '2024-10-19' GROUP BY pages.date
+        SQL;
+
+        $expected = <<<SQL
+            SELECT SUM(pages.count) AS views, pages.date AS date FROM wp_statistics_pages AS pages WHERE pages.date::date BETWEEN '2024-10-13' AND '2024-10-19' GROUP BY pages.date;
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql)); 
+    }
+
+    public function test_it_correctly_handles_alias_orderBys()
+    {
+        $sql = <<<SQL
+            SELECT visitor.last_counter as date, COUNT(visitor.ID) as visitors FROM  wp_statistics_visitor AS visitor WHERE DATE(visitor.last_counter) BETWEEN '2024-10-13' AND '2024-10-19' GROUP BY visitor.last_counter
+        SQL;
+
+        $expected = <<<SQL
+            SELECT visitor.last_counter::date AS date, COUNT(visitor."ID") AS visitors FROM wp_statistics_visitor AS visitor WHERE visitor.last_counter::date BETWEEN '2024-10-13' AND '2024-10-19' GROUP BY visitor.last_counter::date;
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql)); 
+    }
+
+
+    public function test_it_correctly_handles_incrementing_conflicts()
+    {
+        $sql = <<<SQL
+            INSERT INTO `wp_statistics_visit` (last_visit, last_counter, visit) VALUES ( '2024-04-10 19:33:45', '2024-04-10', 1) ON DUPLICATE KEY UPDATE visit = visit + 1
+        SQL;
+
+        $expected = <<<SQL
+            INSERT INTO wp_statistics_visit (last_visit, last_counter, visit) VALUES ('2024-04-10 19:33:45', '2024-04-10', 1) ON CONFLICT (last_counter) DO UPDATE SET visit = wp_statistics_visit.visit + 1 RETURNING *  
+        SQL;
+
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertSame(trim($expected), trim($postgresql)); 
+    }
+
+
     protected function setUp(): void
     {
         global $wpdb;

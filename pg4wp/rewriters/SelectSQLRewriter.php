@@ -68,8 +68,40 @@ class SelectSQLRewriter extends AbstractSQLRewriter
         // HANDLE REGEXP
         $sql = preg_replace('/REGEXP/', '~', $sql);
 
+        // Replace utc_timestamp with equivalent
         $sql = str_replace("utc_timestamp()", "CURRENT_TIMESTAMP AT TIME ZONE 'UTC'", $sql);
 
+        // Remove quotes from order by statmeents
+        $sql = preg_replace("/ORDER BY\s+'(\w+)'\s*(ASC|DESC)?/i", "ORDER BY $1 $2", $sql);
+
+        // remove backticks
+        $sql = preg_replace('/`/', '', $sql);
+
+        // rewrite DATE function
+        $sql = preg_replace('/DATE\(([^)]+)\)/i', '$1::date', $sql);
+
+        // Replace SUBSTRING_INDEX with PostgreSQL equivalent (split_part)
+        // Match the structure: SUBSTRING_INDEX(..., 'delimiter', number)
+        $sql = preg_replace_callback(
+            '/SUBSTRING_INDEX\(\s*(.+?)\s*,\s*\'([^\']+)\'\s*,\s*(\d+)\s*\)/i',
+            function ($matches) {
+                // Convert to split_part(column, 'delimiter', number)
+                $column = $matches[1];
+                $delimiter = $matches[2];
+                $number = $matches[3];
+                
+                // If the number is positive, use split_part directly, 
+                // else we can adjust for negative numbers by manually counting parts (not supported by split_part).
+                if ($number > 0) {
+                    return "split_part($column, '$delimiter', $number)";
+                } else {
+                    // Handle the negative case if needed (split_part doesn't directly support negative indexing).
+                    return "reverse(split_part(reverse($column), '$delimiter', " . abs($number) . "))";
+                }
+            },
+            $sql
+        );
+        
         // In order for users counting to work...
         $matches = array();
         if(preg_match_all('/COUNT[^C]+\),/', $sql, $matches)) {
