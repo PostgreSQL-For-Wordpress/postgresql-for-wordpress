@@ -854,6 +854,50 @@ final class rewriteTest extends TestCase
             public $comments = "wp_comments";
             public $prefix = "wp_";
             public $options = "wp_options";
+            public $sitemeta = "wp_sitemeta";
         };
+    }
+    
+    public function test_it_properly_uses_dynamic_table_prefix_for_delete_queries()
+    {
+        global $wpdb;
+        
+        // Change the prefix to a custom one
+        $wpdb->prefix = "custom_";
+        $wpdb->options = "custom_options";
+        $wpdb->sitemeta = "custom_sitemeta";
+        $wpdb->posts = "custom_posts";
+        $wpdb->postmeta = "custom_postmeta";
+        
+        // Test DELETE with options table
+        $sql = "DELETE a, b FROM custom_options a, custom_options b WHERE a.option_name = '_transient_timeout_something' AND b.option_name = '_transient_something' AND b.option_value < 12345678";
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertStringContainsString("DELETE FROM custom_options a USING custom_options b", $postgresql);
+        $this->assertStringNotContainsString("wp_options", $postgresql);
+        
+        // Test DELETE with sitemeta table
+        $sql = "DELETE a, b FROM custom_sitemeta a, custom_sitemeta b WHERE a.meta_key = '_site_transient_timeout_something' AND b.meta_key = '_site_transient_something' AND b.meta_value < 12345678";
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertStringContainsString("DELETE FROM custom_sitemeta a USING custom_sitemeta b", $postgresql);
+        $this->assertStringNotContainsString("wp_sitemeta", $postgresql);
+        
+        // Test general pattern DELETE with any tables
+        $sql = "DELETE p, pm FROM custom_posts p, custom_postmeta pm WHERE p.ID = pm.post_id AND p.post_type = 'revision'";
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertStringContainsString("DELETE FROM custom_posts p USING custom_postmeta pm", $postgresql);
+        $this->assertStringNotContainsString("wp_posts", $postgresql);
+        $this->assertStringNotContainsString("wp_postmeta", $postgresql);
+        
+        // Test with tables that don't exist as $wpdb properties
+        $sql = "DELETE a, b FROM custom_mytable a, custom_anothertable b WHERE a.id = b.ref_id";
+        $postgresql = pg4wp_rewrite($sql);
+        $this->assertStringContainsString("DELETE FROM custom_mytable a USING custom_anothertable b", $postgresql);
+        
+        // Restore the original prefix for other tests
+        $wpdb->prefix = "wp_";
+        $wpdb->options = "wp_options";
+        $wpdb->sitemeta = "wp_sitemeta";
+        $wpdb->posts = "wp_posts";
+        $wpdb->postmeta = "wp_postmeta";
     }
 }
