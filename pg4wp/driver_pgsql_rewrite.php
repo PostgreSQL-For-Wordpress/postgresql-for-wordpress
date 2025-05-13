@@ -12,7 +12,7 @@ spl_autoload_register(function ($className) {
 function createSQLRewriter(string $sql): AbstractSQLRewriter
 {
     $sql = trim($sql);
-    if (preg_match('/^(SELECT|INSERT|REPLACE INTO|UPDATE|DELETE|DESCRIBE|ALTER TABLE|CREATE TABLE|DROP TABLE|SHOW INDEX|SHOW VARIABLES|SHOW TABLES|OPTIMIZE TABLE|SET NAMES|SHOW FULL COLUMNS|SHOW TABLE STATUS)\b/i', $sql, $matches)) {
+    if (preg_match('/^(SELECT|INSERT|REPLACE INTO|UPDATE|DELETE|DESCRIBE|ALTER TABLE|CREATE TABLE|DROP TABLE|SHOW INDEX|SHOW VARIABLES|SHOW TABLES|OPTIMIZE TABLE|SET NAMES|SHOW FULL COLUMNS|SHOW COLUMNS|SHOW TABLE STATUS)\b/i', $sql, $matches)) {
         // Convert to a format suitable for class names (e.g., "SHOW TABLES" becomes "ShowTables")
         $type = str_replace(' ', '', ucwords(str_replace('_', ' ', strtolower($matches[1]))));
         $className = $type . 'SQLRewriter';
