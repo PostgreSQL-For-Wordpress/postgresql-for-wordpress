@@ -37,7 +37,7 @@ class SelectSQLRewriter extends AbstractSQLRewriter
         if(false !== strpos($sql, 'information_schema')) {
             // WP Site Health rewrites
             if (false !== strpos($sql, "SELECT TABLE_NAME AS 'table', TABLE_ROWS AS 'rows', SUM(data_length + index_length)")) {
-                $sql = $this->postgresTableSizeRewrite();
+                $sql = $this->postgresTableSizeRewrite(DB_SCHEMA);
                 return $sql;
             }
 
@@ -373,7 +373,7 @@ class SelectSQLRewriter extends AbstractSQLRewriter
     }
 
     // This method is specifically to handle should_suggest_persistent_object_cache in wp site health
-    protected function postgresTableSizeRewrite($schema = 'public')
+    protected function postgresTableSizeRewrite($schema)
     {
 
         $sql = <<<SQL

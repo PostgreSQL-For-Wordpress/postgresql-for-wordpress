@@ -105,6 +105,9 @@ function wpsqli_real_connect(&$connection, $hostname = null, $username = null, $
     $pg_connstr = $GLOBALS['pg4wp_connstr'] . ' dbname=' . $dbname;
     $GLOBALS['pg4wp_conn'] = $connection = pg_connect($pg_connstr);
 
+    // Set the default schema
+    pg_query($connection, 'SET search_path TO ' . pg_escape_literal(DB_SCHEMA));
+
     return $connection;
 }
 

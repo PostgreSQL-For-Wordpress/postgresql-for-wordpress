@@ -6,7 +6,7 @@ class DescribeSQLRewriter extends AbstractSQLRewriter
     {
         $sql = $this->original();
         $table = $this->extractTableName($sql);
-        return $this->generatePostgresDescribeTable($table);
+        return $this->generatePostgresDescribeTable($table, DB_SCHEMA);
     }
 
     /**
@@ -31,7 +31,7 @@ class DescribeSQLRewriter extends AbstractSQLRewriter
      * @param string $schema The schema name
      * @return string The generated SQL query
      */
-    public function generatePostgresDescribeTable($tableName, $schema = "public")
+    public function generatePostgresDescribeTable($tableName, $schema)
     {
         $sql = <<<SQL
             SELECT  

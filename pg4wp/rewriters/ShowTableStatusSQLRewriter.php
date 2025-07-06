@@ -5,7 +5,7 @@ class ShowTableStatusSQLRewriter extends AbstractSQLRewriter
     public function rewrite(): string
     {
         $sql = $this->original();
-        return $this->generatePostgresShowTableStatus();
+        return $this->generatePostgresShowTableStatus(DB_SCHEMA);
     }
 
 
@@ -14,7 +14,7 @@ class ShowTableStatusSQLRewriter extends AbstractSQLRewriter
      *
      * @return string The generated SQL query
      */
-    public function generatePostgresShowTableStatus($schema = "public")
+    public function generatePostgresShowTableStatus($schema)
     {
         $sql = <<<SQL
         SELECT 

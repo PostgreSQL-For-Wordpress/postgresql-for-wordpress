@@ -6,7 +6,7 @@ class ShowFullColumnsSQLRewriter extends AbstractSQLRewriter
     {
         $sql = $this->original();
         $table = $this->extractTableNameFromShowColumns($sql);
-        return $this->generatePostgresShowColumns($table);
+        return $this->generatePostgresShowColumns($table, DB_SCHEMA);
     }
 
     /**
@@ -31,7 +31,7 @@ class ShowFullColumnsSQLRewriter extends AbstractSQLRewriter
      * @param string $schema The schema name
      * @return string The generated SQL query
      */
-    public function generatePostgresShowColumns($tableName, $schema = "public")
+    public function generatePostgresShowColumns($tableName, $schema)
     {
         $sql = <<<SQL
             SELECT 

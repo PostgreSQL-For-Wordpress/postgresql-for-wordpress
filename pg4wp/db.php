@@ -49,6 +49,11 @@ if(!defined('PG4WP_ROOT')) {
         mkdir(PG4WP_LOG);
     }
 
+    // Default to public schema
+    if (!defined('DB_SCHEMA')) {
+        define('DB_SCHEMA', 'public');
+    }
+
     // Here happens all the magic
     require_once(PG4WP_ROOT . '/core.php');
 } // Protection against multiple loading

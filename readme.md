@@ -68,6 +68,25 @@ This is because the database needs to be up and running before any plugin can be
 
 1.	Point your Web Browser to your WordPress installation and go through the traditional WordPress installation routine.
 
+wp-config constants you can set
+```
+// ** Database settings - You can get this info from your web host ** //
+/** The name of the database for WordPress */
+define( 'DB_NAME', 'database_name_here' );
+
+/** Database username */
+define( 'DB_USER', 'username_here' );
+
+/** Database password */
+define( 'DB_PASSWORD', 'password_here' );
+
+/** Database hostname */
+define( 'DB_HOST', 'localhost' );
+
+/** PG4WP specific Database schema / search path */
+define( 'DB_SCHEMA', 'public' );
+```
+
 
 ### Contributing
 
